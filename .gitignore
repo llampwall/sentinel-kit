@@ -43,6 +43,3 @@ env/
 .genreleases/
 *.zip
 sdd-*/
-
-# Task-Master
-.taskmaster/
