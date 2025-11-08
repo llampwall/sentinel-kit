@@ -300,9 +300,25 @@ Our research and experimentation focus on:
 
 - **Linux/macOS/Windows**
 - [Supported](#-supported-ai-agents) AI coding agent.
-- [uv](https://docs.astral.sh/uv/) for package management
-- [Python 3.11+](https://www.python.org/downloads/)
+- [uv 0.4+](https://docs.astral.sh/uv/) for package management
+- [Python 3.12+](https://www.python.org/downloads/) (pinned via `.tool-versions`)
+- [Node.js 20.17.x](https://nodejs.org/) (see `.node-version`)
+- [pnpm 9.x](https://pnpm.io/installation) (enable via `corepack`)
 - [Git](https://git-scm.com/downloads)
+
+> [!TIP]
+> Run `uv tool install --from pyproject.toml specify-cli` from the repository root after installing Python 3.12. Then enable Corepack and activate pnpm 9.x:
+>
+> ```bash
+> corepack enable
+> corepack prepare pnpm@9.12.0 --activate
+> ```
+>
+> Version pins for Python, Node.js, and pnpm live in `.tool-versions` so contributors and CI runners stay aligned automatically.
+
+If you encounter issues with an agent, please open an issue so we can refine the integration.
+
+If you encounter issues with an agent, please open an issue so we can refine the integration.
 
 If you encounter issues with an agent, please open an issue so we can refine the integration.
 
