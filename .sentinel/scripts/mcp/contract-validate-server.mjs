@@ -5,7 +5,6 @@
  * Validates fixtures under .sentinel/contracts/fixtures/** against versioned contracts via JSON-RPC over stdio.
  */
 
-import fs from "fs";
 import fsp from "fs/promises";
 import path from "path";
 import { fileURLToPath } from "url";

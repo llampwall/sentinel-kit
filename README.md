@@ -82,6 +82,30 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME
 - Better tool management with `uv tool list`, `uv tool upgrade`, `uv tool uninstall`
 - Cleaner shell configuration
 
+### Install Sentinel tooling (Node workspace)
+
+Once `specify-cli` is available, bootstrap the Sentinel workspace dependencies. Choose the command that matches your platform:
+
+<details>
+<summary><strong>macOS / Linux</strong></summary>
+
+```bash
+make sentinel-install
+```
+
+This target installs/refreshes `specify-cli`, enables Corepack, activates `pnpm@9.12.0`, and runs `pnpm install` inside `.sentinel/`. Pass custom pnpm flags via `PNPM_FLAGS="--registry=https://registry.npmjs.org/" make sentinel-install`.
+</details>
+
+<details>
+<summary><strong>Windows (PowerShell)</strong></summary>
+
+```powershell
+pwsh ./scripts/setup.ps1 [-PnpmFlags "--registry=https://registry.npmjs.org/"]
+```
+
+The script mirrors the Makefile workflow and accepts optional `-PnpmFlags` (or the `PNPM_FLAGS` environment variable) for proxy/caching scenarios.
+</details>
+
 ### 2. Establish project principles
 
 Launch your AI assistant in the project directory. The `/speckit.*` commands are available in the assistant.
@@ -315,6 +339,8 @@ Our research and experimentation focus on:
 > ```
 >
 > Version pins for Python, Node.js, and pnpm live in `.tool-versions` so contributors and CI runners stay aligned automatically.
+
+For Windows environments, pass proxy or registry flags via `-PnpmFlags "--registry=https://registry.npmjs.org/"` or export `PNPM_FLAGS` before running the script.
 
 If you encounter issues with an agent, please open an issue so we can refine the integration.
 
@@ -647,3 +673,4 @@ This project is heavily influenced by and based on the work and research of [Joh
 ## 📄 License
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) file for the full terms.
+

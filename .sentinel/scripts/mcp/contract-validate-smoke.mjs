@@ -45,7 +45,7 @@ function handleMessage(line) {
   try {
     msg = JSON.parse(line);
   } catch (err) {
-    console.error("Smoke test received invalid JSON:", line);
+    console.error("Smoke test received invalid JSON:", line, err);
     process.exit(1);
   }
 

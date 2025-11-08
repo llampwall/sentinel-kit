@@ -9,7 +9,7 @@
         "testStrategy": "Run `uv pip list` + `specify --version` to confirm CLI install; execute `pnpm install` followed by `pnpm exec tsc --noEmit` and `pnpm lint` to ensure toolchain operational; smoke-run `node -e 'console.log(\"sentinel ready\")'` inside `.sentinel/`.",
         "priority": "high",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -30,9 +30,10 @@
               1
             ],
             "details": "Convert `.sentinel/package.json` to use pnpm workspaces (add `pnpm-workspace.yaml` if needed), enable Corepack, add TypeScript 5.6, tsx, AJV ^8.16, Vitest 2.1, `@eslint/js`, `typescript-eslint`, and shared configs; create `tsconfig.json`, `eslint.config.js`, and update scripts for `pnpm lint`, `pnpm typecheck`, and `pnpm test`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "From `.sentinel/`, run `pnpm install`, then `pnpm exec tsc --noEmit`, `pnpm lint`, and `pnpm vitest --run` to ensure the toolchain works.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T12:37:09.947Z"
           },
           {
             "id": 3,
@@ -42,9 +43,10 @@
               2
             ],
             "details": "Create a root `Makefile` target `sentinel-install` invoking uv for specify-cli plus `corepack enable && pnpm install` inside `.sentinel/`, and author `scripts/setup.ps1` (referencing `scripts/powershell/common.ps1`) that mirrors the flow for Windows developers; document env var hooks if proxies/caches required.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Execute `make sentinel-install` on POSIX and `pwsh ./scripts/setup.ps1 -Verbose` on Windows to verify both finish without errors and produce locked dependencies.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T14:01:14.229Z"
           },
           {
             "id": 4,
@@ -54,9 +56,10 @@
               3
             ],
             "details": "Author `UPSTREAM.md` describing Spec-Kit + Sentinel scaffolding provenance, sync cadence, and steps for rebasing onto upstream; update `README.md` (and `.sentinel/tests/sentinels/README.md` if helpful) with the new installation commands, toolchain expectations, and how Node/Python stacks interact.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Peer-review docs for completeness; optionally lint markdown (e.g., `pnpm dlx markdownlint-cli2 UPSTREAM.md README.md`).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T14:25:21.661Z"
           },
           {
             "id": 5,
@@ -66,15 +69,16 @@
               4
             ],
             "details": "Within `.sentinel/`, run `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `node -e 'console.log(\"sentinel ready\")'`; at repo root run `uv pip list` to confirm specify-cli install plus any smoke commands documented in `UPSTREAM.md`, then capture the successful outputs in Task Master notes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Record command transcripts (or CI logs) showing the full suite succeeding; use Task Master update-subtask to attach the evidence.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T14:30:39.386Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
         "expansionPrompt": "Audit the repo root for missing pin files, then (a) add `.tool-versions`/`.node-version` declaring Python 3.12.x, Node 20.17.x, and pnpm 9, and refresh `pyproject.toml` + docs to mention uv-driven installs; (b) convert `.sentinel/package.json` into a pnpm workspace with devDependencies for TypeScript 5.6, tsx, Vitest 2.1, AJV, eslint (`@eslint/js`, `typescript-eslint`) plus lint/typecheck/test scripts and the matching `pnpm-workspace.yaml`, `tsconfig.json`, and `eslint.config.js`; (c) create automation entry points (`Makefile` target `sentinel-install`, `scripts/setup.ps1`) that chain `uv tool install` + `corepack enable` + `pnpm install`; (d) author `UPSTREAM.md` and update `README.md`/`.sentinel/tests/sentinels/README.md` with the new commands; (e) verify `pnpm lint`, `pnpm typecheck`, `pnpm vitest` run clean inside `.sentinel/`.",
-        "updatedAt": "2025-11-08T11:58:29.701Z"
+        "updatedAt": "2025-11-08T14:30:39.386Z"
       },
       {
         "id": "2",
@@ -649,9 +653,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-08T11:58:29.703Z",
+      "lastModified": "2025-11-08T14:30:39.389Z",
       "taskCount": 10,
-      "completedCount": 0,
+      "completedCount": 1,
       "tags": [
         "master"
       ]
