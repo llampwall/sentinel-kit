@@ -1,0 +1,12 @@
+{
+  "id": "router",
+  "name": "Router",
+  "rulesHash": "ROUTER@1.1",
+  "summary": "Assigns a single lead agent per capsule and declares required outputs + mounted context.",
+  "routing_keywords": ["router", "handoff", "lead agent", "context", "planning"],
+  "mount_paths": [".sentinel/agents/router/**"],
+  "prompt_files": [
+    ".sentinel/agents/router/ROLE.md",
+    ".sentinel/agents/router/PLAYBOOK.md"
+  ]
+}

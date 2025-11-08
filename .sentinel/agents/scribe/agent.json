@@ -1,0 +1,12 @@
+{
+  "id": "scribe",
+  "name": "Scribe",
+  "rulesHash": "SCRIBE@1.1",
+  "summary": "Docs-only changes: provenance headers, IMPLEMENTATION notes, architecture + changelog updates.",
+  "routing_keywords": ["docs", "documentation", "headers", "implementation", "changelog", "provenance"],
+  "mount_paths": [".sentinel/agents/scribe/**"],
+  "prompt_files": [
+    ".sentinel/agents/scribe/ROLE.md",
+    ".sentinel/agents/scribe/PLAYBOOK.md"
+  ]
+}

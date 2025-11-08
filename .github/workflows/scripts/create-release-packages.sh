@@ -37,6 +37,20 @@ rewrite_paths() {
     -e 's@(/?)templates/@.specify/templates/@g'
 }
 
+copy_optional_file() {
+  local src=$1
+  local dest=$2
+  local label=${3:-$src}
+
+  if [[ -f "$src" ]]; then
+    mkdir -p "$(dirname "$dest")"
+    cp "$src" "$dest"
+    echo "Copied optional template: $label"
+  else
+    echo "Skipping optional template (missing): $label"
+  fi
+}
+
 generate_commands() {
   local agent=$1 ext=$2 arg_format=$3 output_dir=$4 script_variant=$5
   mkdir -p "$output_dir"
@@ -144,7 +158,7 @@ build_variant() {
     gemini)
       mkdir -p "$base_dir/.gemini/commands"
       generate_commands gemini toml "{{args}}" "$base_dir/.gemini/commands" "$script"
-      [[ -f agent_templates/gemini/GEMINI.md ]] && cp agent_templates/gemini/GEMINI.md "$base_dir/GEMINI.md" ;;
+      copy_optional_file "agent_templates/gemini/GEMINI.md" "$base_dir/GEMINI.md" "GEMINI.md" ;;
     copilot)
       mkdir -p "$base_dir/.github/prompts"
       generate_commands copilot prompt.md "\$ARGUMENTS" "$base_dir/.github/prompts" "$script"
@@ -158,7 +172,7 @@ build_variant() {
     qwen)
       mkdir -p "$base_dir/.qwen/commands"
       generate_commands qwen toml "{{args}}" "$base_dir/.qwen/commands" "$script"
-      [[ -f agent_templates/qwen/QWEN.md ]] && cp agent_templates/qwen/QWEN.md "$base_dir/QWEN.md" ;;
+      copy_optional_file "agent_templates/qwen/QWEN.md" "$base_dir/QWEN.md" "QWEN.md" ;;
     opencode)
       mkdir -p "$base_dir/.opencode/command"
       generate_commands opencode md "\$ARGUMENTS" "$base_dir/.opencode/command" "$script" ;;
@@ -239,4 +253,3 @@ done
 
 echo "Archives in $GENRELEASES_DIR:"
 ls -1 "$GENRELEASES_DIR"/spec-kit-template-*-"${NEW_VERSION}".zip
-
