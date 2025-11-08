@@ -20,7 +20,8 @@
     "scripts/**/*.mjs",
     "tests/**/*.ts",
     "tests/**/*.js",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "vitest.config.sentinel.ts"
   ],
   "exclude": [
     "node_modules",

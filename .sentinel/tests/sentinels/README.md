@@ -11,7 +11,7 @@ Sentinel tests encode previously fixed bugs so regressions are blocked before me
 
 ## Commands
 
-`ash
+```bash
 # install tooling (once per repo clone)
 make sentinel-install     # macOS/Linux
 pwsh ./scripts/setup.ps1  # Windows
@@ -20,6 +20,7 @@ pwsh ./scripts/setup.ps1  # Windows
 cd .sentinel
 pnpm test:sentinels               # full suite
 pnpm test:sentinels -- --filter <slug>  # targeted run
-`
+pnpm test:sentinels:watch              # watch mode
+```
 
-Sentinel CI (Task 10) will run pnpm test:sentinels --runInBand so keep tests deterministic.
+Sentinel CI (Task 10) will run `pnpm test:sentinels -- --filter <slug>` so keep tests deterministic.

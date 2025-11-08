@@ -134,3 +134,4 @@ export async function validateAll({ contract = null } = {}) {
     results
   };
 }
+
