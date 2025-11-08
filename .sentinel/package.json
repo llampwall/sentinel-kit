@@ -10,12 +10,14 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "validate:contracts": "node scripts/contract-validate.mjs",
     "test:watch": "vitest watch"
   },
   "dependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.1",
+    "node-watch": "^0.7.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",

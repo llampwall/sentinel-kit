@@ -90,7 +90,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -98,9 +98,10 @@
             "description": "Create `.sentinel/scripts/contracts/validator.js` that loads YAML schemas, enforces semantic-versioned naming, checks ProducedBy headers, caches compiled AJV validators, and walks fixtures in `.sentinel/contracts/fixtures/**`.",
             "dependencies": [],
             "details": "Implement schema loader with YAML 2.x, instantiate AJV 8.16 plus ajv-formats once, and expose functions for schema discovery, fixture traversal, semantic version enforcement, and ProducedBy header validation with shared cache state.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Vitest unit tests covering schema compilation caching and ProducedBy validation edge cases.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T14:49:45.620Z"
           },
           {
             "id": 2,
@@ -110,9 +111,10 @@
               1
             ],
             "details": "Use Node ESM script with yargs or manual parsing, support mutually-exclusive contract/fixture inputs, format summary JSON (validatedCount, failures, warnings), and map validator errors to CLI exit logic.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Vitest+execa integration test to run CLI against sample good/bad fixtures and assert JSON payload plus exit status.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T14:56:50.926Z"
           },
           {
             "id": 3,
@@ -123,9 +125,10 @@
               2
             ],
             "details": "Abstract watcher setup that reuses validator singleton, handles file add/change/delete events, and keeps process alive with clear logging plus graceful shutdown hooks.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Vitest mock of node-watch or smoke test to simulate file change events and ensure validator reruns without rebuilding AJV instances.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T14:57:58.067Z"
           },
           {
             "id": 4,
@@ -137,14 +140,16 @@
               3
             ],
             "details": "Update package scripts, README instructions, include pseudo-code snippet for traversal, and ensure test fixtures reside under `.sentinel/contracts/fixtures` with coverage assertions logged in CI-ready tests.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Combined Vitest suite measuring validator coverage plus CLI integration tests invoked through the new npm script in CI.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-08T15:00:21.340Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Split the validator into: (1) a reusable module (e.g., `.sentinel/scripts/contracts/validator.js`) that loads YAML schemas, enforces semantic version naming, checks `ProducedBy` headers, caches compiled AJV validators, and walks fixtures under `.sentinel/contracts/fixtures/**`; (2) a CLI entry `.sentinel/scripts/contract-validate.mjs` that accepts `--contract`, `--fixture`, `--watch`, and emits machine-readable JSON plus non-zero exit codes; (3) a watch mode using `node-watch` that reuses the cached validators; (4) project wiring: add `pnpm validate:contracts`, README instructions, and Vitest/execa coverage for good/bad fixtures."
+        "expansionPrompt": "Split the validator into: (1) a reusable module (e.g., `.sentinel/scripts/contracts/validator.js`) that loads YAML schemas, enforces semantic version naming, checks `ProducedBy` headers, caches compiled AJV validators, and walks fixtures under `.sentinel/contracts/fixtures/**`; (2) a CLI entry `.sentinel/scripts/contract-validate.mjs` that accepts `--contract`, `--fixture`, `--watch`, and emits machine-readable JSON plus non-zero exit codes; (3) a watch mode using `node-watch` that reuses the cached validators; (4) project wiring: add `pnpm validate:contracts`, README instructions, and Vitest/execa coverage for good/bad fixtures.",
+        "updatedAt": "2025-11-08T15:00:21.340Z"
       },
       {
         "id": "3",
@@ -653,9 +658,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-08T14:30:39.389Z",
+      "lastModified": "2025-11-08T15:00:21.341Z",
       "taskCount": 10,
-      "completedCount": 1,
+      "completedCount": 2,
       "tags": [
         "master"
       ]

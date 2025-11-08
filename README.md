@@ -106,6 +106,19 @@ pwsh ./scripts/setup.ps1 [-PnpmFlags "--registry=https://registry.npmjs.org/"]
 The script mirrors the Makefile workflow and accepts optional `-PnpmFlags` (or the `PNPM_FLAGS` environment variable) for proxy/caching scenarios.
 </details>
 
+### 3. Validate Sentinel contracts
+
+Every fixture under `.sentinel/contracts/fixtures/**` should validate against its schema before merge. Run the validator from the `.sentinel/` workspace:
+
+```bash
+cd .sentinel
+pnpm validate:contracts                     # validate all fixtures
+pnpm validate:contracts -- --contract users.v1
+pnpm validate:contracts -- --fixture contracts/fixtures/users.v1/get_active.json
+```
+
+Pass `--watch` to re-run automatically when contracts or fixtures change. The command prints a JSON summary; CI will treat any failures as blocking.
+
 ### 2. Establish project principles
 
 Launch your AI assistant in the project directory. The `/speckit.*` commands are available in the assistant.
