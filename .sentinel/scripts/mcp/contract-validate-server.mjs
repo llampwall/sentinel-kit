@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* ProducedBy=SCRIBE RulesHash=DOCS@1.0 Decision=D-0003 */
 /**
- * Minimal MCP server exposing the `contract.validate` tool.
+ * Minimal MCP server exposing the `contract_validate` tool.
  * Validates fixtures under .sentinel/contracts/fixtures/** against versioned contracts via JSON-RPC over stdio.
  */
 
@@ -14,38 +14,34 @@ import Ajv from "ajv";
 import addFormats from "ajv-formats";
 
 const __filename = fileURLToPath(import.meta.url);
-const __dirname  = path.dirname(__filename);
-const ROOT       = path.resolve(__dirname, "../../..");
-const CONTRACTS  = path.join(ROOT, ".sentinel", "contracts");
-const FIXTURES   = path.join(CONTRACTS, "fixtures");
+const __dirname = path.dirname(__filename);
+const ROOT = path.resolve(__dirname, "../../..");
+const CONTRACTS = path.join(ROOT, ".sentinel", "contracts");
+const FIXTURES = path.join(CONTRACTS, "fixtures");
 
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 
 // --------------------------- framing helpers ---------------------------
 function send(msg) {
-  const payload = JSON.stringify(msg);
-  const header = `Content-Length: ${Buffer.byteLength(payload, "utf8")}\r\n\r\n`;
-  process.stdout.write(header);
-  process.stdout.write(payload);
+  process.stdout.write(`${JSON.stringify(msg)}\n`);
 }
 
-let buffer = Buffer.alloc(0);
+let buffer = "";
+process.stdin.setEncoding("utf8");
 process.stdin.on("data", (chunk) => {
-  buffer = Buffer.concat([buffer, chunk]);
+  buffer += chunk;
   while (true) {
-    const sep = buffer.indexOf("\r\n\r\n");
-    if (sep === -1) break;
-    const header = buffer.slice(0, sep).toString("utf8");
-    const m = header.match(/Content-Length:\s*(\d+)/i);
-    if (!m) { buffer = buffer.slice(sep + 4); continue; }
-    const length = parseInt(m[1], 10);
-    const start = sep + 4;
-    if (buffer.length < start + length) break;
-    const body = buffer.slice(start, start + length).toString("utf8");
-    buffer = buffer.slice(start + length);
-    try { handle(JSON.parse(body)); }
-    catch (e) { /* ignore malformed */ }
+    const nl = buffer.indexOf("\n");
+    if (nl === -1) break;
+    const line = buffer.slice(0, nl).trim();
+    buffer = buffer.slice(nl + 1);
+    if (!line) continue;
+    try {
+      handle(JSON.parse(line));
+    } catch (err) {
+      console.error("Failed to parse MCP message:", err);
+    }
   }
 });
 
@@ -131,17 +127,19 @@ function handle(msg) {
   const { id, method, params } = msg || {};
 
   if (method === "initialize") {
-    return reply(id, {
-      protocolVersion: "2024-11-01",
+    const protocolVersion = params?.protocolVersion ?? "2024-11-01";
+    reply(id, {
+      protocolVersion,
       serverInfo: { name: "sentinel-contract-validate", version: "0.1.0" },
-      capabilities: { tools: {} }
+      capabilities: { tools: { listChanged: false } }
     });
+    return;
   }
 
   if (method === "tools/list") {
     return reply(id, {
       tools: [{
-        name: "contract.validate",
+        name: "contract_validate",
         description: "Validate fixtures under .sentinel/contracts/fixtures against versioned contracts.",
         inputSchema: {
           type: "object",
@@ -158,7 +156,7 @@ function handle(msg) {
   if (method === "tools/call") {
     const name = params?.name;
     const args = params?.arguments ?? {};
-    if (name !== "contract.validate") return error(id, -32601, "Unknown tool");
+    if (name !== "contract_validate") return error(id, -32601, "Unknown tool");
     validateAll({ contract: args.contract, fixture: args.fixture })
       .then((res) => reply(id, { content: [{ type: "text", text: JSON.stringify(res, null, 2) }], isError: !res.ok }))
       .catch((e) => error(id, -32000, "Validation failed", String(e)));

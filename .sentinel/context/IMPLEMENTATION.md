@@ -17,5 +17,5 @@
 4. **Artifacts**: Every change is expected to add a provenance header plus a new entry in `DECISIONS.md`, keeping artifact memory decoupled from chat history.
 
 ## Known Gaps
-- `contract-validate-server.mjs` still needs a working MCP handshake plus a smoke client (`npm run mcp:smoke` placeholder). Track this in the PRD as blocked work.
+- `contract-validate-smoke.mjs` proves the MCP server path end-to-end, but we still need equivalent coverage for upcoming `sentinel-run` and `decision-log` servers once they land.
 - The router flow currently requires two manual invocations; future tasks should collapse it into a single run that captures the router JSON automatically.
