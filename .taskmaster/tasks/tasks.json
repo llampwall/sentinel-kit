@@ -289,7 +289,7 @@
           "3",
           "4"
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
@@ -297,10 +297,9 @@
             "description": "Create the `.specify/specs/<id>/capsule.md` template capturing Goal, Required Outputs, Acceptance Criteria, Allowed Context, and Router Notes with clear author guidance.",
             "dependencies": [],
             "details": "Author the base markdown template with placeholder comments, section ordering, and guidance text so future capsules stay within the <300 line expectation and align with Spec/Plan/Tasks data.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": null,
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:54:50.475Z"
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -310,10 +309,9 @@
               1
             ],
             "details": "Use Node 20+ with tsx entry to parse input spec artifacts, assemble template data, auto-fill sections, enforce deterministic hashing for IDs, and fail the CLI when output exceeds 300 lines, returning actionable errors.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Unit and snapshot tests covering CLI generation paths ensure stable markdown output and hash determinism.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:55:15.726Z"
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -323,10 +321,9 @@
               2
             ],
             "details": "Implement filesystem scanning and schema enforcement for Allowed Context entries, ensuring relative paths are used, invalid entries raise errors, and add a linter module reusable by the CLI and future tooling.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Unit tests mocking context directories validate path discovery, deduplication, and error handling for missing files.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:56:12.707Z"
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -344,8 +341,7 @@
         ],
         "complexity": 8,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Create `.specify/specs/<id>/capsule.md` templates that include Goal/Outputs/Acceptance Criteria/Allowed Context/Router Notes, implement a TS/tsx generator (e.g., `.sentinel/scripts/capsule-create.tsx`) wired to `pnpm capsule:create --spec <path>` that reads Spec/Plan/Tasks, computes hashed IDs, and enforces the <300 line budget with auto-populated Allowed Context lists from `.sentinel/context/**/*` references. Add an include-list validator, snapshot/unit tests, and docs in `.specify/README.md` plus integration notes for the `speckit.tasks` pipeline.",
-        "updatedAt": "2025-11-08T15:56:26.023Z"
+        "expansionPrompt": "Create `.specify/specs/<id>/capsule.md` templates that include Goal/Outputs/Acceptance Criteria/Allowed Context/Router Notes, implement a TS/tsx generator (e.g., `.sentinel/scripts/capsule-create.tsx`) wired to `pnpm capsule:create --spec <path>` that reads Spec/Plan/Tasks, computes hashed IDs, and enforces the <300 line budget with auto-populated Allowed Context lists from `.sentinel/context/**/*` references. Add an include-list validator, snapshot/unit tests, and docs in `.specify/README.md` plus integration notes for the `speckit.tasks` pipeline."
       },
       {
         "id": "6",
@@ -671,9 +667,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-08T15:56:26.025Z",
+      "lastModified": "2025-11-08T15:49:15.020Z",
       "taskCount": 10,
-      "completedCount": 5,
+      "completedCount": 4,
       "tags": [
         "master"
       ]
