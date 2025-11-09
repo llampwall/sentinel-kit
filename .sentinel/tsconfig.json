@@ -12,7 +12,9 @@
     "checkJs": false,
     "noEmit": true,
     "resolveJsonModule": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "scripts/**/*.ts",
@@ -20,7 +22,8 @@
     "scripts/**/*.mjs",
     "tests/**/*.ts",
     "tests/**/*.js",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "vitest.config.sentinel.ts"
   ],
   "exclude": [
     "node_modules",
