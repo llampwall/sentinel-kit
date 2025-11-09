@@ -9,6 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "allowJs": true,
+    "allowImportingTsExtensions": true,
     "checkJs": false,
     "noEmit": true,
     "resolveJsonModule": true,

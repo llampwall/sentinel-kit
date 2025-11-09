@@ -155,3 +155,16 @@ afterAll(async () => {
     cleanupDirs.splice(0).map((dir) => rm(dir, { recursive: true, force: true }))
   );
 });
+  it("aborts when Allowed Context entries are invalid", async () => {
+    const dir = await mkdtemp(path.join(ROOT, ".specify", "specs", "tmp-invalid-"));
+    cleanupDirs.push(dir);
+    const brokenCapsule = path.join(dir, "capsule.md");
+    await writeFile(
+      brokenCapsule,
+      "# Capsule\n\n## Allowed Context\n- docs/does-not-exist.md\n",
+      "utf8"
+    );
+    await expect(
+      renderRouterPrompt({ capsulePath: brokenCapsule, root: ROOT })
+    ).rejects.toThrow(/Allowed Context validation failed/i);
+  });

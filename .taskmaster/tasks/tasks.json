@@ -442,7 +442,7 @@
         "dependencies": [
           "6"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -450,9 +450,10 @@
             "description": "Create `.sentinel/context/context-limits.json` with artifact budget entries and schema-validation helper.",
             "dependencies": [],
             "details": "Capture capsule, router, and spec artifact caps (≤300 lines default) plus forbidden directories; expose a TypeScript loader that validates against an AJV schema for future reuse.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit-test schema loader with valid/invalid configs to ensure AJV errors are descriptive.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T16:59:07.366Z"
           },
           {
             "id": 2,
@@ -462,9 +463,10 @@
               1
             ],
             "details": "Reuse capsule parsing utilities, load config limits, traverse include lists to reject forbidden directories/missing files, add `--strict` flag, and cover edge cases with fixtures under Vitest.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add Vitest unit and integration tests that run the CLI on fixture capsules verifying over-budget, forbidden path, and happy-path behavior.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T16:59:14.516Z"
           },
           {
             "id": 3,
@@ -475,14 +477,16 @@
               6
             ],
             "details": "Invoke lint checks inside `.sentinel/scripts/orch/prompt-render.mjs` prior to rendering, fail fast with actionable error text, add docs on keeping capsules lean, and configure Husky 9 hook running the CLI on capsule-touching commits.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add integration test covering renderer rejection message and manual doc verification; smoke test Husky hook via simulated commit touching capsule files.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T16:59:21.535Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Introduce `.sentinel/context/context-limits.json` defining per-artifact line budgets, build a `pnpm context:lint` CLI (TS/Vitest) that scans capsule files for line counts and Allowed Context drift, integrate the checks into the prompt renderer (Task 6) so over-budget capsules fail fast, and document best practices plus optional Husky hooks guarding capsule edits."
+        "expansionPrompt": "Introduce `.sentinel/context/context-limits.json` defining per-artifact line budgets, build a `pnpm context:lint` CLI (TS/Vitest) that scans capsule files for line counts and Allowed Context drift, integrate the checks into the prompt renderer (Task 6) so over-budget capsules fail fast, and document best practices plus optional Husky hooks guarding capsule edits.",
+        "updatedAt": "2025-11-09T16:59:21.535Z"
       },
       {
         "id": "8",
@@ -678,9 +682,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-09T13:51:51.025Z",
+      "lastModified": "2025-11-09T16:59:21.538Z",
       "taskCount": 10,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "master"
       ]

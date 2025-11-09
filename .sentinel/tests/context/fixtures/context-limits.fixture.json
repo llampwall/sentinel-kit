@@ -1,0 +1,15 @@
+{
+  "defaultMaxLines": 8,
+  "warningThreshold": 0.75,
+  "forbiddenPaths": [".git"],
+  "artifacts": [
+    {
+      "name": "fixture-capsules",
+      "globs": [
+        ".sentinel/tests/context/fixtures/capsules/*.md"
+      ],
+      "enforceAllowedContext": true,
+      "maxLines": 8
+    }
+  ]
+}

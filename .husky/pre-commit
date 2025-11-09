@@ -6,7 +6,7 @@ if [ -z "$CHANGED" ]; then
   exit 0
 fi
 
-echo "$CHANGED" | grep -E '(\.specify/specs/.+/capsule\.md|\.sentinel/(context|prompts|templates)/)' > /dev/null || exit 0
+echo "$CHANGED" | grep -E '(\.specify/specs/.+/capsule\.md|\.sentinel/(context|prompts|templates)/|\.sentinel/scripts/context/)' > /dev/null || exit 0
 
 echo "[husky] running pnpm --dir=.sentinel context:lint"
 pnpm --dir=.sentinel context:lint

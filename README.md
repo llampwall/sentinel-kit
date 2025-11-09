@@ -113,54 +113,6 @@ The script mirrors the Makefile workflow and accepts optional `-PnpmFlags` (or t
 <!-- ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0010 -->
 ### Capsule workflow
 
-
-<!-- SENTINEL:PROMPT-RENDER:start -->
-<!-- ProducedBy=BUILDER RulesHash=BUILDER@1.1 Decision=D-0011 -->
-### Prompt renderer workflow
-
-The Eta-based renderer lives in `.sentinel/scripts/orch/prompt-render.mjs`. Use it to hand capsules to the router and lead agents with the correct context and logging.
-
-1. **Render prompts** from the repo root:
-   ```bash
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.mjs \
-     --mode router \
-     --capsule .specify/specs/<slug>/capsule.md \
-     [--output router.md]
-
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.mjs \
-     --mode capsule \
-     --capsule .specify/specs/<slug>/capsule.md \
-     --agent builder \
-     [--output builder.md]
-   ```
-   - `--output` writes the prompt to disk; omit it to stream to stdout.
-   - Capsule paths are relative to repo root; pass absolute paths if running elsewhere.
-2. **Validate router decisions** (optional but recommended) by supplying the router’s JSON file:
-   ```bash
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.mjs \
-     --mode router \
-     --capsule .specify/specs/<slug>/capsule.md \
-     --router-json ./router-output.json
-   ```
-   This enforces the JSON schema (leadAgent, requiredOutputs[], contextToMount[], notes) and appends an entry to `.sentinel/router_log/<timestamp>-<slug>.jsonl` with a hashed capsule path.
-3. **Smoke-test** the end-to-end flow anytime the renderer changes:
-   ```bash
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.smoke.mjs [capsule] [agent]
-   ```
-   The smoke script renders router, then capsule mode (defaults to `005-capsule-gen` + `builder`) and prints previews + prompt lengths.
-4. **Tests**:
-   ```bash
-   pnpm --dir=.sentinel vitest run tests/orch/agents.test.ts tests/orch/prompt-render.test.ts
-   ```
-   These cover agent discovery, template rendering, router schema validation, log writes, and CLI flows.
-
-Tips:
-- Router logs are JSONL (one file per run). Each entry includes ISO timestamp, relative capsule path, a short hash, and the validated payload.
-- Capsule prompts inherit Allowed Context directly from the capsule; if you see missing paths, update the capsule before re-rendering.
-- Running with `--output` makes it easier to copy/paste prompts into external tools without losing formatting.
-<!-- SENTINEL:PROMPT-RENDER:end -->
-
-
 Capsules turn a Spec-Kit feature (`.specify/specs/<slug>`) into a router-ready hand-off with explicit Allowed Context.
 
 1. Start from the reusable template at `.sentinel/templates/capsule.md` (the generator copies this structure automatically if you prefer CLI-driven capsules).
@@ -172,13 +124,18 @@ Capsules turn a Spec-Kit feature (`.specify/specs/<slug>`) into a router-ready h
    - `--decision` must be the next ledger ID from `.sentinel/DECISIONS.md`.
    - Pass `--agent`/`--rulesHash` if the capsule belongs to someone other than ROUTER.
 3. Review the generated `.specify/specs/<slug>/capsule.md` and keep it under 300 lines. The CLI hashes the ID (e.g., `005-capsule-gen@<hash>`) and auto-includes `.sentinel/context/**` via the Allowed Context helper.
-4. Run the deterministic tests any time capsule logic changes:
+4. Run the context linter to ensure the Allowed Context list only references approved paths (the renderer now enforces this automatically):
+   ```bash
+   pnpm --dir=.sentinel context:lint
+   ```
+   - Commits that touch `.specify/specs/*/capsule.md`, `.sentinel/context/**`, or the prompt/template files should enable the bundled hook via `git config core.hooksPath .husky`. The hook re-runs the command above before the commit proceeds.
+5. Run the deterministic tests any time capsule logic changes:
    ```bash
    pnpm -C .sentinel vitest run tests/capsule-create.test.ts
    pnpm -C .sentinel test:sentinels -- --testNamePattern capsule-context
    ```
    Both commands execute inside `.sentinel/`.
-5. When docs mention capsules, edit `.sentinel/snippets/capsules.md` and re-run `node .sentinel/scripts/md-surgeon.mjs` so README stays in sync.
+6. When docs mention capsules, edit `.sentinel/snippets/capsules.md` and re-run `node .sentinel/scripts/md-surgeon.mjs` so README stays in sync.
 <!-- SENTINEL:CAPSULES:end -->
 
 

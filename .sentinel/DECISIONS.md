@@ -3,7 +3,7 @@
 # Decisions Ledger
 
 ## NEXT_ID
-D-0011
+D-0013
 
 ## Format
 
@@ -117,4 +117,22 @@ Scope: .specify/specs/005-capsule-gen; .sentinel/scripts
 Decision: Capsule generator + Allowed Context helper
 Rationale: Automate Task 5 capsules, validate include lists, and document the workflow
 Outputs: .specify/specs/005-capsule-gen/capsule.md, .sentinel/scripts/capsule-create.mjs, .sentinel/scripts/lib/allowed-context.mjs, .sentinel/tests/capsule-create.test.ts, .sentinel/tests/__snapshots__/capsule-create.test.ts.snap, .sentinel/tests/sentinels/sentinel_capsule_context.test.ts, .sentinel/snippets/capsules.md, README.md, .sentinel/scripts/md-surgeon.mjs
+Supersedes: none
+
+ID: D-0011
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/orch/prompt-render.mjs; README.md; .specify/README.md
+Decision: Enforce context linter before prompt rendering
+Rationale: Prompt rendering should fail fast when capsules exceed include-list rules or line budgets.
+Outputs: .sentinel/scripts/orch/prompt-render.mjs, README.md, .specify/README.md
+Supersedes: none
+
+ID: D-0012
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/context/**; .sentinel/context; .sentinel/tests/context
+Decision: Add context-limits schema + pnpm context:lint
+Rationale: Capsule include lists need automated budgets, forbidden-path checks, and reproducible CLI coverage.
+Outputs: .sentinel/context/context-limits.json, .sentinel/scripts/context/config.mts, .sentinel/scripts/context/lint.mts, .sentinel/tests/context/config.test.ts, .sentinel/tests/context/lint.test.ts
 Supersedes: none

@@ -18,6 +18,7 @@ import Ajv from "ajv";
 import addFormats from "ajv-formats";
 import crypto from "node:crypto";
 import { loadAgents } from "./agents.mjs";
+import { extractListFromHeading } from "../lib/capsule-md.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -28,6 +29,8 @@ const ROUTER_LOG_DIR = ".sentinel/router_log";
 const templateCache = new Map();
 const eta = new Eta({ autoEscape: false });
 const ajv = addFormats(new Ajv({ allErrors: true, strict: false }));
+const lintedCapsules = new Set();
+let lintModulePromise;
 const routerSchema = ajv.compile({
   type: "object",
   properties: {
@@ -218,9 +221,9 @@ export async function renderCapsulePrompt({ capsulePath, agentId, root = ROOT })
  */
 export async function buildCapsuleContext({ capsulePath, root = ROOT }) {
   const abs = path.isAbsolute(capsulePath) ? capsulePath : path.resolve(root, capsulePath);
+  await lintCapsuleAllowedContext({ capsuleAbs: abs, root });
   const content = await fs.readFile(abs, "utf8");
-  const allowedSection = extractSection(content, "Allowed Context");
-  const allowedContext = allowedSection ? extractList(allowedSection) : [];
+  const allowedContext = extractListFromHeading(content, "Allowed Context");
   return {
     path: normalizePath(path.relative(root, abs)),
     content: content.trim(),
@@ -238,54 +241,6 @@ async function loadTemplate(p) {
 
 function normalizePath(p) {
   return p.split(path.sep).join("/");
-}
-
-function extractSection(markdown, heading) {
-  const lines = markdown.split(/\r?\n/);
-  const matcher = new RegExp(`^(#{1,6})\\s+${escapeRegExp(heading)}\\s*$`, "i");
-  let capturing = false;
-  let depth = 0;
-  const bucket = [];
-
-  for (const line of lines) {
-    const headerMatch = line.match(/^(#{1,6})\s+(.*?)\s*$/);
-    if (headerMatch) {
-      if (matcher.test(line)) {
-        capturing = true;
-        depth = headerMatch[1].length;
-        continue;
-      }
-      if (capturing && headerMatch[1].length <= depth) break;
-    }
-    if (capturing) bucket.push(line);
-  }
-
-  return bucket.join("\n").trim();
-}
-
-function extractList(section) {
-  const lines = section.split(/\r?\n/);
-  const items = [];
-  let current = "";
-  for (const raw of lines) {
-    const line = raw.trim();
-    if (!line) continue;
-    const bullet = line.match(/^([-*]|\d+\.)\s+(.*)$/);
-    if (bullet) {
-      if (current) items.push(current);
-      current = bullet[2].trim();
-    } else if (current) {
-      current = `${current} ${line}`;
-    } else {
-      current = line;
-    }
-  }
-  if (current) items.push(current);
-  return items;
-}
-
-function escapeRegExp(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export function validateRouterPayload(payload) {
@@ -338,3 +293,36 @@ export default {
   validateRouterPayload,
   writeRouterLog
 };
+
+async function lintCapsuleAllowedContext({ capsuleAbs, root }) {
+  if (lintedCapsules.has(capsuleAbs)) return;
+  const module = await loadLintModule();
+  const rel = normalizePath(path.relative(root, capsuleAbs));
+  const summary = await module.lintContext({
+    root,
+    include: [rel]
+  });
+  const errors = summary.issues.filter((issue) => issue.severity === "error");
+  if (errors.length) {
+    const formatted = errors.map((issue) => `- [${issue.code}] ${issue.message}`).join("\n");
+    throw new Error(`Allowed Context validation failed for ${rel}:\n${formatted}`);
+  }
+  const warnings = summary.issues.filter((issue) => issue.severity === "warning");
+  if (warnings.length) {
+    const formatted = warnings.map((issue) => `- [${issue.code}] ${issue.message}`).join("\n");
+    console.warn(`Allowed Context warnings for ${rel}:\n${formatted}`);
+  }
+  lintedCapsules.add(capsuleAbs);
+}
+
+async function loadLintModule() {
+  if (!lintModulePromise) {
+    try {
+      await import("tsx/esm");
+    } catch (error) {
+      throw new Error(`Failed to load tsx runtime for context linter: ${error instanceof Error ? error.message : String(error)}`);
+    }
+    lintModulePromise = import("../context/lint.mts");
+  }
+  return lintModulePromise;
+}

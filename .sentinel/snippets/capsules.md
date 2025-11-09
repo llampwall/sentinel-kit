@@ -12,11 +12,16 @@ Capsules turn a Spec-Kit feature (`.specify/specs/<slug>`) into a router-ready h
    - `--decision` must be the next ledger ID from `.sentinel/DECISIONS.md`.
    - Pass `--agent`/`--rulesHash` if the capsule belongs to someone other than ROUTER.
 3. Review the generated `.specify/specs/<slug>/capsule.md` and keep it under 300 lines. The CLI hashes the ID (e.g., `005-capsule-gen@<hash>`) and auto-includes `.sentinel/context/**` via the Allowed Context helper.
-4. Run the deterministic tests any time capsule logic changes:
+4. Run the context linter to ensure the Allowed Context list only references approved paths (the renderer now enforces this automatically):
+   ```bash
+   pnpm --dir=.sentinel context:lint
+   ```
+   - Commits that touch `.specify/specs/*/capsule.md`, `.sentinel/context/**`, or the prompt/template files should enable the bundled hook via `git config core.hooksPath .husky`. The hook re-runs the command above before the commit proceeds.
+5. Run the deterministic tests any time capsule logic changes:
    ```bash
    pnpm -C .sentinel vitest run tests/capsule-create.test.ts
    pnpm -C .sentinel test:sentinels -- --testNamePattern capsule-context
    ```
    Both commands execute inside `.sentinel/`.
-5. When docs mention capsules, edit `.sentinel/snippets/capsules.md` and re-run `node .sentinel/scripts/md-surgeon.mjs` so README stays in sync.
+6. When docs mention capsules, edit `.sentinel/snippets/capsules.md` and re-run `node .sentinel/scripts/md-surgeon.mjs` so README stays in sync.
 

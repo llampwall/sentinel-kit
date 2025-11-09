@@ -3,6 +3,8 @@
 
 The Eta-based renderer lives in `.sentinel/scripts/orch/prompt-render.mjs`. Use it to hand capsules to the router and lead agents with the correct context and logging.
 
+- Before rendering, the CLI now lints the capsule's Allowed Context via `pnpm --dir=.sentinel context:lint`. Invalid include lists (missing files, forbidden paths, or empty sections) abort the render with actionable errors, so fix the capsule before retrying.
+
 1. **Render prompts** from the repo root:
    ```bash
    pnpm --dir=.sentinel node scripts/orch/prompt-render.mjs \
