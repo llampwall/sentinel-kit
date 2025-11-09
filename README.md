@@ -700,10 +700,3 @@ This project is heavily influenced by and based on the work and research of [Joh
 
 This project is licensed under the terms of the MIT open source license. Please refer to the [LICENSE](./LICENSE) file for the full terms.
 
-## Decision & Provenance Workflow
-
-After completing a task:
-1. Run 
-ode .sentinel/scripts/decision-log.mjs --author <agent> --date <YYYY-MM-DD> --scope <files> --decision "..." --rationale "..." from repo root.
-2. Copy the ProducedBy=... snippet printed by the CLI into the top of every file you changed.
-3. Commit the code and ledger entry together.

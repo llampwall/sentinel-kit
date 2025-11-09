@@ -232,7 +232,7 @@
         "dependencies": [
           "2"
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
@@ -240,10 +240,9 @@
             "description": "Define the updated `.sentinel/DECISIONS.md` schema, NEXT_ID mechanics, and ProducedBy header format before coding.",
             "dependencies": [],
             "details": "Document table columns (Date, Author, Scope, Rationale, Outputs), define ISO timestamp + slug rules, outline archive rotation trigger (<300 lines), and specify header snippet `ProducedBy=D-### (#<short-hash>)` plus TS/Python comment templates.",
-            "status": "in-progress",
+            "status": "pending",
             "testStrategy": "Peer review checklist ensuring schema and header rules match requirements before implementation.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:44:32.809Z"
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -253,10 +252,9 @@
               1
             ],
             "details": "Build Node CLI accepting `--author --scope --summary --outputs`, manage NEXT_ID counter with file locking, enforce slug + ISO timestamp normalization, output header plus language comment templates, and add Vitest/tsx integration tests covering success, invalid args, duplicate metadata, and concurrency safety.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Vitest integration using temp directories verifying NEXT_ID increments, atomic append, error handling, and header formatting.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:47:53.348Z"
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -267,16 +265,15 @@
               2
             ],
             "details": "Write `UPSTREAM.md` capturing Spec-Kit source-of-truth, sync cadence, and manual steps referencing `.sentinel/DECISIONS.md`. Update `README.md` and `.sentinel/tests/sentinels/README.md` with pnpm/uv prerequisites, new CLI workflow (run after merge), and CI badge placeholders aligned with Task 10 outcomes.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Documentation review ensuring all referenced files mention the CLI usage, prerequisites, and upstream sync instructions consistently.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:49:01.679Z"
+            "parentId": "undefined"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
         "expansionPrompt": "Author `UPSTREAM.md` detailing how SentinelKit tracks Spec-Kit (sources of truth, sync cadence, manual steps), then update `README.md` and `.sentinel/tests/sentinels/README.md` to describe the sentinel toolchain install commands introduced in Task 1 along with `pnpm`/`uv` prerequisites. Include references to `.sentinel/DECISIONS.md` expectations and any CI badges once Task 10 lands.",
-        "updatedAt": "2025-11-08T15:49:15.018Z"
+        "updatedAt": "2025-11-08T15:18:12.499Z"
       },
       {
         "id": "5",
@@ -667,9 +664,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-08T15:49:15.020Z",
+      "lastModified": "2025-11-08T15:18:12.500Z",
       "taskCount": 10,
-      "completedCount": 4,
+      "completedCount": 3,
       "tags": [
         "master"
       ]
