@@ -156,7 +156,7 @@
         "title": "Build Sentinel Regression Test Harness",
         "description": "Stand up deterministic sentinel suites capturing past bugs under `.sentinel/tests/sentinels/**` with dedicated runner.",
         "details": "- Adopt Vitest 2.1 + TS setup; configure `vitest.config.sentinel.ts` to glob `tests/sentinels/**/*.test.ts` and use ESM.\n- Provide helper to load fixtures from `.sentinel/contracts/fixtures` ensuring schema compliance before test execution.\n- Add npm script `pnpm test:sentinels` and optional `--filter <slug>` support via CLI pass-through.\n- Encode canonical sentinel example referencing bug metadata, gating regressions.\n- Document pattern for writing new sentinels (Given-When-Then comment block, referencing DECISION IDs).\n- Optionally integrate snapshot testing via `@vitest/snapshot` for router JSON outputs.",
-        "testStrategy": "Create fixtures representing prior bug; ensure sentinel fails before fix and passes after. Add CI job running `pnpm test:sentinels --runInBand` to avoid flake. Provide coverage report via `vitest --coverage` ensuring >80% sentinel helper coverage.",
+        "testStrategy": "Create fixtures representing prior bug; ensure sentinel fails before fix and passes after. Add CI job running `vitest run --config vitest.config.sentinel.ts --reporter=json` to avoid flake. Provide coverage report via `vitest --coverage` ensuring >80% sentinel helper coverage.",
         "priority": "high",
         "dependencies": [
           "2"
@@ -170,7 +170,7 @@
             "dependencies": [],
             "details": "Ensure .sentinel/package.json includes Vitest 2.1, TypeScript, tsx, and align tsconfig for ESM; add npm scripts `pnpm test:sentinels` and filtered variant; verify workspace config so root pnpm can invoke the sentinel project.",
             "status": "done",
-            "testStrategy": "Run `pnpm test:sentinels --runInBand` to confirm config picks up suite skeleton and exits cleanly.",
+            "testStrategy": "Run `vitest run --config vitest.config.sentinel.ts --reporter=json` to confirm config picks up suite skeleton and exits cleanly.",
             "parentId": "undefined",
             "updatedAt": "2025-11-09T03:25:15.823Z"
           },
@@ -210,7 +210,7 @@
               2,
               3
             ],
-            "details": "Include instructions for adding new bugs, invoking filter flag, wiring CI job (`pnpm test:sentinels --runInBand`), and overview of helper API plus snapshot guidance; ensure doc links to Task 2 validator and Task 1 workspace steps.",
+            "details": "Include instructions for adding new bugs, invoking filter flag, wiring CI job (`vitest run --config vitest.config.sentinel.ts --reporter=json`), and overview of helper API plus snapshot guidance; ensure doc links to Task 2 validator and Task 1 workspace steps.",
             "status": "done",
             "testStrategy": null,
             "parentId": "undefined",
@@ -499,7 +499,7 @@
           "2",
           "6"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -507,9 +507,10 @@
             "description": "Refactor the existing `.sentinel/scripts/contracts/validate.mjs` logic into a shared module that can be imported by both the CLI and MCP server without duplicating traversal or AJV wiring.",
             "dependencies": [],
             "details": "Move the schema loading, AJV compilation, and fixture traversal into a new helper (e.g., `.sentinel/scripts/contracts/validator-core.mjs`) exported as pure functions, update the CLI to consume it, and ensure version/provenance checks remain untouched.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add/adjust Vitest unit tests to cover the shared module directly and rerun existing CLI integration tests to ensure behavior parity.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T17:29:42.945Z"
           },
           {
             "id": 2,
@@ -517,9 +518,10 @@
             "description": "Rebuild `.sentinel/scripts/mcp/contract-validate-server.mjs` on top of `vscode-jsonrpc` or `@anthropic-ai/mcp-sdk`, register the `contract_validate` tool, and wire it to the shared validator module with watch support and proper protocol framing.",
             "dependencies": [],
             "details": "Initialize the MCP transport, expose initialize/tools/list/tools/call handlers, forward parameters to the shared validator, stream diagnostics, and ensure graceful shutdown plus Node entry point hooking for `pnpm mcp:contract-validate`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create integration tests that spawn the server via child process, perform initialize→tools/list→tools/call, and assert deterministic JSON-RPC responses.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T17:46:47.528Z"
           },
           {
             "id": 3,
@@ -527,20 +529,22 @@
             "description": "Expand `contract-validate-smoke.mjs` into a reusable CI-friendly harness that launches the MCP server, exercises the handshake with sample fixtures, add the `pnpm mcp:contract-validate` script, and document the `.mcp.json` configuration snippet.",
             "dependencies": [],
             "details": "Ensure the smoke runner reuses helper utilities for process lifecycle, wire it into CI, add package scripts for local execution, and update project docs (e.g., README/CLAUDE.md) with command usage plus `.mcp.json` example including env vars.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run the smoke harness locally/CI to validate initialize/tools/call flow and verify documentation accuracy via reviewer checklist (no automated test).",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T18:04:47.401Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Extract the validation logic from `.sentinel/scripts/contracts/validate.mjs` into a shared module and have `.sentinel/scripts/mcp/contract-validate-server.mjs` import it, then rebuild the MCP server on top of `vscode-jsonrpc` or `@anthropic-ai/mcp-sdk` with proper protocol framing, watch support, and CLI entry `pnpm mcp:contract-validate`. Expand `contract-validate-smoke.mjs` into a reusable smoke harness invoked by CI and document the `.mcp.json` snippet needed to mount the server."
+        "expansionPrompt": "Extract the validation logic from `.sentinel/scripts/contracts/validate.mjs` into a shared module and have `.sentinel/scripts/mcp/contract-validate-server.mjs` import it, then rebuild the MCP server on top of `vscode-jsonrpc` or `@anthropic-ai/mcp-sdk` with proper protocol framing, watch support, and CLI entry `pnpm mcp:contract-validate`. Expand `contract-validate-smoke.mjs` into a reusable smoke harness invoked by CI and document the `.mcp.json` snippet needed to mount the server.",
+        "updatedAt": "2025-11-09T18:04:47.401Z"
       },
       {
         "id": "9",
         "title": "MCP Sentinel-Run & Decision-Log Servers",
         "description": "Add MCP servers for sentinel execution and decision logging, mirroring CLI behavior.",
-        "details": "- `sentinel-run.mjs`: exposes tool `sentinel_run` with optional `filter` param; runs `pnpm test:sentinels -- --runInBand --reporter=json`, returns structured failures.\n- `decision-log.mjs`: wraps Task 4 CLI to append entries; ensure inputs validated (author, scope[], rationale, outputs). Returns header snippet + ledger path.\n- Provide shared RPC bootstrap utility to reduce duplication.\n- Create smoke harness `sentinel-run-smoke.mjs` + `decision-log-smoke.mjs` invoked in CI.\n- Update docs instructing Codex/Task Master to mount these MCP servers via `.mcp.json`.",
+        "details": "- `sentinel-run.mjs`: exposes tool `sentinel_run` with optional `filter` param; runs `vitest run --config vitest.config.sentinel.ts --reporter=json`, returns structured failures.\n- `decision-log.mjs`: wraps Task 4 CLI to append entries; ensure inputs validated (author, scope[], rationale, outputs). Returns header snippet + ledger path.\n- Provide shared RPC bootstrap utility to reduce duplication.\n- Create smoke harness `sentinel-run-smoke.mjs` + `decision-log-smoke.mjs` invoked in CI.\n- Update docs instructing Codex/Task Master to mount these MCP servers via `.mcp.json`.",
         "testStrategy": "Integration tests covering successful run, failing sentinel, and ledger append; verify JSON contract using zod schemas. Smoke scripts executed in CI to ensure handshake success and deterministic output.",
         "priority": "high",
         "dependencies": [
@@ -548,7 +552,7 @@
           "4",
           "8"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -556,9 +560,10 @@
             "description": "Define a reusable RPC bootstrap module to load MCP servers with consistent logging, error handling, and schema validation.",
             "dependencies": [],
             "details": "Audit existing MCP usages (e.g., other tasks) to understand expected request/response lifecycle, then author a helper in `.sentinel/scripts/mcp/lib/bootstrap.mjs` that wires JSON-RPC transport, structured logging, graceful shutdown, and shared Zod schema utilities for tools. Expose hooks so individual servers can register their tool metadata and handlers without duplicating boilerplate.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Author unit tests (Vitest) for the bootstrap helper to ensure malformed requests throw deterministic errors and that registered tools can be invoked with mocked payloads.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T19:45:14.747Z"
           },
           {
             "id": 2,
@@ -567,10 +572,11 @@
             "dependencies": [
               1
             ],
-            "details": "Use the bootstrap helper to define the `sentinel_run` tool, validate inputs (accept optional `filter` string), and spawn `pnpm test:sentinels -- --runInBand --reporter=json` via execa/child_process. Parse the JSON reporter output into a normalized payload containing pass/fail counts plus failure metadata. Ensure errors bubble with helpful messages and exit codes suitable for MCP.",
-            "status": "pending",
+            "details": "Use the bootstrap helper to define the `sentinel_run` tool, validate inputs (accept optional `filter` string), and spawn `vitest run --config vitest.config.sentinel.ts --reporter=json` via execa/child_process. Parse the JSON reporter output into a normalized payload containing pass/fail counts plus failure metadata. Ensure errors bubble with helpful messages and exit codes suitable for MCP.",
+            "status": "done",
             "testStrategy": "Integration test by invoking the module with mock filter values and stubbing the child process; confirm success/failure payloads conform to schema and that CLI args pass through correctly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T19:45:21.138Z"
           },
           {
             "id": 3,
@@ -580,9 +586,10 @@
               1
             ],
             "details": "Leverage the shared bootstrap to expose a `decision_log_append` (or similar) tool that enforces author string, non-empty scope array, rationale, and outputs payloads using Zod schemas. Delegate to the existing decision-log CLI, capture the returned header snippet plus ledger path, and surface them in the MCP response while handling CLI errors gracefully.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write integration coverage ensuring invalid payloads are rejected, successful calls echo the header snippet/path, and CLI failures propagate structured errors.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T19:45:57.382Z"
           },
           {
             "id": 4,
@@ -600,7 +607,8 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Create shared MCP bootstrapping utilities, then implement `.sentinel/scripts/mcp/sentinel-run.mjs` (wrapping `pnpm test:sentinels -- --runInBand --reporter=json`) and `.sentinel/scripts/mcp/decision-log.mjs` (wrapping the Task 4 CLI) with parameter validation and JSON responses. Add smoke scripts for each server, wire pnpm entries (`pnpm mcp:sentinel-run`, `pnpm mcp:decision-log`), and document the `.mcp.json` configuration so Codex/Task Master can mount the new tools."
+        "expansionPrompt": "Create shared MCP bootstrapping utilities, then implement `.sentinel/scripts/mcp/sentinel-run.mjs` (wrapping `pnpm test:sentinels -- --runInBand --reporter=json`) and `.sentinel/scripts/mcp/decision-log.mjs` (wrapping the Task 4 CLI) with parameter validation and JSON responses. Add smoke scripts for each server, wire pnpm entries (`pnpm mcp:sentinel-run`, `pnpm mcp:decision-log`), and document the `.mcp.json` configuration so Codex/Task Master can mount the new tools.",
+        "updatedAt": "2025-11-09T19:45:57.382Z"
       },
       {
         "id": "10",
@@ -614,7 +622,7 @@
           "8",
           "9"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -622,9 +630,10 @@
             "description": "Plan the `.github/workflows/sentinel-kit.yml` workflow, including job list, triggers (push/PR), required secrets, and artifact needs.",
             "dependencies": [],
             "details": "Document the expected jobs (setup-toolchain, contracts, sentinels, mcp-smoke, docs-lint) plus shared env/caching strategy, ensuring ubuntu/windows matrices and necessary permissions are accounted for before implementation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T21:34:34.093Z"
           },
           {
             "id": 2,
@@ -634,14 +643,15 @@
               1
             ],
             "details": "Create matrix strategy, configure `actions/setup-node`, pnpm cache restore/save, uv cache logic, and expose outputs/artifacts that downstream jobs consume; validate secrets or tokens needed for registry access.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Dry-run workflow locally with `act` (ubuntu) to confirm caching keys and job outputs resolve.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T21:34:44.483Z"
           },
           {
             "id": 3,
             "title": "Add contracts, sentinels, MCP smoke, and docs lint jobs",
-            "description": "Create separate jobs invoking `pnpm validate:contracts`, `pnpm test:sentinels --runInBand`, MCP smoke scripts, `pnpm context:lint`, and any docs lint commands, wiring them to the matrix and setup outputs.",
+            "description": "Create separate jobs invoking `pnpm validate:contracts`, `vitest run --config vitest.config.sentinel.ts --reporter=json`, MCP smoke scripts, `pnpm context:lint`, and any docs lint commands, wiring them to the matrix and setup outputs.",
             "dependencies": [
               2
             ],
@@ -677,14 +687,15 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/context/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels."
+        "expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/context/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels.",
+        "updatedAt": "2025-11-09T21:34:44.483Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-09T16:59:21.538Z",
+      "lastModified": "2025-11-09T21:34:44.484Z",
       "taskCount": 10,
-      "completedCount": 7,
+      "completedCount": 8,
       "tags": [
         "master"
       ]

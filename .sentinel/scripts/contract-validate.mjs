@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0013 */
 import path from "path";
 import { fileURLToPath } from "url";
 import watch from "node-watch";
@@ -6,10 +7,11 @@ import { validateAll, validateFixture } from "./contracts/validator.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const ROOT = path.resolve(__dirname, "..");
+const SENTINEL_ROOT = path.resolve(__dirname, "..");
+const REPO_ROOT = path.resolve(SENTINEL_ROOT, "..");
 const WATCH_PATHS = [
-  path.join(ROOT, ".sentinel", "contracts"),
-  path.join(ROOT, ".sentinel", "contracts", "fixtures")
+  path.join(REPO_ROOT, ".sentinel", "contracts"),
+  path.join(REPO_ROOT, ".sentinel", "contracts", "fixtures")
 ];
 
 function parseArgs() {

@@ -24,4 +24,4 @@ Sentinel tests codify previously fixed bugs so regressions are caught before mer
 
 ## CI Expectations
 
-CI should run pnpm test:sentinels --runInBand to avoid flake. Keep tests deterministic (no timers, random data, or network calls) and prefer pure assertions over filesystem writes unless a capsule explicitly requires artifacts.
+CI should run pnpm test:sentinels -- --reporter=json to avoid flake. Keep tests deterministic (no timers, random data, or network calls) and prefer pure assertions over filesystem writes unless a capsule explicitly requires artifacts.

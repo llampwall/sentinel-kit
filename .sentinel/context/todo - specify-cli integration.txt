@@ -9,3 +9,5 @@ If we don’t need turnkey onboarding, we can leave the file untouched and keep 
 
 
 Makes sense—let Spec-Kit keep controlling --ai for the base agent scaffolding, and add a separate --sentinel (or --with-sentinel) flag that layers our artifacts on top of whatever bundle they pick. That way users can still choose Copilot, Codex, etc., and the flag just means “after you copy that agent’s prompts, run the SentinelKit hook to drop .sentinel/**, router prompts, MCP scripts, etc.” We can wire that into specify_cli/__init__.py later—just note it in your integration doc so when we implement the hook we know exactly what the flag should do.
+
+make everything run on all environments.

@@ -2,23 +2,30 @@
 SentinelKit extends GitHub's Spec-Kit with contract enforcement, sentinel regression harnesses, provenance logs, and prompt orchestration so AI agents can operate deterministically. The current focus is wiring these primitives into the upstream flow (CLI tooling, docs, and agent prompts) before layering higher-order planning features and capsule automation.
 
 ## Current State
-- Task 5 is complete: `.sentinel/templates/capsule.md` defines the reusable capsule skeleton, `.sentinel/scripts/capsule-create.mjs` hydrates it from Spec/Plan/Tasks, and `.sentinel/scripts/lib/allowed-context.mjs` validates include lists (see `.sentinel/tests/capsule-create.test.ts` + `.sentinel/tests/sentinels/sentinel_capsule_context.test.ts` for coverage).
-- Task 6.1–6.3 are complete: agent discovery + Eta templates (`.sentinel/scripts/orch/agents.mjs`, `.sentinel/prompts/router.prompt.eta.md`, `.sentinel/prompts/agent.prompt.eta.md`), the refactored renderer (`.sentinel/scripts/orch/prompt-render.mjs`) with CLI options, schema validation + JSONL logging, and the Vitest suite (`.sentinel/tests/orch/{agents,prompt-render}.test.ts`) now covers helper APIs, CLI flows, and log writes.
-- New smoke runner: `.sentinel/scripts/orch/prompt-render.smoke.mjs` previews router + capsule prompts for `.specify/specs/005-capsule-gen/capsule.md` (override capsule/agent args as needed).
-- Tooling/tests: run from repo root with `pnpm --dir=.sentinel lint`, `pnpm --dir=.sentinel typecheck`, `pnpm --dir=.sentinel vitest run tests/capsule-create.test.ts`, `pnpm --dir=.sentinel vitest run tests/orch/agents.test.ts tests/orch/prompt-render.test.ts`, and `pnpm --dir=.sentinel test:sentinels -- --testNamePattern capsule-context`.
+- Task 5 remains the capsule baseline: `.sentinel/templates/capsule.md`, `.sentinel/scripts/capsule-create.mjs`, and `.sentinel/scripts/lib/allowed-context.mjs` (plus tests under `.sentinel/tests/capsule-create.test.ts` + `.sentinel/tests/sentinels/sentinel_capsule_context.test.ts`) keep capsules deterministic and <=300 lines.
+- Task 6.x is wrapped: agent discovery + Eta templates (`.sentinel/scripts/orch/agents.mjs`, `.sentinel/prompts/router.prompt.eta.md`, `.sentinel/prompts/agent.prompt.eta.md`) feed the refactored renderer (`.sentinel/scripts/orch/prompt-render.mjs`) with schema validation, JSONL logging, smoke runner (`.sentinel/scripts/orch/prompt-render.smoke.mjs`), and docs/snippets already synced via md-surgeon.
+- Task 7 delivered context budgets: `.sentinel/context/context-limits.json` + schema, loader (`.sentinel/scripts/context/config.mts`), the `pnpm --dir=.sentinel context:lint` CLI, and renderer integration that aborts when capsules exceed include-list limits. Docs now mention running the linter and pre-commit hook.
+- Task 8 shipped MCP contract-validate server + smoke harness; Task 9 added the shared MCP bootstrap, sentinel-run server (`vitest run --config vitest.config.sentinel.ts --reporter=json` via Node) + decision-log server, each with smoke scripts and `pnpm mcp:*` commands documented in README + `.specify/README.md`.
+- Tooling/tests snapshot: `pnpm --dir=.sentinel lint`, `pnpm --dir=.sentinel typecheck`, `pnpm --dir=.sentinel vitest run tests/orch/agents.test.ts tests/orch/prompt-render.test.ts tests/mcp/*.test.ts`, `pnpm --dir=.sentinel context:lint`, `pnpm --dir=.sentinel validate:contracts`, `pnpm --dir=.sentinel test:sentinels -- --reporter=json`, plus MCP smokes (`pnpm --dir=.sentinel mcp:sentinel-run:smoke`, `mcp:decision-log:smoke`, `mcp:contract-validate:smoke`).
 
 ## Next Subtasks
-1. **Task 6.5 – Documentation updates**
-   - Refresh README/.specify docs with the new CLI usage, logging paths, smoke script, and testing guidance now that renderer work (6.1–6.4) is wrapped.
+1. **Task 10 wrap-up / next roadmap**
+   - Workflow + docs + PR template are in place. Await instructions for the next major task (Task 11+) once Task Master is updated.
 
 ## Known Landmines
 - Docs via md-surgeon: managed sections (README/UPSTREAM) must be edited through .sentinel/scripts/md-surgeon.mjs + .sentinel/snippets/*.md; manual edits risk desync.
 - Windows quoting: inline multiline commands easily break—prefer snippet + md-surgeon flow instead of raw heredocs.
 - Ledger locking: .sentinel/DECISIONS.md is append-only via the CLI; manual edits can corrupt NEXT_ID or leave .lock files behind.
+- MCP servers run via pnpm scripts; on Windows we spawn Vitest through Node (`process.execPath` + CLI). If you see `spawn EINVAL`, double-check you’re not invoking `.cmd` directly.
+- Decision-log smoke tests set `SENTINEL_DECISION_LOG_DRY_RUN=1` to avoid real ledger writes. Clear that env var before running the actual CLI.
+- CI jobs reinstall dependencies per job—if you add new packages, ensure both root and `.sentinel/` lockfiles stay in sync or the workflow will fail during `pnpm install --frozen-lockfile`.
 
 ## Pointers
 - Decision log CLI/tests: .sentinel/scripts/decision-log.mjs, .sentinel/tests/decision-log.test.ts.
 - Contract validator + CLI: .sentinel/scripts/contracts/validator.mjs, .sentinel/scripts/contract-validate.mjs.
 - Sentinel harness + helper: .sentinel/tests/sentinels/**, .sentinel/tests/sentinels/helpers/fixture-loader.mjs.
 - Prompt renderer + templates: .sentinel/scripts/orch/prompt-render.mjs, .sentinel/prompts/{sentinel.router.md,sentinel.capsule.md,router.prompt.eta.md,agent.prompt.eta.md}, and `.sentinel/scripts/orch/agents.mjs`.
+- MCP servers + smokes: `.sentinel/scripts/mcp/lib/bootstrap.mjs`, `mcp/sentinel-run.mjs`, `mcp/decision-log.mjs`, `mcp/contract-validate-server.mjs`, tests under `.sentinel/tests/mcp/**`, and smoke scripts `.sentinel/scripts/mcp/*-smoke.mjs`.
+- Lint/CI context plan + badge: `.sentinel/context/IMPLEMENTATION.md`, `.github/workflows/sentinel-kit.yml`, README `.mcp` snippet, `.specify/README.md`.
+- PR template + enforcement checklist: `.github/pull_request_template.md`.
 - md-surgeon + snippets: .sentinel/scripts/md-surgeon.mjs, .sentinel/snippets/*.md.

@@ -6,96 +6,81 @@
  */
 
 import { spawn } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  createMessageConnection,
+  StreamMessageReader,
+  StreamMessageWriter
+} from "vscode-jsonrpc/node.js";
 
-const server = spawn(process.execPath, [".sentinel/scripts/mcp/contract-validate-server.mjs"], {
-  stdio: ["pipe", "pipe", "inherit"]
-});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ROOT = path.resolve(__dirname, "../../..");
+const SERVER = path.join(ROOT, ".sentinel", "scripts", "mcp", "contract-validate-server.mjs");
 
-let buffer = "";
-let awaitingToolResponse = true;
+async function main() {
+  const server = spawn(process.execPath, [SERVER], {
+    cwd: ROOT,
+    stdio: ["pipe", "pipe", "inherit"]
+  });
 
-server.stdin.setDefaultEncoding("utf8");
-server.stdout.setEncoding("utf8");
+  const connection = createMessageConnection(
+    new StreamMessageReader(server.stdout),
+    new StreamMessageWriter(server.stdin)
+  );
 
-server.stdout.on("data", (chunk) => {
-  buffer += chunk;
-  while (true) {
-    const nl = buffer.indexOf("\n");
-    if (nl === -1) break;
-    const line = buffer.slice(0, nl).trim();
-    buffer = buffer.slice(nl + 1);
-    if (!line) continue;
-    handleMessage(line);
-  }
-});
+  connection.listen();
 
-server.on("exit", (code) => {
-  if (code !== 0 && awaitingToolResponse) {
-    console.error("Smoke test failed: server exited before completing tool call.");
-    process.exit(1);
-  }
-});
-
-function send(msg) {
-  server.stdin.write(JSON.stringify(msg) + "\n");
-}
-
-function handleMessage(line) {
-  let msg;
-  try {
-    msg = JSON.parse(line);
-  } catch (err) {
-    console.error("Smoke test received invalid JSON:", line, err);
-    process.exit(1);
-  }
-
-  if (msg.id === 1) {
-    // initialization succeeded
-    send({ jsonrpc: "2.0", method: "notifications/initialized" });
-    send({ jsonrpc: "2.0", id: 2, method: "tools/list" });
-    return;
-  }
-
-  if (msg.id === 2) {
-    const toolNames = msg.result?.tools?.map((t) => t.name) ?? [];
-    if (!toolNames.includes("contract_validate")) {
-      console.error("Smoke test failed: contract_validate not listed in tools.");
+  let closed = false;
+  let completed = false;
+  server.on("exit", (code) => {
+    closed = true;
+    if (!completed && code !== 0) {
+      console.error("Smoke test failed: server exited unexpectedly.");
       process.exit(1);
     }
-    send({ jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "contract_validate", arguments: {} } });
-    return;
-  }
+  });
 
-  if (msg.id === 3) {
-    awaitingToolResponse = false;
-    const ok = msg.result && msg.result.isError === false;
-    if (!ok) {
-      console.error("Smoke test failed: tool call did not succeed.", msg);
-      process.exit(1);
-    }
-    console.log("contract_validate smoke test passed.");
-    server.kill("SIGTERM");
-    return;
-  }
-}
-
-// Kick off initialize
-send({
-  jsonrpc: "2.0",
-  id: 1,
-  method: "initialize",
-  params: {
+  const init = await connection.sendRequest("initialize", {
     protocolVersion: "2024-11-01",
     capabilities: {},
     clientInfo: { name: "smoke-client", version: "0.0.0" }
+  });
+  if (!init?.serverInfo?.name) {
+    throw new Error("Smoke test failed: initialize response missing serverInfo.");
   }
-});
 
-// Safety timeout
-setTimeout(() => {
-  if (awaitingToolResponse) {
-    console.error("Smoke test timed out.");
-    server.kill("SIGTERM");
-    process.exit(1);
+  connection.sendNotification("notifications/initialized");
+  const list = await connection.sendRequest("tools/list", {});
+  const toolNames = list?.tools?.map((tool) => tool.name) ?? [];
+  if (!toolNames.includes("contract_validate")) {
+    throw new Error("Smoke test failed: contract_validate not listed in tools.");
   }
-}, 5000);
+
+  const call = await connection.sendRequest("tools/call", {
+    name: "contract_validate",
+    arguments: {}
+  });
+  const payload = call?.content?.[0];
+  const ok =
+    call &&
+    call.isError === false &&
+    payload?.type === "json" &&
+    payload?.json?.ok === true;
+  if (!ok) {
+    throw new Error("Smoke test failed: tool call did not succeed.");
+  }
+
+  console.log("contract_validate smoke test passed.");
+  completed = true;
+  connection.dispose();
+  if (!closed) {
+    server.kill("SIGTERM");
+  }
+}
+
+main().catch((error) => {
+  console.error(error?.message || error);
+  process.exit(1);
+});

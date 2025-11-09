@@ -3,7 +3,7 @@
 # Decisions Ledger
 
 ## NEXT_ID
-D-0013
+D-0019
 
 ## Format
 
@@ -135,4 +135,49 @@ Scope: .sentinel/scripts/context/**; .sentinel/context; .sentinel/tests/context
 Decision: Add context-limits schema + pnpm context:lint
 Rationale: Capsule include lists need automated budgets, forbidden-path checks, and reproducible CLI coverage.
 Outputs: .sentinel/context/context-limits.json, .sentinel/scripts/context/config.mts, .sentinel/scripts/context/lint.mts, .sentinel/tests/context/config.test.ts, .sentinel/tests/context/lint.test.ts
+Supersedes: none
+
+ID: D-0013
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/contracts/*.mjs; .sentinel/scripts/contract-validate.mjs; .sentinel/tests/contracts
+Decision: Extract shared contract validator core and update CLI
+Rationale: MCP server work needs a reusable validator module and the CLI should consume it while exposing watch hooks.
+Outputs: .sentinel/scripts/contracts/validator-core.mjs, .sentinel/scripts/contracts/validator.mjs, .sentinel/scripts/contract-validate.mjs, .sentinel/tests/contracts/validator-core.test.ts
+Supersedes: none
+
+ID: D-0014
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/mcp/contract-validate-server.mjs; .sentinel/scripts/mcp/contract-validate-smoke.mjs; .sentinel/tests/mcp/contract-validate-server.test.ts
+Decision: Rebuild contract-validate MCP server on vscode-jsonrpc
+Rationale: Needed a standards-compliant MCP endpoint that reuses the shared validator core, exposes proper tooling metadata, and ships with automated coverage.
+Outputs: .sentinel/scripts/mcp/contract-validate-server.mjs, .sentinel/scripts/mcp/contract-validate-smoke.mjs, .sentinel/tests/mcp/contract-validate-server.test.ts
+Supersedes: none
+
+ID: D-0015
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/mcp/lib/bootstrap.mjs; .sentinel/tests/mcp/bootstrap.test.ts
+Decision: Add shared MCP bootstrap helper
+Rationale: Needed a reusable JSON-RPC server scaffold with Zod validation for upcoming sentinel_run/decision_log MCP endpoints.
+Outputs: .sentinel/scripts/mcp/lib/bootstrap.mjs, .sentinel/tests/mcp/bootstrap.test.ts
+Supersedes: none
+
+ID: D-0016
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/mcp/sentinel-run.mjs; .sentinel/tests/mcp/sentinel-run.test.ts
+Decision: Implement sentinel_run MCP server
+Rationale: Expose pnpm test:sentinels via MCP so agents can trigger sentinel suites with optional filters.
+Outputs: .sentinel/scripts/mcp/sentinel-run.mjs, .sentinel/tests/mcp/sentinel-run.test.ts
+Supersedes: none
+
+ID: D-0018
+Date: 2025-11-09
+Author: Builder
+Scope: .github/workflows/sentinel-kit.yml
+Decision: Add sentinel-kit workflow skeleton
+Rationale: CI needs a shared setup job with pnpm/uv caching and OS matrix before wiring downstream gates.
+Outputs: .github/workflows/sentinel-kit.yml
 Supersedes: none
