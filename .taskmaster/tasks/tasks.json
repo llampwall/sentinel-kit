@@ -161,7 +161,7 @@
         "dependencies": [
           "2"
         ],
-        "status": "done",
+        "status": "pending",
         "subtasks": [
           {
             "id": 1,
@@ -169,10 +169,9 @@
             "description": "Install/update .sentinel devDependencies, add vitest.config.sentinel.ts that targets tests/sentinels/**/*.test.ts with ESM + TS support, and wire pnpm scripts for test:sentinels plus filter passthrough.",
             "dependencies": [],
             "details": "Ensure .sentinel/package.json includes Vitest 2.1, TypeScript, tsx, and align tsconfig for ESM; add npm scripts `pnpm test:sentinels` and filtered variant; verify workspace config so root pnpm can invoke the sentinel project.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Run `pnpm test:sentinels --runInBand` to confirm config picks up suite skeleton and exits cleanly.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:07:58.172Z"
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -182,10 +181,9 @@
               1
             ],
             "details": "Wrap Task 2 validator to load schema metadata, throw descriptive errors with DECISION IDs, and expose async helper returning typed fixture payloads; include minimal unit tests to keep coverage high.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Unit-test helper using sample fixtures (valid/invalid) to ensure validation errors bubble and happy path resolves typed data.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:10:57.843Z"
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -196,10 +194,9 @@
               2
             ],
             "details": "Include at least one suite per critical bug with metadata comments, ensure tests fail before fixes, and support `--filter <slug>` usage; add snapshot harness when JSON outputs need locking.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": "Execute `pnpm test:sentinels -- --filter <slug>` to confirm targeted runs plus snapshot updates behave deterministically.",
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:16:11.489Z"
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -211,16 +208,14 @@
               3
             ],
             "details": "Include instructions for adding new bugs, invoking filter flag, wiring CI job (`pnpm test:sentinels --runInBand`), and overview of helper API plus snapshot guidance; ensure doc links to Task 2 validator and Task 1 workspace steps.",
-            "status": "done",
+            "status": "pending",
             "testStrategy": null,
-            "parentId": "undefined",
-            "updatedAt": "2025-11-08T15:17:35.899Z"
+            "parentId": "undefined"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Establish a `.sentinel` Vitest project by adding `vitest.config.sentinel.ts`, shared helpers to load `.sentinel/contracts/fixtures/**` and validate via the Task 2 module, new npm scripts (`pnpm test:sentinels`, `pnpm test:sentinels -- --filter <slug>`), and seed sentinel suites covering historical bugs. Include documentation in `.sentinel/tests/sentinels/README.md` describing Given/When/Then formatting plus CI usage, and ensure the harness integrates with the pnpm workspace from Task 1.",
-        "updatedAt": "2025-11-08T15:17:35.899Z"
+        "expansionPrompt": "Establish a `.sentinel` Vitest project by adding `vitest.config.sentinel.ts`, shared helpers to load `.sentinel/contracts/fixtures/**` and validate via the Task 2 module, new npm scripts (`pnpm test:sentinels`, `pnpm test:sentinels -- --filter <slug>`), and seed sentinel suites covering historical bugs. Include documentation in `.sentinel/tests/sentinels/README.md` describing Given/When/Then formatting plus CI usage, and ensure the harness integrates with the pnpm workspace from Task 1."
       },
       {
         "id": "4",
@@ -272,8 +267,7 @@
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Author `UPSTREAM.md` detailing how SentinelKit tracks Spec-Kit (sources of truth, sync cadence, manual steps), then update `README.md` and `.sentinel/tests/sentinels/README.md` to describe the sentinel toolchain install commands introduced in Task 1 along with `pnpm`/`uv` prerequisites. Include references to `.sentinel/DECISIONS.md` expectations and any CI badges once Task 10 lands.",
-        "updatedAt": "2025-11-08T15:18:12.499Z"
+        "expansionPrompt": "Author `UPSTREAM.md` detailing how SentinelKit tracks Spec-Kit (sources of truth, sync cadence, manual steps), then update `README.md` and `.sentinel/tests/sentinels/README.md` to describe the sentinel toolchain install commands introduced in Task 1 along with `pnpm`/`uv` prerequisites. Include references to `.sentinel/DECISIONS.md` expectations and any CI badges once Task 10 lands."
       },
       {
         "id": "5",
@@ -664,9 +658,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-08T15:18:12.500Z",
+      "lastModified": "2025-11-08T15:00:21.341Z",
       "taskCount": 10,
-      "completedCount": 3,
+      "completedCount": 2,
       "tags": [
         "master"
       ]

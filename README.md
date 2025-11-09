@@ -119,19 +119,6 @@ pnpm validate:contracts -- --fixture contracts/fixtures/users.v1/get_active.json
 
 Pass `--watch` to re-run automatically when contracts or fixtures change. The command prints a JSON summary; CI will treat any failures as blocking.
 
-### 4. Run Sentinel regression tests
-
-Sentinel tests encode previously fixed bugs. After writing or updating a sentinel suite under `.sentinel/tests/sentinels/**`, run:
-
-```bash
-cd .sentinel
-pnpm test:sentinels                     # full run
-pnpm test:sentinels -- --filter my-sentinel
-pnpm test:sentinels:watch               # watch mode for iterative work
-```
-
-The Vitest config is scoped to sentinel suites and will be wired into CI in Phase 3.
-
 ### 2. Establish project principles
 
 Launch your AI assistant in the project directory. The `/speckit.*` commands are available in the assistant.

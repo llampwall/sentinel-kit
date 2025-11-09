@@ -10,8 +10,6 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:sentinels": "vitest run --config vitest.config.sentinel.ts",
-    "test:sentinels:watch": "vitest watch --config vitest.config.sentinel.ts",
     "validate:contracts": "node scripts/contract-validate.mjs",
     "test:watch": "vitest watch"
   },
