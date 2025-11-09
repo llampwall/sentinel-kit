@@ -14,7 +14,7 @@ const VALID_FIXTURE = path.join(
   "get_active.json"
 );
 
-async function createTempFixture(contents) {
+async function createTempFixture(contents: string): Promise<string> {
   const dir = await fsp.mkdtemp(path.join(os.tmpdir(), "sentinel-fixture-"));
   const file = path.join(dir, "fixture.json");
   await fsp.writeFile(file, contents, "utf8");

@@ -289,7 +289,7 @@
           "3",
           "4"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -297,9 +297,10 @@
             "description": "Create the `.specify/specs/<id>/capsule.md` template capturing Goal, Required Outputs, Acceptance Criteria, Allowed Context, and Router Notes with clear author guidance.",
             "dependencies": [],
             "details": "Author the base markdown template with placeholder comments, section ordering, and guidance text so future capsules stay within the <300 line expectation and align with Spec/Plan/Tasks data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T07:35:07.478Z"
           },
           {
             "id": 2,
@@ -309,9 +310,10 @@
               1
             ],
             "details": "Use Node 20+ with tsx entry to parse input spec artifacts, assemble template data, auto-fill sections, enforce deterministic hashing for IDs, and fail the CLI when output exceeds 300 lines, returning actionable errors.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit and snapshot tests covering CLI generation paths ensure stable markdown output and hash determinism.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T08:24:09.326Z"
           },
           {
             "id": 3,
@@ -321,9 +323,10 @@
               2
             ],
             "details": "Implement filesystem scanning and schema enforcement for Allowed Context entries, ensuring relative paths are used, invalid entries raise errors, and add a linter module reusable by the CLI and future tooling.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests mocking context directories validate path discovery, deduplication, and error handling for missing files.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T08:24:18.547Z"
           },
           {
             "id": 4,
@@ -334,14 +337,16 @@
               3
             ],
             "details": "Detail CLI invocation examples, explain hashed IDs and line budget requirements, outline how speckit tasks consume capsules, and ensure docs mention new linter behavior and include-list schema.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Doc review plus optional markdown linting; verify examples by running the CLI commands referenced.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T08:24:53.241Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Create `.specify/specs/<id>/capsule.md` templates that include Goal/Outputs/Acceptance Criteria/Allowed Context/Router Notes, implement a TS/tsx generator (e.g., `.sentinel/scripts/capsule-create.tsx`) wired to `pnpm capsule:create --spec <path>` that reads Spec/Plan/Tasks, computes hashed IDs, and enforces the <300 line budget with auto-populated Allowed Context lists from `.sentinel/context/**/*` references. Add an include-list validator, snapshot/unit tests, and docs in `.specify/README.md` plus integration notes for the `speckit.tasks` pipeline."
+        "expansionPrompt": "Create `.specify/specs/<id>/capsule.md` templates that include Goal/Outputs/Acceptance Criteria/Allowed Context/Router Notes, implement a TS/tsx generator (e.g., `.sentinel/scripts/capsule-create.tsx`) wired to `pnpm capsule:create --spec <path>` that reads Spec/Plan/Tasks, computes hashed IDs, and enforces the <300 line budget with auto-populated Allowed Context lists from `.sentinel/context/**/*` references. Add an include-list validator, snapshot/unit tests, and docs in `.specify/README.md` plus integration notes for the `speckit.tasks` pipeline.",
+        "updatedAt": "2025-11-09T08:24:53.241Z"
       },
       {
         "id": "6",
@@ -667,9 +672,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-09T06:00:32.119Z",
+      "lastModified": "2025-11-09T08:24:53.243Z",
       "taskCount": 10,
-      "completedCount": 4,
+      "completedCount": 5,
       "tags": [
         "master"
       ]

@@ -1,4 +1,4 @@
-﻿import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
 import path from "node:path";
 import os from "node:os";
 import fsp from "node:fs/promises";
@@ -6,7 +6,7 @@ import { spawnSync } from "node:child_process";
 
 const CLI = path.resolve("scripts", "decision-log.mjs");
 
-async function createTempLedger(nextId = "D-0005") {
+async function createTempLedger(nextId = "D-0005"): Promise<{ dir: string; ledger: string }> {
   const dir = await fsp.mkdtemp(path.join(os.tmpdir(), "decision-ledger-"));
   const ledger = path.join(dir, "DECISIONS.md");
   const template = `<!-- header -->\n\n# Decisions Ledger\n\n## NEXT_ID\n${nextId}\n\n## Format\n\nID: D-0001\nDate: 2025-11-01\nAuthor: Seed\nScope: init\nDecision: seed entry\nRationale: placeholder\nOutputs: none\nSupersedes: none\n`;
@@ -14,7 +14,7 @@ async function createTempLedger(nextId = "D-0005") {
   return { dir, ledger };
 }
 
-function runCli(args) {
+function runCli(args: string[]) {
   return spawnSync(process.execPath, [CLI, ...args], {
     cwd: path.resolve("."),
     encoding: "utf8",
@@ -23,7 +23,7 @@ function runCli(args) {
 }
 
 describe("decision-log CLI", () => {
-  const tempDirs = [];
+  const tempDirs: string[] = [];
 
   afterEach(async () => {
     for (const dir of tempDirs.splice(0)) {
@@ -94,3 +94,4 @@ describe("decision-log CLI", () => {
     expect(result.stderr || result.stdout).toMatch(/locked/);
   });
 });
+

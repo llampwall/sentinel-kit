@@ -3,7 +3,7 @@
 # Decisions Ledger
 
 ## NEXT_ID
-D-0007
+D-0011
 
 ## Format
 
@@ -81,4 +81,40 @@ Scope: sync/<YYYY-MM-DD>
 Decision: Merge spec-kit upstream into sentinel-kit
 Rationale: Rebase onto upstream main
 Outputs: UPSTREAM.md, .sentinel/**
+Supersedes: none
+
+ID: D-0007
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/orch
+Decision: Adopt Eta prompt renderer
+Rationale: Unified templates + logging
+Outputs: .sentinel/scripts/orch/prompt-render.mjs, README.md
+Supersedes: none
+
+ID: D-0008
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/orch
+Decision: Adopt Eta prompt renderer
+Rationale: Unified templates + logging
+Outputs: .sentinel/scripts/orch/prompt-render.mjs, README.md
+Supersedes: none
+
+ID: D-0009
+Date: 2025-11-09
+Author: Builder
+Scope: .sentinel/scripts/orch
+Decision: Adopt Eta prompt renderer
+Rationale: Unified templates + logging
+Outputs: .sentinel/scripts/orch/prompt-render.mjs, README.md
+Supersedes: none
+
+ID: D-0010
+Date: 2025-11-09
+Author: Builder
+Scope: .specify/specs/005-capsule-gen; .sentinel/scripts
+Decision: Capsule generator + Allowed Context helper
+Rationale: Automate Task 5 capsules, validate include lists, and document the workflow
+Outputs: .specify/specs/005-capsule-gen/capsule.md, .sentinel/scripts/capsule-create.mjs, .sentinel/scripts/lib/allowed-context.mjs, .sentinel/tests/capsule-create.test.ts, .sentinel/tests/__snapshots__/capsule-create.test.ts.snap, .sentinel/tests/sentinels/sentinel_capsule_context.test.ts, .sentinel/snippets/capsules.md, README.md, .sentinel/scripts/md-surgeon.mjs
 Supersedes: none

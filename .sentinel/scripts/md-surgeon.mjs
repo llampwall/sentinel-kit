@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0010 */
 
 // Safe, surgical Markdown edits with UTF-8 + code-fence checks.
 //
@@ -116,7 +117,8 @@ function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
   if (!hasBalancedFences(doc)) {
     fail("resulting document has unbalanced code fences; write aborted");
   }
-  if (/[^\u0000-\u007F]/.test(doc) && doc.includes("\uFFFD")) {
+  const hasNonAscii = [...doc].some((char) => char.charCodeAt(0) > 0x7f);
+  if (hasNonAscii && doc.includes("\uFFFD")) {
     fail("replacement character detected; encoding issue");
   }
 

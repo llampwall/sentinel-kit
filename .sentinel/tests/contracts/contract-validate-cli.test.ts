@@ -7,7 +7,7 @@ import { spawn } from "node:child_process";
 const CLI = path.resolve("scripts", "contract-validate.mjs");
 const ROOT = path.resolve("..");
 
-function runCli(args) {
+function runCli(args: string[]): Promise<{ code: number; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
     const child = spawn(process.execPath, [CLI, ...args], {
       cwd: path.join(ROOT, ".sentinel"),
@@ -18,11 +18,11 @@ function runCli(args) {
     let stderr = "";
     child.stdout.on("data", (chunk) => (stdout += chunk.toString()));
     child.stderr.on("data", (chunk) => (stderr += chunk.toString()));
-    child.on("close", (code) => resolve({ code, stdout, stderr }));
+    child.on("close", (code) => resolve({ code: code ?? 1, stdout, stderr }));
   });
 }
 
-async function createInvalidFixture() {
+async function createInvalidFixture(): Promise<string> {
   const dir = await fsp.mkdtemp(path.join(os.tmpdir(), "sentinel-cli-"));
   const file = path.join(dir, "invalid.json");
   await fsp.writeFile(
@@ -37,7 +37,6 @@ async function createInvalidFixture() {
     "utf8"
   );
   return file;
-
 }
 
 describe("contract-validate CLI", () => {
