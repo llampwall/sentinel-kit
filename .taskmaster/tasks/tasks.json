@@ -552,7 +552,7 @@
           "4",
           "8"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -600,15 +600,16 @@
               3
             ],
             "details": "Implement `sentinel-run-smoke.mjs` and `decision-log-smoke.mjs` that ping each server via the bootstrap helper to ensure they respond deterministically, add `pnpm mcp:sentinel-run` and `pnpm mcp:decision-log` scripts, update CI configuration to execute the smoke tests, and document the `.mcp.json` entries plus usage guidance in relevant READMEs/CLAUDE.md.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Hook smoke scripts into CI and run locally to validate they exit 0; manually verify docs render correct `.mcp.json` snippets.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T22:22:12.381Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
         "expansionPrompt": "Create shared MCP bootstrapping utilities, then implement `.sentinel/scripts/mcp/sentinel-run.mjs` (wrapping `pnpm test:sentinels -- --runInBand --reporter=json`) and `.sentinel/scripts/mcp/decision-log.mjs` (wrapping the Task 4 CLI) with parameter validation and JSON responses. Add smoke scripts for each server, wire pnpm entries (`pnpm mcp:sentinel-run`, `pnpm mcp:decision-log`), and document the `.mcp.json` configuration so Codex/Task Master can mount the new tools.",
-        "updatedAt": "2025-11-09T19:45:57.382Z"
+        "updatedAt": "2025-11-09T22:22:12.381Z"
       },
       {
         "id": "10",
@@ -622,7 +623,7 @@
           "8",
           "9"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -656,9 +657,10 @@
               2
             ],
             "details": "Ensure each job uses the OS matrix, restores caches, runs required pnpm scripts, uploads logs on failure, and enforces required secrets; include job dependencies so failures block the workflow.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use `act` for ubuntu path checks and inspect GitHub Actions logs on PR to ensure every script executes and fails the workflow when commands exit non-zero.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T22:11:39.250Z"
           },
           {
             "id": 4,
@@ -668,9 +670,10 @@
               3
             ],
             "details": "Insert status badge referencing the new workflow, describe how contracts/sentinels/docs checks gate PRs, outline remediation steps, and keep wording consistent across both docs; verify links resolve.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Manual doc review plus Markdown lint run (`pnpm context:lint`) to ensure formatting passes CI.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T22:11:46.178Z"
           },
           {
             "id": 5,
@@ -680,22 +683,23 @@
               3
             ],
             "details": "Add checklist items covering capsule, decision log, sentinel updates, and describe any new release automation referencing Spec-Kit packaging so contributors follow enforcement steps.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Open a test PR locally to confirm the template renders correctly; run release script dry-run if added to ensure sentinel references resolve.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T22:11:52.560Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
         "expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/context/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels.",
-        "updatedAt": "2025-11-09T21:34:44.483Z"
+        "updatedAt": "2025-11-09T22:11:52.560Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-09T21:34:44.484Z",
+      "lastModified": "2025-11-09T22:22:12.382Z",
       "taskCount": 10,
-      "completedCount": 8,
+      "completedCount": 10,
       "tags": [
         "master"
       ]

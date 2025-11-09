@@ -9,8 +9,13 @@ SentinelKit extends GitHub's Spec-Kit with contract enforcement, sentinel regres
 - Tooling/tests snapshot: `pnpm --dir=.sentinel lint`, `pnpm --dir=.sentinel typecheck`, `pnpm --dir=.sentinel vitest run tests/orch/agents.test.ts tests/orch/prompt-render.test.ts tests/mcp/*.test.ts`, `pnpm --dir=.sentinel context:lint`, `pnpm --dir=.sentinel validate:contracts`, `pnpm --dir=.sentinel test:sentinels -- --reporter=json`, plus MCP smokes (`pnpm --dir=.sentinel mcp:sentinel-run:smoke`, `mcp:decision-log:smoke`, `mcp:contract-validate:smoke`).
 
 ## Next Subtasks
-1. **Task 10 wrap-up / next roadmap**
-   - Workflow + docs + PR template are in place. Await instructions for the next major task (Task 11+) once Task Master is updated.
+1. **Verify Tasks 8–10 end-to-end**
+   - Re-run `pnpm --dir=.sentinel validate:contracts`, `pnpm --dir=.sentinel vitest run tests/mcp/*.test.ts`, `pnpm --dir=.sentinel mcp:*:smoke`, `pnpm --dir=.sentinel context:lint`, and `pnpm --dir=.sentinel test:sentinels -- --reporter=json` to confirm MCP servers, linter, and sentinel suites remain green on fresh installs (CI parity).
+2. **Draft PRD – Spec-Kit CLI Sentinel integration (turnkey onboarding)**
+   - Outline `specify init --sentinel` flow (CLI flag semantics, prompts, defaults).
+   - Define artifacts copied into new repos: router/agent prompts, `.sentinel/**` workspace, MCP scripts, agents roster, workflow YAML, PR template.
+   - Describe post-init steps (running capsule generator, configuring MCP servers, decision-log initialization).
+   - Success criteria: zero manual steps beyond `specify init --sentinel`, Spec-Kit iterative workflow untouched, CI badge + MCP instructions present.
 
 ## Known Landmines
 - Docs via md-surgeon: managed sections (README/UPSTREAM) must be edited through .sentinel/scripts/md-surgeon.mjs + .sentinel/snippets/*.md; manual edits risk desync.
