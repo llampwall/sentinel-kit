@@ -2,20 +2,14 @@
 SentinelKit extends GitHub's Spec-Kit with contract enforcement, sentinel regression harnesses, provenance logs, and prompt orchestration so AI agents can operate deterministically. The current focus is wiring these primitives into the upstream flow (CLI tooling, docs, and agent prompts) before layering higher-order planning features and capsule automation.
 
 ## Current State
-- Code changes: .sentinel/scripts/decision-log.mjs, .sentinel/tests/decision-log.test.ts, .sentinel/scripts/md-surgeon.mjs, .sentinel/snippets/{decision-log.md,upstream-decision.md}, .sentinel/DECISIONS.md, README.md, UPSTREAM.md, sentinel test suite, contract validator, prompt renderer.
-- Tooling/tests: "cd .sentinel && pnpm test" passes (contract validator, sentinel harness, decision-log CLI). "pnpm lint" and "pnpm typecheck" also pass with the updated md-surgeon flow.
-- Remaining work: Task 5 (capsule template + generator + Allowed Context linting) is untouched; Task 6+ follow per PRD.
+- Task 5 is complete: `.sentinel/templates/capsule.md` defines the reusable capsule skeleton, `.sentinel/scripts/capsule-create.mjs` hydrates it from Spec/Plan/Tasks, and `.sentinel/scripts/lib/allowed-context.mjs` validates include lists (see `.sentinel/tests/capsule-create.test.ts` + `.sentinel/tests/sentinels/sentinel_capsule_context.test.ts` for coverage).
+- Task 6.1–6.3 are complete: agent discovery + Eta templates (`.sentinel/scripts/orch/agents.mjs`, `.sentinel/prompts/router.prompt.eta.md`, `.sentinel/prompts/agent.prompt.eta.md`), the refactored renderer (`.sentinel/scripts/orch/prompt-render.mjs`) with CLI options, schema validation + JSONL logging, and the Vitest suite (`.sentinel/tests/orch/{agents,prompt-render}.test.ts`) now covers helper APIs, CLI flows, and log writes.
+- New smoke runner: `.sentinel/scripts/orch/prompt-render.smoke.mjs` previews router + capsule prompts for `.specify/specs/005-capsule-gen/capsule.md` (override capsule/agent args as needed).
+- Tooling/tests: run from repo root with `pnpm --dir=.sentinel lint`, `pnpm --dir=.sentinel typecheck`, `pnpm --dir=.sentinel vitest run tests/capsule-create.test.ts`, `pnpm --dir=.sentinel vitest run tests/orch/agents.test.ts tests/orch/prompt-render.test.ts`, and `pnpm --dir=.sentinel test:sentinels -- --testNamePattern capsule-context`.
 
 ## Next Subtasks
-1. Task 5.1 - Capsule template skeleton
-   - Add .specify/specs/<id>/capsule.md template with Goal/Outputs/Acceptance/Allowed Context/Router Notes.
-   - Acceptance: template committed, docs reference it, md-surgeon snippet renders in README/PRD without lint errors.
-2. Task 5.2 - Capsule generator CLI
-   - Implement .sentinel/scripts/capsule-create.mjs (tsx/Node) + "pnpm capsule:create --spec <path>" that hydrates the template, enforces <300 lines, and hashes capsule IDs.
-   - Acceptance: Vitest CLI test shows deterministic capsule output; README documents usage.
-3. Task 5.3 - Allowed Context autopop + validation
-   - Build helper that scans .sentinel/context/** and emits validated include lists; generator consumes it.
-   - Acceptance: unit tests cover valid/missing paths; generator refuses invalid include lists; CI step runs the linter.
+1. **Task 6.5 – Documentation updates**
+   - Refresh README/.specify docs with the new CLI usage, logging paths, smoke script, and testing guidance now that renderer work (6.1–6.4) is wrapped.
 
 ## Known Landmines
 - Docs via md-surgeon: managed sections (README/UPSTREAM) must be edited through .sentinel/scripts/md-surgeon.mjs + .sentinel/snippets/*.md; manual edits risk desync.
@@ -26,5 +20,5 @@ SentinelKit extends GitHub's Spec-Kit with contract enforcement, sentinel regres
 - Decision log CLI/tests: .sentinel/scripts/decision-log.mjs, .sentinel/tests/decision-log.test.ts.
 - Contract validator + CLI: .sentinel/scripts/contracts/validator.mjs, .sentinel/scripts/contract-validate.mjs.
 - Sentinel harness + helper: .sentinel/tests/sentinels/**, .sentinel/tests/sentinels/helpers/fixture-loader.mjs.
-- Prompt renderer + templates: .sentinel/scripts/orch/prompt-render.mjs, .sentinel/templates/prompts/*.eta.mts.
+- Prompt renderer + templates: .sentinel/scripts/orch/prompt-render.mjs, .sentinel/prompts/{sentinel.router.md,sentinel.capsule.md,router.prompt.eta.md,agent.prompt.eta.md}, and `.sentinel/scripts/orch/agents.mjs`.
 - md-surgeon + snippets: .sentinel/scripts/md-surgeon.mjs, .sentinel/snippets/*.md.

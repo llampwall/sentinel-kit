@@ -358,7 +358,7 @@
         "dependencies": [
           "5"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -366,9 +366,10 @@
             "description": "Set up reusable prompt templates and agent metadata loading scaffolding.",
             "dependencies": [],
             "details": "Create `.sentinel/prompts/*.md` with ROLE/PLAYBOOK sections, and build a configuration helper that enumerates `.sentinel/agents/**`, validates `agent.json` + markdown files, and exposes metadata for rendering.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit-test agent discovery against valid/invalid agent directories using Vitest.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T11:16:32.072Z"
           },
           {
             "id": 2,
@@ -378,9 +379,10 @@
               1
             ],
             "details": "Refactor `.sentinel/scripts/orch/prompt-render.mjs` into modular functions that load capsule data, hydrate Eta templates, inject allowed context, and honor `--mode router|capsule`, `--agent`, and `--output` CLI options.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Vitest unit tests covering CLI arg parsing and successful capsule prompt rendering via Eta templates.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T11:36:57.344Z"
           },
           {
             "id": 3,
@@ -390,9 +392,10 @@
               2
             ],
             "details": "Define a JSON schema for router output (leadAgent, requiredOutputs[], contextToMount[], notes), validate rendered router JSON before emitting, and write each invocation to `.sentinel/router_log/<timestamp>-<slug>.jsonl` with hashed capsule path.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Vitest tests asserting invalid router payloads throw, valid payloads pass, and log files are appended with expected fields.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T11:57:27.252Z"
           },
           {
             "id": 4,
@@ -403,9 +406,10 @@
               3
             ],
             "details": "Create `.sentinel/scripts/orch/prompt-render.smoke.mjs` that runs router then capsule mode sequentially using sample capsules, and expand Vitest suite to cover template variable resolution, include pruning, and log writes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Smoke script execution assertion plus Vitest integration tests covering router and capsule flows with snapshot comparison.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T13:43:02.297Z"
           },
           {
             "id": 5,
@@ -417,14 +421,16 @@
               4
             ],
             "details": "Revise relevant README / docs sections so router users know how to run `prompt-render.mjs` end-to-end, including template locations, CLI options, logging output, and testing guidance.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-09T13:51:51.023Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Refactor `.sentinel/scripts/orch/prompt-render.mjs` into an Eta/Mustache-powered module that validates router JSON against a schema, injects Allowed Context/agent metadata from `.sentinel/agents/**`, and logs every router decision to `.sentinel/router_log/<timestamp>-<slug>.jsonl`. Add CLI options (`--mode router|capsule`, `--agent`, `--output <file>`) plus reusable templates under `.sentinel/prompts/*.md`, ensure JSON schema enforcement, and create smoke + Vitest coverage. Update docs so router users know how to run the new CLI end-to-end."
+        "expansionPrompt": "Refactor `.sentinel/scripts/orch/prompt-render.mjs` into an Eta/Mustache-powered module that validates router JSON against a schema, injects Allowed Context/agent metadata from `.sentinel/agents/**`, and logs every router decision to `.sentinel/router_log/<timestamp>-<slug>.jsonl`. Add CLI options (`--mode router|capsule`, `--agent`, `--output <file>`) plus reusable templates under `.sentinel/prompts/*.md`, ensure JSON schema enforcement, and create smoke + Vitest coverage. Update docs so router users know how to run the new CLI end-to-end.",
+        "updatedAt": "2025-11-09T13:51:51.023Z"
       },
       {
         "id": "7",
@@ -672,9 +678,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-09T08:24:53.243Z",
+      "lastModified": "2025-11-09T13:51:51.025Z",
       "taskCount": 10,
-      "completedCount": 5,
+      "completedCount": 6,
       "tags": [
         "master"
       ]
