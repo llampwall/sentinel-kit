@@ -1,4 +1,4 @@
-#!/usr/bin/env pwsh
+﻿#!/usr/bin/env pwsh
 <#
 .SYNOPSIS
 Bootstrap SentinelKit tooling (uv/specify-cli + pnpm workspace).
@@ -47,7 +47,7 @@ function Invoke-Step {
 
     Write-StepInfo "==> $Message"
     & $Script
-    Write-StepInfo "✓ $Message" -Color Green
+    Write-StepInfo "[OK] $Message" -Color Green
 }
 
 Invoke-Step "Installing specify-cli via uv" {

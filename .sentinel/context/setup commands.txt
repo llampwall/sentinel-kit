@@ -1,0 +1,10 @@
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+uv tool install specify-cli --from git+https://github.com/github/spec-kit.git
+
+corepack enable
+corepack prepare pnpm@9.12.0 --activate
+
+./scripts/setup.ps1 -PnpmFlags "--registry=https://registry.npmjs.org/"  
+
+pnpm --dir=.sentinel mcp:contract-validate:smoke
