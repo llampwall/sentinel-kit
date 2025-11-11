@@ -1,4 +1,17 @@
 # PRD (RPG) — Sentinel‑Kit: Python‑Only Integration into Spec‑Kit (Windows/Linux/macOS)
+<!-- For context you can show Codex:
+
+Spec-Kit’s Specify CLI is the official init path we’re integrating with. 
+https://github.com/github/spec-kit?utm_source=chatgpt.com
+
+Task Master’s PRD + parsing flow (quick start / intro / tasks) matches the structure here. 
+https://docs.task-master.dev/getting-started/quick-start/quick-start?utm_source=chatgpt.com
+
+uv is the recommended fast Python project manager we’re standardizing on. 
+https://docs.astral.sh/uv/?utm_source=chatgpt.com
+
+If you want a DECISIONS.md seed and the pyproject.toml/Typer CLI skeleton added under the PRD in the canvas, say the word and I’ll drop those next. -->
+
 
 > **Standard:** Task Master PRD + RPG format (author this file under `.taskmaster/docs/sentinel_python_integration_rpg.md` and parse with `task-master parse-prd`).
 
@@ -205,4 +218,5 @@ pytest -q -m sentinel         # regression suite
 - `/speckit.*` commands are transparently gated; failing states block with clear, actionable errors.
 - Legacy Node workspace removed; DECISION recorded; CI green.
 </appendix>
+
 
