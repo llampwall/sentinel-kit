@@ -3,7 +3,7 @@
 exports[`capsule-create > renders deterministic capsule content for Task 5 spec 1`] = `
 "<!-- ProducedBy=ROUTER RulesHash=ROUTER@Test Decision=D-TEST -->
 
-# Capsule 005-capsule-gen@45f68a75
+# Capsule 005-capsule-gen@7f444e96
 
 ## Goal
 SentinelKit capsules must capture Task 5 (template, generator CLI, Allowed Context enforcement) so routers can mount exactly the files required for provenance-safe automation. The capsule should summarize the work, the deliverables, and the acceptance bullets that currently live in the developer handoff doc.
@@ -20,10 +20,15 @@ SentinelKit capsules must capture Task 5 (template, generator CLI, Allowed Conte
 - Allowed Context helper auto-mounts \`.sentinel/context/**\`, dedupes + validates includes, feeds the generator, and \`pnpm -C .sentinel test:sentinels -- --filter capsule-context\` stays green.
 
 ## Allowed Context
+- .sentinel/context/context-limits.json
+- .sentinel/context/context-limits.schema.json
+- .sentinel/context/handoff prompt.txt
 - .sentinel/context/IMPLEMENTATION.md
 - .sentinel/context/SentinelKit_salvage_plan.md
 - .sentinel/context/SentinelKit_thesis.md
+- .sentinel/context/setup commands.txt
 - .sentinel/context/todo - specify-cli integration.txt
+- .sentinel/context/turnkey_boostrap_spec_kit_integration_prd.md
 - .sentinel/scripts/capsule-create.mjs
 - .sentinel/scripts/lib/allowed-context.mjs
 - .sentinel/scripts/md-surgeon.mjs
