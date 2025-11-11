@@ -29,4 +29,4 @@ Keep the repo legible by maintaining provenance headers, IMPLEMENTATION notes, a
 - Verification plan proving docs lint or format steps (or "n/a" if none exist).
 
 ## Notes on paths
-- If both /IMPLEMENTATION.md and /.sentinel/context/IMPLEMENTATION.md exist, update whichever the capsule lists. Otherwise, update the one that exists and note the path explicitly in the capsule.
+- If both /IMPLEMENTATION.md and /.sentinel/docs/IMPLEMENTATION.md exist, update whichever the capsule lists. Otherwise, update the one that exists and note the path explicitly in the capsule.

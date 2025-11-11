@@ -134,7 +134,7 @@ Author: Builder
 Scope: .sentinel/scripts/context/**; .sentinel/context; .sentinel/tests/context
 Decision: Add context-limits schema + pnpm context:lint
 Rationale: Capsule include lists need automated budgets, forbidden-path checks, and reproducible CLI coverage.
-Outputs: .sentinel/context/context-limits.json, .sentinel/scripts/context/config.mts, .sentinel/scripts/context/lint.mts, .sentinel/tests/context/config.test.ts, .sentinel/tests/context/lint.test.ts
+Outputs: .sentinel/context/limits/context-limits.json, .sentinel/scripts/context/config.mts, .sentinel/scripts/context/lint.mts, .sentinel/tests/context/config.test.ts, .sentinel/tests/context/lint.test.ts
 Supersedes: none
 
 ID: D-0013

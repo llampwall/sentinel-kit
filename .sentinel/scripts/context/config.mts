@@ -8,8 +8,8 @@ import YAML from "yaml";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DEFAULT_ROOT = path.resolve(__dirname, "../../..");
-const DEFAULT_CONFIG = ".sentinel/context/context-limits.json";
-const DEFAULT_SCHEMA = ".sentinel/context/context-limits.schema.json";
+const DEFAULT_CONFIG = ".sentinel/context/limits/context-limits.json";
+const DEFAULT_SCHEMA = ".sentinel/context/limits/context-limits.schema.json";
 
 const ajv = addFormats(new Ajv({ allErrors: true, strict: false }));
 let cachedSchemaPath: string | undefined;

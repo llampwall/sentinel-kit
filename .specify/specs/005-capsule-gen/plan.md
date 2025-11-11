@@ -24,4 +24,4 @@
 ## Router Notes
 - Builder executes the CLI + helper changes; Scribe only enters once docs expand past snippets.
 - Keep capsules under 300 lines; split into multiple specs if this one bloats past the budget.
-- Mount `.sentinel/context/**` plus the include list above when prompting router/agents; anything missing must be added to the spec, not improvised mid-flight.
+- Mount only the include list above when prompting router/agents; maintainer notes now live under `.sentinel/notes-dev/**` and should be referenced outside capsules if needed.

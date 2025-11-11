@@ -1,3 +1,3 @@
 # Fixture Capsule
 ## Allowed Context
-- .sentinel/context/IMPLEMENTATION.md
+- .sentinel/docs/IMPLEMENTATION.md

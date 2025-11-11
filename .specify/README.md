@@ -145,7 +145,12 @@ pnpm -C .sentinel capsule:create --spec .specify/specs/<slug> --decision D-XXXX
 - Optional `--agent` and `--rulesHash` override the ProducedBy header.
 
 The CLI reads the feature’s spec/plan/tasks, applies the template, hashes a capsule ID,
-auto-populates Allowed Context (including `.sentinel/context/**`), enforces the 300-line
+auto-populates Allowed Context (including `.sentinel/context/**` for shipping context files; maintainer notes under `.sentinel/notes-dev/**` are excluded), enforces the 300-line
+
+### Implementation Runbook
+- Every repo now scaffolds `.sentinel/docs/IMPLEMENTATION.md`, a living report of the current enforcement surface, execution flow, known gaps, and CI gates.
+- Update it whenever `/speckit.plan` changes the stack/architecture (CLI helpers will automate this in the Sentinel Python migration).
+- New teammates can skim this file to understand how SentinelKit fits together before diving into capsules or agent prompts.
 budget, and writes `.specify/specs/<slug>/capsule.md`.
 
 ### Validation

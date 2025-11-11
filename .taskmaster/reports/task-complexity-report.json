@@ -62,8 +62,8 @@
 			"taskTitle": "Context Budget & Include-List Enforcement",
 			"complexityScore": 6,
 			"recommendedSubtasks": 3,
-			"expansionPrompt": "Introduce `.sentinel/context/context-limits.json` defining per-artifact line budgets, build a `pnpm context:lint` CLI (TS/Vitest) that scans capsule files for line counts and Allowed Context drift, integrate the checks into the prompt renderer (Task 6) so over-budget capsules fail fast, and document best practices plus optional Husky hooks guarding capsule edits.",
-			"reasoning": ".sentinel/context/SentinelKit_thesis.md:57 explicitly caps capsules at ≤300 lines, yet there is no linter, config, or CLI enforcing that rule, nor any script hook mentioned in `.sentinel/scripts/orch/prompt-render.mjs`. Because Task 6 will already parse capsules for routing, this linter must share parsing logic, expose `pnpm context:lint`, and integrate with future CI (Task 10), representing moderate effort once the TypeScript toolchain exists."
+			"expansionPrompt": "Introduce `.sentinel/context/limits/context-limits.json` defining per-artifact line budgets, build a `pnpm context:lint` CLI (TS/Vitest) that scans capsule files for line counts and Allowed Context drift, integrate the checks into the prompt renderer (Task 6) so over-budget capsules fail fast, and document best practices plus optional Husky hooks guarding capsule edits.",
+			"reasoning": ".sentinel/notes-dev/SentinelKit_thesis.md:57 explicitly caps capsules at ≤300 lines, yet there is no linter, config, or CLI enforcing that rule, nor any script hook mentioned in `.sentinel/scripts/orch/prompt-render.mjs`. Because Task 6 will already parse capsules for routing, this linter must share parsing logic, expose `pnpm context:lint`, and integrate with future CI (Task 10), representing moderate effort once the TypeScript toolchain exists."
 		},
 		{
 			"taskId": 8,
@@ -86,7 +86,7 @@
 			"taskTitle": "CI Gates & Documentation",
 			"complexityScore": 7,
 			"recommendedSubtasks": 5,
-			"expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/context/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels.",
+			"expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/docs/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels.",
 			"reasoning": ".github/workflows` currently only holds `docs.yml`, `lint.yml`, and `release.yml`; `lint.yml:1-20` merely runs markdownlint on ubuntu-latest, so none of the Sentinel-specific checks exist in CI. Standing up multi-job, multi-OS workflows that exercise pnpm scripts, MCP smoke harnesses, and uv installs—as well as documenting the enforcement loop—will require coordinating new scripts from Tasks 1-9 and ensuring caching + badge updates are correct."
 		}
 	]

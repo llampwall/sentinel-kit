@@ -67,8 +67,8 @@
   **Mitigation:** Build “context linter” early (Phase 2 subtask) to warn when include-lists exceed budget.
 
 ## 7. Deliverables for Next Repo Commit
-1. `.sentinel/context/SentinelKit_thesis.md` (already written; import verbatim).
-2. `.sentinel/context/SentinelKit_salvage_plan.md` (this document).
+1. `.sentinel/notes-dev/SentinelKit_thesis.md` (already written; import verbatim).
+2. `.sentinel/notes-dev/SentinelKit_salvage_plan.md` (this document).
 3. `docs/UPSTREAM.md` stub referencing Spec-Kit clone target (to be completed during Phase 0).
 4. `PRD` skeleton based on RPG template (next step).
 

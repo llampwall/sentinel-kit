@@ -9,4 +9,4 @@
 ## Acceptance Criteria
 - Template committed, snippet/docs updated if referenced, and `pnpm -C .sentinel lint` remains clean.
 - Generator hydrates spec/plan/tasks into <=300-line capsules, enforces hashed IDs, refuses invalid include lists, and `pnpm -C .sentinel vitest run tests/capsule-create.test.ts` passes.
-- Allowed Context helper auto-mounts `.sentinel/context/**`, dedupes + validates includes, feeds the generator, and `pnpm -C .sentinel test:sentinels -- --filter capsule-context` stays green.
+- Allowed Context helper mounts repository-scoped context (if any) under `.sentinel/context/**`, dedupes + validates includes, feeds the generator, and `pnpm -C .sentinel test:sentinels -- --filter capsule-context` stays green. Maintainer notes under `.sentinel/notes-dev/**` are excluded unless explicitly added.

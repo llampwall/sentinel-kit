@@ -14,13 +14,9 @@ SentinelKit capsules must capture Task 5 (template, generator CLI, Allowed Conte
 ## Acceptance Criteria
 - Template committed, snippet/docs updated if referenced, and `pnpm -C .sentinel lint` remains clean.
 - Generator hydrates spec/plan/tasks into <=300-line capsules, enforces hashed IDs, refuses invalid include lists, and `pnpm -C .sentinel vitest run tests/capsule-create.test.ts` passes.
-- Allowed Context helper auto-mounts `.sentinel/context/**`, dedupes + validates includes, feeds the generator, and `pnpm -C .sentinel test:sentinels -- --filter capsule-context` stays green.
+- Allowed Context helper mounts repository-scoped context (if any) under `.sentinel/context/**`, dedupes + validates includes, feeds the generator, and `pnpm -C .sentinel test:sentinels -- --filter capsule-context` stays green. Maintainer notes live under `.sentinel/notes-dev/**` and are intentionally excluded unless explicitly added.
 
 ## Allowed Context
-- .sentinel/context/IMPLEMENTATION.md
-- .sentinel/context/SentinelKit_salvage_plan.md
-- .sentinel/context/SentinelKit_thesis.md
-- .sentinel/context/todo - specify-cli integration.txt
 - .sentinel/scripts/capsule-create.mjs
 - .sentinel/scripts/lib/allowed-context.mjs
 - .sentinel/scripts/md-surgeon.mjs
@@ -37,4 +33,4 @@ SentinelKit capsules must capture Task 5 (template, generator CLI, Allowed Conte
 ## Router Notes
 - Builder executes the CLI + helper changes; Scribe only enters once docs expand past snippets.
 - Keep capsules under 300 lines; split into multiple specs if this one bloats past the budget.
-- Mount `.sentinel/context/**` plus the include list above when prompting router/agents; anything missing must be added to the spec, not improvised mid-flight.
+- Mount only the include list above when prompting router/agents; maintainer notes under `.sentinel/notes-dev/**` should be referenced manually outside capsules when needed.

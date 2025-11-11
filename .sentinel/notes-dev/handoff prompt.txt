@@ -4,9 +4,9 @@ You’re reviewing SentinelKit after the Task 1–10 work. Your job is to confir
 **Links / References**
 Current status & upcoming subtasks: .sentinel/status/dev_handoff.md
 Task master definitions: .taskmaster/tasks/tasks.json (Task 10 still drives the workflow)
-Core tooling guides: .sentinel/context/IMPLEMENTATION.md, .sentinel/snippets/*, README.md, .specify/README.md
+Core tooling guides: .sentinel/docs/IMPLEMENTATION.md, .sentinel/snippets/*, README.md, .specify/README.md
 MCP infrastructure: .sentinel/scripts/mcp/, .sentinel/tests/mcp/, .sentinel/snippets/mcp-contract-validate.md
-Context budgeting & lint: .sentinel/context/context-limits.{json,schema}, .sentinel/scripts/context/{config,lint}.mts, .sentinel/tests/context/{config,lint}.ts
+Context budgeting & lint: .sentinel/context/limits/context-limits.{json,schema}, .sentinel/scripts/context/{config,lint}.mts, .sentinel/tests/context/{config,lint}.ts
 Capsule tooling: .sentinel/scripts/capsule-create.mjs, .sentinel/scripts/lib/allowed-context.mjs, .sentinel/templates/capsule.md, .sentinel/tests/capsule-create.test.ts, .sentinel/tests/sentinels/sentinel_capsule_context.test.ts
 Prompt renderer + agents: .sentinel/scripts/orch/prompt-render.mjs, .sentinel/scripts/orch/agents.mjs, .sentinel/prompts/*.eta.md, .sentinel/scripts/orch/prompt-render.smoke.mjs
 MCP servers: .sentinel/scripts/mcp/{bootstrap,sentinel-run,decision-log,contract-validate-server}.mjs, .sentinel/tests/mcp/**, .sentinel/scripts/mcp/*-smoke.mjs

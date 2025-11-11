@@ -1,7 +1,7 @@
 # Fixture Capsule Too Long
 
 ## Allowed Context
-- .sentinel/context/IMPLEMENTATION.md
+- .sentinel/docs/IMPLEMENTATION.md
 
 ## Body
 1. line one

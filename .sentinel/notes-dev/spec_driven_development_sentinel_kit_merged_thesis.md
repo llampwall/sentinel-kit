@@ -11,11 +11,15 @@ For decades, teams treated specifications as scaffolding and code as the truth. 
 SDD starts from a rough idea and iteratively hardens it into a complete PRD with acceptance criteria. Research agents gather constraints; the plan translates requirements into architecture; tasks are derived mechanically. The output is a living set of artifacts—specs, plans, contracts, data models, quickstarts, and tests—versioned in a feature branch. Implementation regenerates from those artifacts whenever intent changes.
 
 ### Command Rails (Spec‑Kit)
-Spec‑Kit operationalizes SDD via a narrow set of slash commands:
-- **`/speckit.specify`** → creates a numbered feature spec, branch, and folder.
-- **`/speckit.plan`** → produces an implementation plan, data models, contracts, research, and a quickstart.
-- **`/speckit.tasks`** → derives an executable `tasks.md` with parallelization hints.
-These commands keep the documentation, plans, and generated outputs aligned and traceable.
+Spec‑Kit operationalizes SDD via a focused command set:
+- **`specify init` / `specify check`** – scaffold a workspace and verify the toolchain before any slash commands run.
+- **`/speckit.constitution`** – codify project principles and guardrails.
+- **`/speckit.specify`** – create a numbered feature spec, branch, and folder.
+- **`/speckit.plan`** – produce an implementation plan, data models, contracts, research, and a quickstart.
+- **`/speckit.tasks`** – derive an executable `tasks.md` with parallelization hints.
+- **`/speckit.clarify`**, **`/speckit.analyze`**, **`/speckit.checklist`** – optional QA helpers for ambiguity busting, cross-artifact alignment, and acceptance readiness.
+- **`/speckit.implement`** – drive execution to completion with sign-off gates.
+These rails keep documentation, plans, and generated outputs aligned and traceable; SentinelKit ensures every step has hardened artifacts behind it.
 
 ---
 
@@ -48,6 +52,25 @@ Constrain **context** and amplify **artifacts**. Every task executes inside a sm
 
 ## 5) Orchestration: Spec‑Kit × SentinelKit
 The rails stay Spec‑Kit; SentinelKit supplies guardrails.
+
+### Command Rail × Enforcement Map
+| Spec‑Kit Command | SentinelKit Additions |
+| --- | --- |
+| `specify init --sentinel`, `specify check` | Bootstraps the Python-only Sentinel workspace via `uv sync`, installs CLI entry points, and runs `sentinel selfcheck` (contracts, context lint, sentinel pytest, MCP smokes) before any slash command is accepted. |
+| `/speckit.constitution` | Automatically runs contract/context lint against the newly minted constitution; decision ledger + provenance headers capture the governing rules. |
+| `/speckit.specify` | Generates/updates capsules sourced from `spec.md`; Allowed Context builder enforces the ≤300-line include list and md-surgeon snippets update README/UPSTREAM badges. |
+| `/speckit.plan` | Forces capsule regeneration + prompt-render smoke so the Router has deterministic inputs; logs plan deltas as decisions. |
+| `/speckit.tasks` | Syncs Required Outputs and Acceptance Criteria into sentinel TODOs, recalculates Allowed Context, and prepares MCP smoke fixtures for the upcoming work. |
+| `/speckit.clarify` | Pipelines every `[NEEDS CLARIFICATION]` into the decision ledger and capsule Router Notes so ambiguity never lives only in chat. |
+| `/speckit.analyze` | Runs the prompt renderer in “analyze” mode to diff spec/plan/tasks/capsule; emits sentinel warnings when artifacts drift. |
+| `/speckit.checklist` | Builds acceptance checklists from capsule criteria + sentinel coverage gaps; stores them alongside the capsule for `/speckit.implement`. |
+| `/speckit.implement` | Blocks completion until `sentinel sentinels run`, contract validator, context lint, capsule generator, doc snippets, and MCP smokes all pass; router JSON and provenance headers are mandatory outputs. |
+
+### Agent Roster & CapsuleAuthor
+- Router lives under `.sentinel/agents/router/` and is the only required agent. Prompt-render auto-discovers every other folder under `.sentinel/agents/<id>`; add or remove specialists (Builder, Integrator, Designer, Scribe, etc.) at will.
+- Keep ROLE/CHECKLIST/PLAYBOOK + `agent.json` per agent so RulesHash stays accurate. When these files change, bump the hash so provenance headers and capsules reference the right revision.
+- CapsuleAuthor remains optional but enables closed-loop planning: when agents uncover a gap, CapsuleAuthor can regenerate the capsule, log a decision, rerun lint/tests, and hand the new capsule back to the Router without pausing `/speckit.implement`.
+- Teams that prefer manual capsules can omit CapsuleAuthor entirely—the router simply never routes to it.
 
 **Flow**
 1. Use Spec‑Kit to produce `spec.md`, `plan.md`, and `tasks.md` for a feature.
@@ -112,4 +135,3 @@ AI can generate from precise specifications, but without artifact guardrails tea
 - Enforce decision logging from the first PR to build provenance muscle.
 
 *This merged thesis is intentionally concise: SDD describes **what** and **why**; SentinelKit enforces **how we keep it true** in code, tests, and history.*
-

@@ -12,6 +12,7 @@ import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 
 const DEFAULT_CONTEXT_DIR = ".sentinel/context";
+const EXCLUDED_SUBPATHS = new Set(["limits"]);
 
 /**
  * @param {string} p
@@ -42,6 +43,11 @@ export async function listContextFiles(root, contextDir = DEFAULT_CONTEXT_DIR) {
     for (const entry of dirents) {
       const abs = path.join(dir, entry.name);
       if (entry.isDirectory()) {
+        const relative = posixify(path.relative(resolved, abs));
+        const topLevel = relative.split("/")[0] ?? relative;
+        if (EXCLUDED_SUBPATHS.has(topLevel)) {
+          continue;
+        }
         await walk(abs);
       } else {
         entries.push(abs);

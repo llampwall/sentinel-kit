@@ -436,7 +436,7 @@
         "id": "7",
         "title": "Context Budget & Include-List Enforcement",
         "description": "Add tooling to enforce capsule context budgets and router include-lists, preventing drift beyond 300 lines.",
-        "details": "- Implement linter `pnpm context:lint` scanning capsules for line counts, verifying Allowed Context matches actual files and excludes forbidden directories.\n- Provide config `.sentinel/context/context-limits.json` with thresholds per artifact type.\n- Integrate with prompt renderer to reject capsules exceeding limit and emit actionable error.\n- Add docs describing best practices for spec authors to keep capsules minimal.\n- Optionally add Git hook (Husky 9) running linter on commit touching capsule files.",
+        "details": "- Implement linter `pnpm context:lint` scanning capsules for line counts, verifying Allowed Context matches actual files and excludes forbidden directories.\n- Provide config `.sentinel/context/limits/context-limits.json` with thresholds per artifact type.\n- Integrate with prompt renderer to reject capsules exceeding limit and emit actionable error.\n- Add docs describing best practices for spec authors to keep capsules minimal.\n- Optionally add Git hook (Husky 9) running linter on commit touching capsule files.",
         "testStrategy": "Unit-test linter to ensure it flags oversize capsules and invalid include paths; add integration test running CLI against sample repo. In CI, run `pnpm context:lint --strict` and fail if any capsule violates budgets.",
         "priority": "medium",
         "dependencies": [
@@ -447,7 +447,7 @@
           {
             "id": 1,
             "title": "Define context limit configuration schema and defaults",
-            "description": "Create `.sentinel/context/context-limits.json` with artifact budget entries and schema-validation helper.",
+            "description": "Create `.sentinel/context/limits/context-limits.json` with artifact budget entries and schema-validation helper.",
             "dependencies": [],
             "details": "Capture capsule, router, and spec artifact caps (≤300 lines default) plus forbidden directories; expose a TypeScript loader that validates against an AJV schema for future reuse.",
             "status": "done",
@@ -485,7 +485,7 @@
         ],
         "complexity": 6,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Introduce `.sentinel/context/context-limits.json` defining per-artifact line budgets, build a `pnpm context:lint` CLI (TS/Vitest) that scans capsule files for line counts and Allowed Context drift, integrate the checks into the prompt renderer (Task 6) so over-budget capsules fail fast, and document best practices plus optional Husky hooks guarding capsule edits.",
+        "expansionPrompt": "Introduce `.sentinel/context/limits/context-limits.json` defining per-artifact line budgets, build a `pnpm context:lint` CLI (TS/Vitest) that scans capsule files for line counts and Allowed Context drift, integrate the checks into the prompt renderer (Task 6) so over-budget capsules fail fast, and document best practices plus optional Husky hooks guarding capsule edits.",
         "updatedAt": "2025-11-09T16:59:21.535Z"
       },
       {
@@ -615,7 +615,7 @@
         "id": "10",
         "title": "CI Gates & Documentation",
         "description": "Wire GitHub Actions enforcing contracts, sentinels, decision ledger, and document enforcement loop.",
-        "details": "- Create workflow `.github/workflows/sentinel-kit.yml` with jobs: `setup-toolchain` (cache pnpm + uv), `contracts`, `sentinels`, `mcp-smoke`, `docs-lint`.\n- Use matrix for OS (ubuntu-latest + windows-latest) to catch path issues; run `pnpm validate:contracts`, `pnpm test:sentinels`, MCP smoke scripts, and `pnpm context:lint`.\n- Add status badge + enforcement overview to README and `.sentinel/context/IMPLEMENTATION.md` describing Phase gating + success metrics.\n- Ensure `gh pr` template reminds contributors to attach capsule + decision entry + sentinel update.\n- Optionally add release scripts hooking into Spec-Kit packaging referencing Sentinel assets.",
+        "details": "- Create workflow `.github/workflows/sentinel-kit.yml` with jobs: `setup-toolchain` (cache pnpm + uv), `contracts`, `sentinels`, `mcp-smoke`, `docs-lint`.\n- Use matrix for OS (ubuntu-latest + windows-latest) to catch path issues; run `pnpm validate:contracts`, `pnpm test:sentinels`, MCP smoke scripts, and `pnpm context:lint`.\n- Add status badge + enforcement overview to README and `.sentinel/docs/IMPLEMENTATION.md` describing Phase gating + success metrics.\n- Ensure `gh pr` template reminds contributors to attach capsule + decision entry + sentinel update.\n- Optionally add release scripts hooking into Spec-Kit packaging referencing Sentinel assets.",
         "testStrategy": "Trigger workflow via push/PR to confirm gates block failures; add workflow tests using `act` locally if possible. Review README updates for clarity and ensure quickstart steps reproducible by teammate.",
         "priority": "high",
         "dependencies": [
@@ -665,7 +665,7 @@
           {
             "id": 4,
             "title": "Document enforcement loop in README and IMPLEMENTATION files",
-            "description": "Update `README.md` and `.sentinel/context/IMPLEMENTATION.md` with workflow badge, phase gating summary, and success metrics for the enforcement loop.",
+            "description": "Update `README.md` and `.sentinel/docs/IMPLEMENTATION.md` with workflow badge, phase gating summary, and success metrics for the enforcement loop.",
             "dependencies": [
               3
             ],
@@ -691,7 +691,7 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/context/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels.",
+        "expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/docs/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels.",
         "updatedAt": "2025-11-09T22:11:52.560Z"
       }
     ],

@@ -91,9 +91,10 @@ Ensures enforcement scripts run automatically.
 1. **Spec-Kit Lead-Up** *(Phase 1 output)*: Product manager (human or orchestrator agent) runs `/speckit.constitution → /speckit.specify → /speckit.plan → /speckit.tasks`, producing spec/plan/tasks plus a capsule under `.specify/specs/<feature>/capsule.md`.
 2. **Capsule Selection** *(Phase 2 dependency)*: When a Task Master task becomes unblocked, the PM copies that capsule path and runs `node .sentinel/scripts/orch/prompt-render.mjs --capsule <capsule> --mode router` (CLI delivered in Phase 2 - Capsules & Routing).
 3. **Router Handoff** *(Phase 2 deliverable)*: The Router agent responds with JSON (`leadAgent`, `requiredOutputs`, `contextToMount`, `notes`). Prompt-render logs the JSON to `.sentinel/router_log/<slug>.jsonl`.
-4. **Agent Execution** *(Phase 2→Phase 3 bridge)*: The PM (or automation) reruns prompt-render with `--mode capsule --agent <leadAgent>` to produce the working agent prompt. The agent only mounts the capsule’s Allowed Context plus `.sentinel/agents/<leadAgent>/**`.
+4. **Agent Execution** *(Phase 2→Phase 3 bridge)*: The PM (or automation) reruns prompt-render with `--mode capsule --agent <leadAgent>` to produce the working agent prompt. The agent only mounts the capsule's Allowed Context plus `.sentinel/agents/<leadAgent>/**`.
 5. **Artifacts Back to Spec-Kit** *(Phase 1/3 enforcement)*: Agent updates contracts/sentinels/docs/DECISIONS as required, then human reviewers feed diffs back through the normal Spec-Kit git/PR flow. Task Master marks the task complete once artifacts + ledger entries are merged.
-6. **Dynamic Agent Adds** *(ongoing)*: Dropping new folders under `.sentinel/agents/<id>` (agent.json + ROLE/PLAYBOOK) immediately exposes them to prompt-render; no CLI updates needed unless we want `specify init` to ship them by default.
+6. **Dynamic Agent Adds** *(ongoing)*: Dropping new folders under `.sentinel/agents/<id>` (agent.json + ROLE/PLAYBOOK) immediately exposes them to prompt-render; no CLI updates needed unless we want `specify init` to ship them by default. Specialized agents (Integrator, Designer, CapsuleAuthor, etc.) can be added/removed per repo—Router is the only required entry.
+7. **CapsuleAuthor Loop** *(optional)*: A dedicated CapsuleAuthor agent can patch capsules (or create new ones) whenever other agents discover plan gaps, enabling closed-loop `/speckit.implement` runs without human intervention. When present, Capsules must log the new decisions and rerun lint/tests automatically.
 
 ### Module: `.sentinel/contracts`
 - **Responsibility**: Store contracts, fixtures, README, provenance headers.
@@ -111,8 +112,12 @@ Ensures enforcement scripts run automatically.
 - **Interfaces**: CLI via `node .sentinel/scripts/...`, MCP via JSON-RPC stdio, smoke harnesses such as `contract-validate-smoke.mjs`.
 
 ### Module: `.sentinel/agents`
-- **Responsibility**: Role definitions (ROLE/CHECKLIST/PLAYBOOK + agent.json) with RulesHash.
-- **Interfaces**: Prompt renderer mounts these folders for lead agents.
+- **Responsibility**: Role definitions (ROLE/CHECKLIST/PLAYBOOK + agent.json) with RulesHash; holds Router (mandatory) plus optional specialists (Builder, Integrator, Designer, CapsuleAuthor, Scribe, etc.).
+- **Interfaces**: Prompt renderer mounts these folders for lead agents; CapsuleAuthor can be invoked to edit capsules when the plan changes mid-run.
+
+### Module: `.sentinel/docs/IMPLEMENTATION.md`
+- **Responsibility**: Living runbook describing current enforcement surface, execution flow, stack context, and CI gates.
+- **Interfaces**: Updated by `/speckit.plan`, CapsuleAuthor, or CLI helpers whenever architecture/stack decisions change; referenced by README/status docs and optional capsule Router Notes.
 
 ### Module: `.sentinel/prompts`
 - **Responsibility**: Source templates for router/agent prompts (e.g., `sentinel.router.md`, `sentinel.capsule.md`).
@@ -132,7 +137,7 @@ Ensures enforcement scripts run automatically.
 - **Interfaces**: `specify init --ai <agent>` downloads the per-agent archive, release scripts now tolerate missing `agent_templates/*` folders (optional Gemini/Qwen handbooks) via guarded copies, and context updaters refresh `.windsurf/`, `.codex/`, etc. Task Master should own follow-ups whenever SentinelKit needs new agent prompts or optional template bundles.
 
 ### Module: `.sentinel/context`
-- **Responsibility**: `.sentinel/context/SentinelKit_thesis.md`, `.sentinel/context/SentinelKit_salvage_plan.md`, implementation notes.
+- **Responsibility**: `.sentinel/notes-dev/SentinelKit_thesis.md`, `.sentinel/notes-dev/SentinelKit_salvage_plan.md`, implementation notes.
 - **Interfaces**: Linked from README/PRD; capsules may include these files explicitly.
 </structural-decomposition>
 
@@ -190,7 +195,7 @@ Ensures enforcement scripts run automatically.
 
 ### Phase 4 – CI & Release Gates
 - Configure CI (GitHub Actions) for contracts, sentinels, docs, decision enforcement.
-- Document quickstart + enforcement loop in README + `.sentinel/context/IMPLEMENTATION.md`.
+- Document quickstart + enforcement loop in README + `.sentinel/docs/IMPLEMENTATION.md`.
 </execution-order>
 
 <risks>
@@ -215,8 +220,8 @@ Ensures enforcement scripts run automatically.
 
 <appendix>
 ## References
-- `.sentinel/context/SentinelKit_thesis.md` – Mission, pillars, differentiation.
-- `.sentinel/context/SentinelKit_salvage_plan.md` – Asset inventory + phased plan.
+- `.sentinel/notes-dev/SentinelKit_thesis.md` – Mission, pillars, differentiation.
+- `.sentinel/notes-dev/SentinelKit_salvage_plan.md` – Asset inventory + phased plan.
 - Spec-Kit upstream repo (`../spec-kit/`) – Base CLI and templates.
 
 ## Glossary
