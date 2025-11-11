@@ -1,20 +1,41 @@
-# Integrator · Playbook
+# Integrator - PLAYBOOK
 
-## Checklist
-- Contracts + fixtures updated/bumped.
-- Client isolates auth/retry logic.
-- Unit + sentinel tests cover success + failure.
-- Env vars documented (no secrets committed).
-- Verification commands listed (contract validator + tests).
+1) SPECIFY
+   - Record provider base URL(s), auth type (key, OAuth, webhook secret), expected throughput, and error model.
+   - List resources/endpoints with required params and rate-limit notes.
 
-## Flow
-1. **Scope** – Confirm which external systems/endpoints are in scope and list them in the capsule response.
-2. **Contracts first** – Add/update `.sentinel/contracts/<service>.vN.*` plus fixtures; bump version on breaking change.
-3. **Client implementation** – Build/extend client modules with retries/backoff/circuit breakers + structured errors.
-4. **Testing** – Write unit tests for happy/error paths and sentinel tests capturing prior incidents (invalid schema, rate limiting).
-5. **Docs** – Summarize configuration requirements for Scribe/README.
+2) CONTRACT
+   - Create/refresh:
+     - .sentinel/contracts/<provider>.<resource>.vN.yaml
+     - .sentinel/contracts/fixtures/<provider>.<resource>.vN/good/*.json
+     - .sentinel/contracts/fixtures/<provider>.<resource>.vN/bad/*.json
+   - Run: pnpm -C .sentinel validate:contracts (expect failing first if drift exists).
 
-## Escalate When
-- Provider behavior requires new infrastructure or background jobs.
-- Secrets/keys management decisions are undefined.
-- Contract changes would ripple to other capsules (coordinate via Decision + new capsules).
+3) IMPLEMENT
+   - Add client at /src/clients/<provider>/<resource>.ts:
+     - auth, retries/backoff (with jitter), circuit breaker, rate limiting
+     - request/response validation against schema
+     - structured logs per Observer schema (no secrets)
+   - Expose a minimal, typed surface (pure functions returning DTOs).
+
+4) VERIFY
+   - Unit/integration tests under /tests/clients/<provider>/*.test.ts
+   - Contract check: pnpm -C .sentinel validate:contracts
+   - Sentinel smoke: .sentinel/tests/sentinels/integrations/<provider>/*.mjs
+   - Prove a failing case (bad fixture) then passing with current code.
+
+5) PACKAGE
+   - Write /ops/integrations/<provider>/README.md:
+     - env vars and secret names, scopes, rate-limit math, quotas, expected SLAs
+     - troubleshooting matrix (common upstream errors -> client behavior)
+   - Include provenance headers across artifacts.
+
+6) HANDOFF
+   - Releaser: wire CI gates for contracts + integration tests + sentinels.
+   - Observer: confirm log fields and redaction rules.
+   - Scribe: polish docs and link from main README.
+
+Notes:
+- Prefer small, composable clients per resource; avoid “god” clients.
+- Version contracts on any upstream change; never silently widen types.
+- If a provider is unstable, add a canary sentinel that pings a single cheap endpoint daily.

@@ -1,8 +1,8 @@
 {
   "id": "scribe",
   "name": "Scribe",
-  "rulesHash": "SCRIBE@1.1",
-  "summary": "Docs-only changes: provenance headers, IMPLEMENTATION notes, architecture + changelog updates.",
+  "rulesHash": "SCRIBE@1.2",
+  "summary": "Docs-only changes: provenance headers, IMPLEMENTATION notes, architecture + changelog updates. No code edits.",
   "routing_keywords": ["docs", "documentation", "headers", "implementation", "changelog", "provenance"],
   "mount_paths": [".sentinel/agents/scribe/**"],
   "prompt_files": [

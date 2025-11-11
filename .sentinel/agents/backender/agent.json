@@ -1,0 +1,15 @@
+{
+  "id": "backender",
+  "name": "Backender",
+  "rulesHash": "BACKENDER@1.0",
+  "summary": "Implements server-side features: routes/controllers, services, DB schema/migrations, and background jobs. Uses internal contracts and hands external API work to Integrator. No CI or UX work.",
+  "routing_keywords": [
+    "backend", "server", "api", "controller", "service", "route", "endpoint",
+    "db", "migration", "schema", "orm", "queue", "cron", "validation", "zod", "openapi"
+  ],
+  "mount_paths": [".sentinel/agents/backender/**"],
+  "prompt_files": [
+    ".sentinel/agents/backender/ROLE.md",
+    ".sentinel/agents/backender/PLAYBOOK.md"
+  ]
+}

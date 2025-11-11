@@ -1,0 +1,15 @@
+{
+  "id": "refactorer",
+  "name": "Refactorer",
+  "rulesHash": "REFACTORER@1.0",
+  "summary": "Performs scoped, behavior-preserving code restructuring with minimal diffs and a rollback plan. Queues Verifier and Scribe follow-ups. Behavior changes only when capsule explicitly authorizes them.",
+  "routing_keywords": [
+    "refactor", "rename", "extract", "dedupe", "modularize",
+    "dead code", "technical debt", "codemod", "cleanup", "architecture"
+  ],
+  "mount_paths": [".sentinel/agents/refactorer/**"],
+  "prompt_files": [
+    ".sentinel/agents/refactorer/ROLE.md",
+    ".sentinel/agents/refactorer/PLAYBOOK.md"
+  ]
+}

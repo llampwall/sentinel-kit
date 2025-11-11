@@ -1,0 +1,16 @@
+{
+  "id": "observer",
+  "name": "Observer",
+  "rulesHash": "OBSERVER@1.0",
+  "summary": "Adds structured logging, error-handling policy, and telemetry hooks. Produces runbooks and plans. No feature logic changes; code edits handed to Builder.",
+  "routing_keywords": [
+    "logging", "logs", "error", "errors", "exception", "stacktrace",
+    "telemetry", "observability", "tracing", "correlation id", "opentelemetry",
+    "pino", "winston", "sentry", "rollbar", "metrics", "runbook"
+  ],
+  "mount_paths": [".sentinel/agents/observer/**"],
+  "prompt_files": [
+    ".sentinel/agents/observer/ROLE.md",
+    ".sentinel/agents/observer/PLAYBOOK.md"
+  ]
+}
