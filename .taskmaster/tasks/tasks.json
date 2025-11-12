@@ -106,7 +106,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -114,9 +114,10 @@
             "description": "Create `sentinelkit/cli/main.py` defining the Typer root application, register the required subcommand modules (contracts, context, capsule, prompts, sentinels, decisions, runbook, mcp) as stubs, and expose shared CLI options for root discovery and output formatting.",
             "dependencies": [],
             "details": "Set up the Typer app factory, configure global options such as `--root` and `--format`, wire subcommand entrypoints (even if they just raise `NotImplementedError` for now), and ensure the executable script entry is added in `pyproject.toml`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T06:15:00Z"
           },
           {
             "id": 2,
@@ -169,7 +170,8 @@
         ],
         "complexity": 8,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Create subtasks for defining the `sentinelkit/cli/main.py` Typer root with subcommand stubs, building the concurrent `sentinel selfcheck` runner plus shared `--root/--format` options and `utils/errors.py`, adding CLI tests (unit + integration) simulating success/failure of the delegated checks, updating `src/specify_cli/__init__.py` so `specify check` shells out to `uv run sentinel selfcheck` with proper Rich output, and documenting CLI usage in README/spec guides."
+        "expansionPrompt": "Create subtasks for defining the `sentinelkit/cli/main.py` Typer root with subcommand stubs, building the concurrent `sentinel selfcheck` runner plus shared `--root/--format` options and `utils/errors.py`, adding CLI tests (unit + integration) simulating success/failure of the delegated checks, updating `src/specify_cli/__init__.py` so `specify check` shells out to `uv run sentinel selfcheck` with proper Rich output, and documenting CLI usage in README/spec guides.",
+        "updatedAt": "2025-11-12T05:40:15.195Z"
       },
       {
         "id": "3",
@@ -824,7 +826,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-12T05:38:51.577Z",
+      "lastModified": "2025-11-12T05:40:15.197Z",
       "taskCount": 10,
       "completedCount": 1,
       "tags": [

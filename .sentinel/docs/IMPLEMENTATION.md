@@ -41,6 +41,12 @@
 - Added `tests/smoke/test_imports.py`, a smoke test that imports every `sentinelkit` module, satisfying the new pytest requirement.
 - `uv run pytest` passes after the documentation updates and new smoke test.
 
+## Task 2.1 Summary
+
+- Rebuilt the Typer root (`sentinelkit/cli/main.py`) with a callback that sets shared `--root` and `--format` options and exposes the required namespaces (`contracts`, `context`, `capsule`, `prompts`, `sentinels`, `decisions`, `runbook`, `mcp`, and `selfcheck`).
+- Added placeholder modules for each namespace plus a shared `cli/state.py` helper that stores the resolved root/output format.
+- The CLI still surfaces placeholders, but `uv run sentinel --help` now shows the full command tree and options.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
