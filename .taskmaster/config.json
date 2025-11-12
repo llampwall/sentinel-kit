@@ -7,15 +7,15 @@
       "temperature": 0.2
     },
     "research": {
-      "provider": "openai",
-      "modelId": "gpt-4o-search-preview",
+      "provider": "perplexity",
+      "modelId": "sonar-reasoning-pro",
       "maxTokens": 8700,
-      "temperature": 0.1
+      "temperature": 0.2
     },
     "fallback": {
-      "provider": "openai",
-      "modelId": "gpt-5",
-      "maxTokens": 100000,
+      "provider": "perplexity",
+      "modelId": "sonar-reasoning",
+      "maxTokens": 8700,
       "temperature": 0.2
     }
   },

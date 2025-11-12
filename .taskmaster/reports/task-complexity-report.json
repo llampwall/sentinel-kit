@@ -1,6 +1,6 @@
 {
 	"meta": {
-		"generatedAt": "2025-11-08T10:51:16.815Z",
+		"generatedAt": "2025-11-11T13:41:54.518Z",
 		"tasksAnalyzed": 10,
 		"totalTasks": 10,
 		"analysisCount": 10,
@@ -11,83 +11,83 @@
 	"complexityAnalysis": [
 		{
 			"taskId": 1,
-			"taskTitle": "Bootstrap SentinelKit Tooling Stack",
-			"complexityScore": 7,
-			"recommendedSubtasks": 5,
-			"expansionPrompt": "Audit the repo root for missing pin files, then (a) add `.tool-versions`/`.node-version` declaring Python 3.12.x, Node 20.17.x, and pnpm 9, and refresh `pyproject.toml` + docs to mention uv-driven installs; (b) convert `.sentinel/package.json` into a pnpm workspace with devDependencies for TypeScript 5.6, tsx, Vitest 2.1, AJV, eslint (`@eslint/js`, `typescript-eslint`) plus lint/typecheck/test scripts and the matching `pnpm-workspace.yaml`, `tsconfig.json`, and `eslint.config.js`; (c) create automation entry points (`Makefile` target `sentinel-install`, `scripts/setup.ps1`) that chain `uv tool install` + `corepack enable` + `pnpm install`; (d) author `UPSTREAM.md` and update `README.md`/`.sentinel/tests/sentinels/README.md` with the new commands; (e) verify `pnpm lint`, `pnpm typecheck`, `pnpm vitest` run clean inside `.sentinel/`.",
-			"reasoning": "`.sentinel/package.json:1-10` only lists three runtime deps and zero scripts, so the pnpm workspace, TypeScript config, and lint/test commands described in the task do not exist yet. `pyproject.toml:1-12` still advertises `requires-python >=3.11` (no uv metadata) and the root lacks `.tool-versions`, `.node-version`, a `Makefile`, or `UPSTREAM.md` (confirmed via repo listing), so the toolchain pinning + documentation portions are net-new work. Wiring cross-platform installers plus ensuring `pnpm lint/typecheck` succeed after converting from npm adds coordination risk across Python+Node setups."
+			"taskTitle": "Bootstrap Sentinel Python package and CI",
+			"complexityScore": 9,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break this into subtasks that cover: extending `pyproject.toml` into a multi-package uv/hatch project for both `specify-cli` and the new `sentinelkit` package, scaffolding the namespace layout (`contracts/`, `context/`, `capsule/`, `prompt/`, `cli/`, `utils/`, `scripts/`, `tests/`) with placeholder modules and a Typer entry point, adding uv metadata (`.tool-versions`, `uv.lock`) plus `sentinelkit/__init__.py`, authoring the Python-only bootstrap script + Makefile updates, replacing `.github/workflows/sentinel-kit.yml` with a Python/uv matrix workflow, and updating README/docs to describe the uv bootstrap and CI badge alongside a smoke test that imports every module.",
+			"reasoning": "The repo currently only publishes `specify-cli` in `pyproject.toml:1-23`, so introducing `sentinelkit` requires restructuring the build, dependencies, and uv metadata from scratch. The existing Sentinel workspace is entirely Node-based (`.sentinel/package.json:1-40`) and CI is wired to pnpm/Vitest workflows (`.github/workflows/sentinel-kit.yml:21-157`), so migrating to a uv matrix means redesigning caching, bootstrap, and artifact steps. Documentation and helper scripts still instruct pnpm flows (README.md:96-204, .specify/README.md:12-119, Makefile:1-17), so every contributor-facing surface must switch to Python instructions while preserving Windows/Linux/macOS parity. Implementing namespace scaffolding, Typer entry points, bootstrap commands, CI, and docs simultaneously is broad, cross-cutting work with high coordination cost."
 		},
 		{
 			"taskId": 2,
-			"taskTitle": "Implement Contract Validation CLI",
+			"taskTitle": "Implement Typer CLI root and selfcheck wiring",
 			"complexityScore": 8,
-			"recommendedSubtasks": 4,
-			"expansionPrompt": "Split the validator into: (1) a reusable module (e.g., `.sentinel/scripts/contracts/validator.js`) that loads YAML schemas, enforces semantic version naming, checks `ProducedBy` headers, caches compiled AJV validators, and walks fixtures under `.sentinel/contracts/fixtures/**`; (2) a CLI entry `.sentinel/scripts/contract-validate.mjs` that accepts `--contract`, `--fixture`, `--watch`, and emits machine-readable JSON plus non-zero exit codes; (3) a watch mode using `node-watch` that reuses the cached validators; (4) project wiring: add `pnpm validate:contracts`, README instructions, and Vitest/execa coverage for good/bad fixtures.",
-			"reasoning": ".sentinel/scripts/contracts/validate.mjs:1-73 performs a single pass over contracts/fixtures, prints human-readable logs, and exits without any CLI argument parsing, JSON summary, or header enforcement, so substantial CLI + validation behavior still needs to be built. `.sentinel/contracts/fixtures/get_active.json:1-3` sits directly under `fixtures/` rather than contract-scoped folders, highlighting the need to standardize traversal + version handling. Because Task 1’s pnpm toolchain isn’t ready yet, this CLI also depends on the workspace conversion before scripts/tests can be added."
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Create subtasks for defining the `sentinelkit/cli/main.py` Typer root with subcommand stubs, building the concurrent `sentinel selfcheck` runner plus shared `--root/--format` options and `utils/errors.py`, adding CLI tests (unit + integration) simulating success/failure of the delegated checks, updating `src/specify_cli/__init__.py` so `specify check` shells out to `uv run sentinel selfcheck` with proper Rich output, and documenting CLI usage in README/spec guides.",
+			"reasoning": "No Sentinel CLI exists today; only the Specify CLI is exposed and `specify check` simply tests for installed tools (`src/specify_cli/__init__.py:1164-1205`). Delivering a new Typer app requires designing subcommand routing, concurrency, structured error payloads, and Rich reporting that will later rely on the Python rewrites from Tasks 3-7. Hooking it into `specify check` changes the UX contract for existing users and must coordinate with uv execution patterns established in Task 1. High complexity stems from building new infrastructure, ensuring exit codes bubble correctly, and adding regression tests that stub the various checks while the dependent features are still under development."
 		},
 		{
 			"taskId": 3,
-			"taskTitle": "Build Sentinel Regression Test Harness",
+			"taskTitle": "Port contract validation to Python CLI + MCP",
 			"complexityScore": 7,
-			"recommendedSubtasks": 4,
-			"expansionPrompt": "Establish a `.sentinel` Vitest project by adding `vitest.config.sentinel.ts`, shared helpers to load `.sentinel/contracts/fixtures/**` and validate via the Task 2 module, new npm scripts (`pnpm test:sentinels`, `pnpm test:sentinels -- --filter <slug>`), and seed sentinel suites covering historical bugs. Include documentation in `.sentinel/tests/sentinels/README.md` describing Given/When/Then formatting plus CI usage, and ensure the harness integrates with the pnpm workspace from Task 1.",
-			"reasoning": ".sentinel/tests/sentinels/sentinel_users_email_format.test.mjs:1-15 imports `../../src/users_consumer.mjs`, yet `src/` currently only hosts the Python package (`src/specify_cli/__init__.py`), so the example sentinel cannot even run. There is no `vitest.config.*` or `devDependencies` in `.sentinel/package.json:1-10`, and no script such as `pnpm test:sentinels`, so building the harness entails configuring tooling, creating helpers, and ensuring it hooks into the upcoming pnpm workspace plus Task 2’s validator API."
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Plan subtasks for re-implementing the contract loader/validator (`sentinelkit/contracts/loader.py`, schema caching, ProducedBy checks) modeled on `.sentinel/scripts/contracts/validator-core.mjs`, exposing a Typer command `sentinel contracts validate` with `--id/--path/--format` options, snapshotting CLI/JSON outputs against fixtures under `tests/contracts/`, adding a reusable API surface for MCP consumers, and wiring regression tests that compare new JSON payloads to the legacy Vitest snapshots.",
+			"reasoning": "The existing validator logic lives entirely in Node (`.sentinel/scripts/contracts/validator-core.mjs:1-186`) and depends on Ajv/YAML helpers plus ProducedBy enforcement, with CLI wrappers and Vitest suites (`.sentinel/tests/contracts/*.test.ts`). Rebuilding this in Python requires picking compatible libraries (likely `jsonschema`/`pydantic` + PyYAML), ensuring deterministic ordering, and supporting both CLI and MCP callers with identical JSON schemas. Because downstream workflows (selfcheck, MCP server, slash commands) depend on its outputs, the new implementation must maintain parity with the historical fixtures, making testing and compatibility considerations substantial."
 		},
 		{
 			"taskId": 4,
-			"taskTitle": "Document upstream sync cadence and workflows",
-			"complexityScore": 5,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "Author `UPSTREAM.md` detailing how SentinelKit tracks Spec-Kit (sources of truth, sync cadence, manual steps), then update `README.md` and `.sentinel/tests/sentinels/README.md` to describe the sentinel toolchain install commands introduced in Task 1 along with `pnpm`/`uv` prerequisites. Include references to `.sentinel/DECISIONS.md` expectations and any CI badges once Task 10 lands.",
-			"reasoning": "The repository lacks an `UPSTREAM.md` altogether and `README.md:1-120` is still the vanilla Spec Kit marketing copy with no mention of Sentinel-specific install flows or pnpm/uv requirements, so documenting provenance and workflows is greenfield writing. Capturing sync cadence also relies on knowledge from `.sentinel/DECISIONS.md:1-34`, meaning the doc task spans multiple artifacts but is still straightforward content work once the tooling story stabilizes."
+			"taskTitle": "Build Allowed Context discovery & linting in Python",
+			"complexityScore": 7,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Generate subtasks that cover porting `.sentinel/scripts/context/lint.mts` into `sentinelkit/context/` modules (discovery, limits dataclasses, lint CLI), reusing deterministic globbing and forbidden path enforcement, wiring CLI options (`sentinel context lint --capsule/--strict`) with JSON output, updating fixtures/tests under `tests/context/` to mirror the Vitest suite, and integrating shared path utilities for other modules.",
+			"reasoning": "The current linter relies on TypeScript + picomatch (`.sentinel/scripts/context/lint.mts:47-365`) and a JSON schema config (`.sentinel/context/limits/context-limits.json:1-40`) with Vitest coverage for good/bad capsules (`.sentinel/tests/context/lint.test.ts:1-38`). Rewriting this in Python entails replicating glob resolution, line-budget warnings, Allowed Context normalization, and CLI ergonomics while ensuring deterministic ordering across platforms. The tool also feeds the capsule generator and future CLI gating, so accuracy and compatibility with the existing fixtures are critical, increasing the implementation and testing burden."
 		},
 		{
 			"taskId": 5,
-			"taskTitle": "Capsule Template & Generator",
+			"taskTitle": "Implement capsule generator, prompt renderer, and agent prompt sync",
 			"complexityScore": 8,
-			"recommendedSubtasks": 4,
-			"expansionPrompt": "Create `.specify/specs/<id>/capsule.md` templates that include Goal/Outputs/Acceptance Criteria/Allowed Context/Router Notes, implement a TS/tsx generator (e.g., `.sentinel/scripts/capsule-create.tsx`) wired to `pnpm capsule:create --spec <path>` that reads Spec/Plan/Tasks, computes hashed IDs, and enforces the <300 line budget with auto-populated Allowed Context lists from `.sentinel/context/**/*` references. Add an include-list validator, snapshot/unit tests, and docs in `.specify/README.md` plus integration notes for the `speckit.tasks` pipeline.",
-			"reasoning": "There is no `.specify/` directory or capsule template anywhere in the tree (confirmed by root glob and `rg` results), so both the markdown structure and generator CLI must be implemented from scratch, likely in TypeScript once Task 1’s workspace exists. The generator has to parse existing Spec/Plan/Tasks templates (`templates/plan-template.md`, etc.) and integrate with future Router tooling, which introduces parsing + formatting complexity along with new automated tests."
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Break down the work into subtasks for porting the capsule generator (`sentinelkit/capsule/generator.py`) from `.sentinel/scripts/capsule-create.mjs`, reimplementing the Eta prompt renderer in Python (Jinja2 or equivalent) for router/agent modes, recreating md-surgeon-style snippet syncing for README badges and agent bundles, providing Typer commands (`sentinel capsule generate`, `sentinel prompt render`, prompt sync options), writing golden-file tests under `tests/capsule/` and `tests/prompt/`, and sharing normalized path utilities with the context linter.",
+			"reasoning": "The capsule workflow is currently Node-only: generation logic (`.sentinel/scripts/capsule-create.mjs:1-303`), Allowed Context seeding, and md-surgeon-driven snippet syncing (`.sentinel/scripts/md-surgeon.mjs:1-127`) plus Eta prompt rendering referenced throughout the README/spec docs (.specify/README.md:73-119). Replicating this stack in Python requires deterministic markdown rendering, Allowed Context reuse, template token replacement, snippet injection safety checks, and multi-agent sync rules. Tests must compare golden outputs to existing fixtures, and the CLI needs to expose several modes and options, making the task intricate and tightly coupled to other modules."
 		},
 		{
 			"taskId": 6,
-			"taskTitle": "Router & Agent Prompt Renderer",
-			"complexityScore": 8,
-			"recommendedSubtasks": 5,
-			"expansionPrompt": "Refactor `.sentinel/scripts/orch/prompt-render.mjs` into an Eta/Mustache-powered module that validates router JSON against a schema, injects Allowed Context/agent metadata from `.sentinel/agents/**`, and logs every router decision to `.sentinel/router_log/<timestamp>-<slug>.jsonl`. Add CLI options (`--mode router|capsule`, `--agent`, `--output <file>`) plus reusable templates under `.sentinel/prompts/*.md`, ensure JSON schema enforcement, and create smoke + Vitest coverage. Update docs so router users know how to run the new CLI end-to-end.",
-			"reasoning": ".sentinel/scripts/orch/prompt-render.mjs:95-154 simply reads the markdown templates and performs `replaceAll` substitutions; it never enforces the router JSON schema, has no logging, and duplicates string replacements for each mode. `.sentinel/router_log/README.md:1-15` already describes the JSONL log format, highlighting a gap between documentation and implementation. Implementing templating, schema validation, logging, and CLI ergonomics (plus tests) will require significant refactoring once the pnpm workspace exists."
+			"taskTitle": "Port sentinel regression tests to pytest with CLI wrappers",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Outline subtasks for translating `.sentinel/tests/sentinels/**` Vitest suites to `tests/sentinels/**` in pytest (fixtures, markers, shared data), configuring `pytest.ini` with `pytest-json-report`/`pytest-junitxml`, implementing `sentinelkit/cli/sentinels.py` to invoke `python -m pytest` with marker/filter/report flags, and adding regression tests that assert JSON/JUnit artifacts and CLI exit codes match the prior vitest behavior.",
+			"reasoning": "All sentinel regression coverage runs via Vitest today (`.sentinel/tests/sentinels/sentinel_capsule_context.test.ts:1-24`) and CI calls `pnpm --dir=.sentinel vitest ...` (`.github/workflows/sentinel-kit.yml:94-121`), so moving to pytest means rewriting the suites, migrating fixtures, configuring new reporting plugins, and ensuring compatibility with Windows paths. The CLI wrapper has to orchestrate pytest execution, capture JSON/JUnit outputs for CI and selfcheck, and mimic the existing summary schema consumed by agents, so both test translation and command ergonomics add to the workload."
 		},
 		{
 			"taskId": 7,
-			"taskTitle": "Context Budget & Include-List Enforcement",
+			"taskTitle": "Implement decision ledger CLI and structured runbook updates",
 			"complexityScore": 6,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "Introduce `.sentinel/context/limits/context-limits.json` defining per-artifact line budgets, build a `pnpm context:lint` CLI (TS/Vitest) that scans capsule files for line counts and Allowed Context drift, integrate the checks into the prompt renderer (Task 6) so over-budget capsules fail fast, and document best practices plus optional Husky hooks guarding capsule edits.",
-			"reasoning": ".sentinel/notes-dev/SentinelKit_thesis.md:57 explicitly caps capsules at ≤300 lines, yet there is no linter, config, or CLI enforcing that rule, nor any script hook mentioned in `.sentinel/scripts/orch/prompt-render.mjs`. Because Task 6 will already parse capsules for routing, this linter must share parsing logic, expose `pnpm context:lint`, and integrate with future CI (Task 10), representing moderate effort once the TypeScript toolchain exists."
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Create subtasks that cover porting `.sentinel/scripts/decision-log.mjs` into `sentinelkit/cli/decision_log.py` with locking, ProducedBy snippets, and dry-run support, adding runbook maintenance helpers (`sentinelkit/runbook/updater.py`) that update `.sentinel/docs/IMPLEMENTATION.md`, wiring Typer commands for `sentinel decisions append` and `sentinel runbook append`, and writing unit/integration tests for serialization, duplicate detection, and dry-run behavior.",
+			"reasoning": "Ledger management currently depends on Node scripts (`.sentinel/scripts/decision-log.mjs:1-189`) and the MCP wrapper (`.sentinel/scripts/mcp/decision-log.mjs:1-116`), with docs referencing pnpm invocations (.specify/README.md:33-68). Re-implementing this in Python requires replicating locking semantics, ID bumping, ProducedBy snippet generation, and Markdown updates while ensuring deterministic outputs for CI diffs. Adding runbook automation introduces another Markdown-editing surface that must interoperate with md-surgeon-style workflows, demanding careful file handling and tests."
 		},
 		{
 			"taskId": 8,
-			"taskTitle": "MCP Contract-Validate Server & Smoke Harness",
-			"complexityScore": 6,
-			"recommendedSubtasks": 3,
-			"expansionPrompt": "Extract the validation logic from `.sentinel/scripts/contracts/validate.mjs` into a shared module and have `.sentinel/scripts/mcp/contract-validate-server.mjs` import it, then rebuild the MCP server on top of `vscode-jsonrpc` or `@anthropic-ai/mcp-sdk` with proper protocol framing, watch support, and CLI entry `pnpm mcp:contract-validate`. Expand `contract-validate-smoke.mjs` into a reusable smoke harness invoked by CI and document the `.mcp.json` snippet needed to mount the server.",
-			"reasoning": ".sentinel/scripts/mcp/contract-validate-server.mjs:1-170 reimplements contract traversal instead of reusing `.sentinel/scripts/contracts/validate.mjs:1-73`, and it speaks a homemade newline-delimited JSON protocol rather than the `vscode-jsonrpc`/`@anthropic-ai/mcp-sdk` transports called out in the task. `.sentinel/package.json:1-10` has no `mcp:contract-validate` script, so integrating with pnpm plus ensuring smoke coverage and docs still requires meaningful work even though a prototype exists."
+			"taskTitle": "Integrate Sentinel CLI with Specify CLI flows and slash-command gates",
+			"complexityScore": 9,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Plan subtasks for enhancing `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Python Sentinel assets (sentinelkit package, .sentinel prompts/agents/templates, workflows) and runs `uv sync` + `sentinel selfcheck`, updating `specify check` and other health commands to run Sentinel gates, refactoring slash-command templates in `templates/commands/*.md` (and supporting bash/ps scripts) so each `/speckit.*` command invokes the new Sentinel subcommands, adding agent bundle sync hooks, and extending tests/mocks to cover these flows.",
+			"reasoning": "Today the CLI and slash-command templates only orchestrate shell scripts (`scripts/bash/*.sh`) and pnpm-based Sentinel helpers (templates/commands/plan.md:1-45), with no knowledge of the forthcoming Python CLI. Wiring every entry point (`specify init`, `specify check`, `/speckit.*` commands) to the Sentinel Typer app requires restructuring scaffold logic, file copying, bootstrap steps, and multiple agent bundle sync locations. Because each slash command has both bash and PowerShell automation plus agent context hooks, the integration cuts across templates, scripts, and CLI code, demanding extensive testing and coordination with tasks 1-7."
 		},
 		{
 			"taskId": 9,
-			"taskTitle": "MCP Sentinel-Run & Decision-Log Servers",
+			"taskTitle": "Deliver MCP stdio server and smoke tests for sentinel tools",
 			"complexityScore": 7,
 			"recommendedSubtasks": 4,
-			"expansionPrompt": "Create shared MCP bootstrapping utilities, then implement `.sentinel/scripts/mcp/sentinel-run.mjs` (wrapping `pnpm test:sentinels -- --runInBand --reporter=json`) and `.sentinel/scripts/mcp/decision-log.mjs` (wrapping the Task 4 CLI) with parameter validation and JSON responses. Add smoke scripts for each server, wire pnpm entries (`pnpm mcp:sentinel-run`, `pnpm mcp:decision-log`), and document the `.mcp.json` configuration so Codex/Task Master can mount the new tools.",
-			"reasoning": "A repo-wide search turns up no files named `sentinel-run` or `decision-log` under `.sentinel/scripts/mcp`, so both servers and their smoke harnesses are missing. Because these servers must wrap the future sentinel test harness (Task 3) and decision-log CLI (Task 4), they will need cohesive RPC abstractions plus CLI integrations similar to Task 8, leading to a fairly involved implementation once prerequisites land."
+			"expansionPrompt": "Break down the task into subtasks for implementing an MCP stdio server under `sentinelkit/cli/mcp/server.py` that exposes contract validation, sentinel runs, and decision log tools via asyncio/jsonrpc, wiring `sentinel mcp smoke` and CLI entry points (`python -m sentinelkit.cli.mcp.server`), updating `.mcp.json` templates and init scaffolding to point to the Python server, and creating pytest smoke tests under `tests/mcp/` that spin up the server, call initialize/tools/list/tools/call, and assert JSON payload parity with the legacy Node responses.",
+			"reasoning": "The current MCP servers are discrete Node scripts (`.sentinel/scripts/mcp/contract-validate-server.mjs:1-154`, `sentinel-run.mjs:1-139`, `decision-log.mjs:1-116`) and `.specify/README.md:24-70` instructs pnpm commands plus JSON snippets pointing at those binaries. Replacing them with a single Python stdio server that reuses the new modules from Tasks 3, 6, and 7 requires async process management, JSON-RPC plumbing, tool registration, and smoke coverage to ensure parity. Updating scaffolding (e.g., `.mcp.json` templates) and ensuring CI/selfcheck runs `uv run sentinel mcp smoke` adds coordination overhead across docs, CLI, and tests."
 		},
 		{
 			"taskId": 10,
-			"taskTitle": "CI Gates & Documentation",
-			"complexityScore": 7,
+			"taskTitle": "Remove Node sentinel enclave and harden cross-platform support",
+			"complexityScore": 8,
 			"recommendedSubtasks": 5,
-			"expansionPrompt": "Author `.github/workflows/sentinel-kit.yml` with jobs for setup-toolchain (pnpm + uv caches), contracts (`pnpm validate:contracts`), sentinels (`pnpm test:sentinels --runInBand`), MCP smoke scripts, context linter, and docs linting across ubuntu/windows matrices. Add required secrets/caching, surface status badges + enforcement notes in `README.md` and `.sentinel/docs/IMPLEMENTATION.md`, and update `.github/pull_request_template.md` (or similar) to remind contributors about capsules/decisions/sentinels.",
-			"reasoning": ".github/workflows` currently only holds `docs.yml`, `lint.yml`, and `release.yml`; `lint.yml:1-20` merely runs markdownlint on ubuntu-latest, so none of the Sentinel-specific checks exist in CI. Standing up multi-job, multi-OS workflows that exercise pnpm scripts, MCP smoke harnesses, and uv installs—as well as documenting the enforcement loop—will require coordinating new scripts from Tasks 1-9 and ensuring caching + badge updates are correct."
+			"expansionPrompt": "Create subtasks for deleting the legacy `.sentinel` Node workspace (package.json, pnpm lock, Vitest configs, scripts) and updating `.gitignore`, rewriting documentation (README, docs/quickstart.md, .specify/README.md, SUPPORT.md) to reference only uv/sentinel CLI flows, ensuring `specify init --sentinel` scaffolds no Node artifacts and adds Linux hardening notes to `.sentinel/docs/IMPLEMENTATION.md`, adding CI/grep checks that block `pnpm`/`node_modules` references, and documenting the deprecation in DECISIONS.md with migration guidance.",
+			"reasoning": "Once the Python tooling lands, the existing Node enclave (`.sentinel/package.json`, `.sentinel/node_modules/**`, Vitest configs, pnpm lockfiles) becomes redundant and must be carefully removed without breaking historical artifacts. Numerous docs and badges still point to the Node workflow (README.md:96-204, .specify/README.md:12-119), so every contributor touchpoint needs updated instructions and Linux/macOS/Windows notes for uv installs. Ensuring `specify init` no longer copies Node assets, updating `.gitignore`, inserting a DECISIONS.md entry, and adding CI safeguards against stray pnpm references requires repo-wide changes and coordination with prior tasks, making this a complex clean-up stage."
 		}
 	]
 }
