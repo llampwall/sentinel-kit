@@ -82,29 +82,27 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME
 - Better tool management with `uv tool list`, `uv tool upgrade`, `uv tool uninstall`
 - Cleaner shell configuration
 
-### Install Sentinel tooling (Node workspace)
+### 2. Bootstrap SentinelKit (Python workspace)
 
-Once `specify-cli` is available, bootstrap the Sentinel workspace dependencies. Choose the command that matches your platform:
-
-<details>
-<summary><strong>macOS / Linux</strong></summary>
+Once `specify-cli` is available, install the SentinelKit Python workspace directly:
 
 ```bash
-make sentinel-install
+uv sync
+python scripts/bootstrap.py
 ```
 
-This target installs/refreshes `specify-cli`, enables Corepack, activates `pnpm@9.12.0`, and runs `pnpm install` inside `.sentinel/`. Pass custom pnpm flags via `PNPM_FLAGS="--registry=https://registry.npmjs.org/" make sentinel-install`.
-</details>
+The bootstrap script runs `uv sync`, `uv run sentinel selfcheck`, and `uv run pytest -q` to ensure the CLI, selfcheck, and smoke tests all pass. If you have GNU Make available you can run the same flow with:
 
-<details>
-<summary><strong>Windows (PowerShell)</strong></summary>
-
-```powershell
-pwsh ./scripts/setup.ps1 [-PnpmFlags "--registry=https://registry.npmjs.org/"]
+```bash
+make bootstrap
 ```
 
-The script mirrors the Makefile workflow and accepts optional `-PnpmFlags` (or the `PNPM_FLAGS` environment variable) for proxy/caching scenarios.
-</details>
+Need to re-run a single stage?
+
+```bash
+uv run sentinel selfcheck --verbose
+uv run pytest -q
+```
 
 ### 3. Validate Sentinel contracts
 
@@ -115,16 +113,16 @@ The script mirrors the Makefile workflow and accepts optional `-PnpmFlags` (or t
 <!-- ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0018 -->
 ### CI & Enforcement
 
-[![Sentinel Kit](https://github.com/github/spec-kit/actions/workflows/sentinel-kit.yml/badge.svg)](https://github.com/github/spec-kit/actions/workflows/sentinel-kit.yml)
+[![Sentinel CI](https://github.com/github/spec-kit/actions/workflows/sentinel-ci.yml/badge.svg)](https://github.com/github/spec-kit/actions/workflows/sentinel-ci.yml)
 
-The `sentinel-kit` workflow runs on pushes/PRs to `main` and gates the following jobs:
-1. **setup-toolchain** – caches Node/pnpm/uv on Ubuntu + Windows.
-2. **contracts** – `pnpm --dir=.sentinel validate:contracts`
-3. **sentinels** – `pnpm --dir=.sentinel vitest run --config vitest.config.sentinel.ts --reporter=json`
-4. **mcp-smoke** – `pnpm --dir=.sentinel mcp:contract-validate:smoke`, `mcp:sentinel-run:smoke`, `mcp:decision-log:smoke`
-5. **docs-lint** – `pnpm --dir=.sentinel context:lint`
+The `sentinel-ci` workflow runs on pushes/PRs to `main` and executes the Python bootstrap on Ubuntu, macOS, and Windows:
 
-Failures in any job block merges; artifacts (Vitest JSON, smoke logs) are uploaded for debugging.
+1. **Setup uv** – Installs Python 3.12 with `actions/setup-python` and restores the uv cache.
+2. **Bootstrap** – `uv sync --locked --dev` to install the workspace.
+3. **Selfcheck** – `uv run sentinel selfcheck --verbose`.
+4. **Tests** – `uv run pytest -q --junitxml=test-results/junit.xml` with artifacts uploaded per platform.
+
+Failures in any step block merges and artifacts are uploaded for debugging.
 <!-- SENTINEL:WORKFLOW-BADGE:end -->
 
 
@@ -132,50 +130,37 @@ Failures in any job block merges; artifacts (Vitest JSON, smoke logs) are upload
 <!-- ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0014 -->
 ### MCP contract validator
 
-Use the MCP server when you need JSON-RPC tooling access to the contract fixtures without leaving your editor.
+Use the Python CLI when you need JSON-RPC tooling access without leaving your editor.
 
 **Commands**
-- `pnpm --dir=.sentinel mcp:contract-validate` starts the stdio server (press `Ctrl+C` to stop).
-- `pnpm --dir=.sentinel mcp:contract-validate:smoke` runs the initialize → tools/list → tools/call handshake.
+- uv run sentinel contracts validate (CLI front door for contract validation; logic is landing as the migration progresses).
+- uv run sentinel mcp server starts the stdio server (press Ctrl+C to stop).
 
 ### MCP sentinel + decision log servers
 
-- `pnpm --dir=.sentinel mcp:sentinel-run` exposes the `sentinel_run` tool (accepts optional `filter`).
-- `pnpm --dir=.sentinel mcp:sentinel-run:smoke` verifies the server before CI.
-- `pnpm --dir=.sentinel mcp:decision-log` wraps the decision-log CLI for ledger append.
-- `pnpm --dir=.sentinel mcp:decision-log:smoke` sanity-checks the append path.
+The Typer CLI exposes placeholders for the legacy workflows while we finish the migration:
+
+- uv run sentinel context lint - context lint entry point.
+- uv run sentinel decisions ... - decision log entry point.
 
 **.mcp.json snippet**
-```json
+`json
 {
   "mcpServers": {
-    "contract-validate": {
-      "command": "pnpm",
-      "args": ["--dir=.sentinel", "mcp:contract-validate"],
+    "sentinel": {
+      "command": "uv",
+      "args": ["run", "sentinel", "mcp", "server"],
       "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "sentinel-run": {
-      "command": "pnpm",
-      "args": ["--dir=.sentinel", "mcp:sentinel-run"],
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "decision-log": {
-      "command": "pnpm",
-      "args": ["--dir=.sentinel", "mcp:decision-log"],
-      "env": {
-        "NODE_ENV": "production"
+        "PYTHONUTF8": "1"
       }
     }
   }
 }
-```
-- Add API keys or additional env vars per server inside `env` as needed.
-- The servers watch `.sentinel/contracts/**` and `.sentinel/DECISIONS.md`, so you can keep them running while editing.
+`
+- Add API keys or additional env vars per server inside env as needed.
+- The server watches .sentinel/contracts/** and .sentinel/DECISIONS.md, so you can keep it running while editing.
 <!-- SENTINEL:MCP-CONTRACT-VALIDATE:end -->
+
 
 
 <!-- SENTINEL:CAPSULES:start -->
@@ -186,25 +171,20 @@ Capsules turn a Spec-Kit feature (`.specify/specs/<slug>`) into a router-ready h
 
 1. Start from the reusable template at `.sentinel/templates/capsule.md` (the generator copies this structure automatically if you prefer CLI-driven capsules).
 2. Update the Spec-Kit feature (spec.md, plan.md, tasks.md). Capsule Task 5 lives in `.specify/specs/005-capsule-gen`.
-2. Render the capsule from the `.sentinel/` workspace:
+2. Render the capsule via the upcoming Sentinel CLI (work in progress):
    ```bash
-   pnpm -C .sentinel capsule:create --spec ../.specify/specs/005-capsule-gen --decision D-XXXX
+   uv run sentinel capsules create --spec .specify/specs/005-capsule-gen --decision D-XXXX
    ```
    - `--decision` must be the next ledger ID from `.sentinel/DECISIONS.md`.
    - Pass `--agent`/`--rulesHash` if the capsule belongs to someone other than ROUTER.
 3. Review the generated `.specify/specs/<slug>/capsule.md` and keep it under 300 lines. The CLI hashes the ID (e.g., `005-capsule-gen@<hash>`) and auto-includes `.sentinel/context/**` (shipping context files) via the Allowed Context helper. Maintainer-only notes now live under `.sentinel/notes-dev/**` and are excluded by default unless you list them explicitly.
 4. Run the context linter to ensure the Allowed Context list only references approved paths (the renderer now enforces this automatically):
    ```bash
-   pnpm --dir=.sentinel context:lint
+   uv run sentinel context lint
    ```
    - Commits that touch `.specify/specs/*/capsule.md`, `.sentinel/context/**`, or the prompt/template files should enable the bundled hook via `git config core.hooksPath .husky`. The hook re-runs the command above before the commit proceeds.
-5. Run the deterministic tests any time capsule logic changes:
-   ```bash
-   pnpm -C .sentinel vitest run tests/capsule-create.test.ts
-   pnpm -C .sentinel test:sentinels -- --testNamePattern capsule-context
-   ```
-   Both commands execute inside `.sentinel/`.
-6. When docs mention capsules, edit `.sentinel/snippets/capsules.md` and re-run `node .sentinel/scripts/md-surgeon.mjs` so README stays in sync.
+5. Deterministic tests will migrate to `uv run pytest -m capsule`; until then run the standard smoke suite (`python scripts/bootstrap.py`) after capsule changes.
+6. When docs mention capsules, edit `.sentinel/snippets/capsules.md` and re-run the upcoming Python md-surgeon replacement so README stays in sync.
 <!-- SENTINEL:CAPSULES:end -->
 
 ### Implementation Runbook

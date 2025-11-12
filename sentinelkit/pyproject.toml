@@ -3,7 +3,12 @@ name = "sentinelkit"
 version = "0.0.0a0"
 description = "Python enforcement toolkit for Spec Kit sentinels."
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "typer>=0.12",
+]
+
+[project.scripts]
+sentinel = "sentinelkit.cli.main:app"
 
 [build-system]
 requires = ["hatchling"]

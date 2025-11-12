@@ -13,6 +13,12 @@ dependencies = [
     "sentinelkit",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.6",
+]
+
 [project.scripts]
 specify = "specify_cli:main"
 

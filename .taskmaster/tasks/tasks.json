@@ -9,7 +9,7 @@
         "testStrategy": "`uv run sentinel selfcheck` should succeed on clean clones for Windows/Linux/macOS; GitHub workflow must pass the matrix. Add a smoke test that imports every sentinelkit module to ensure package integrity.",
         "priority": "medium",
         "dependencies": [],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -44,9 +44,10 @@
               2
             ],
             "details": "Create namespace packages for every required directory, insert placeholder modules raising NotImplementedError, and add sentinelkit/cli/main.py plus `[project.scripts] sentinel = \"sentinelkit.cli.main:app\"` ensuring Typer app imports all namespaces.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "`uv run python -c \"import sentinelkit.cli.main\"` and `uv run sentinel --help` should execute without ImportError, verifying module scaffolding.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T05:15:35.935Z"
           },
           {
             "id": 4,
@@ -57,9 +58,10 @@
               3
             ],
             "details": "Implement scripts/bootstrap.py calling the documented uv commands, adjust Makefile targets to wrap the Python bootstrap flow, and ensure no pnpm tooling remains referenced anywhere in bootstrap instructions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "From a clean tree run `python scripts/bootstrap.py` and `make bootstrap` to ensure both pathways execute the uv sync + sentinel selfcheck pipeline.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T05:26:01.518Z"
           },
           {
             "id": 5,
@@ -69,9 +71,10 @@
               4
             ],
             "details": "Create a new workflow that installs uv, caches ~/.cache/uv, runs uv sync, sentinel selfcheck, pytest with JSON/JUnit outputs, and uploads artifacts for Windows, Linux, and macOS while removing the old pnpm/Vitest workflow file.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Push to a test branch or use `act` where possible; otherwise rely on workflow syntax validation (`gh workflow lint`) and review generated matrix/job steps.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T05:38:40.263Z"
           },
           {
             "id": 6,
@@ -82,15 +85,16 @@
               4
             ],
             "details": "Rewrite README.md (and any related docs) to document uv-only setup and new CI badge, remove pnpm guidance, and add a tests/smoke/test_imports.py that imports each sentinelkit module ensuring placeholders are wired.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "`uv run pytest tests/smoke/test_imports.py` should pass and README should reflect uv instructions verified via markdown lint or manual review.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T05:38:51.575Z"
           }
         ],
         "complexity": 9,
         "recommendedSubtasks": 6,
         "expansionPrompt": "Break this into subtasks that cover: extending `pyproject.toml` into a multi-package uv/hatch project for both `specify-cli` and the new `sentinelkit` package, scaffolding the namespace layout (`contracts/`, `context/`, `capsule/`, `prompt/`, `cli/`, `utils/`, `scripts/`, `tests/`) with placeholder modules and a Typer entry point, adding uv metadata (`.tool-versions`, `uv.lock`) plus `sentinelkit/__init__.py`, authoring the Python-only bootstrap script + Makefile updates, replacing `.github/workflows/sentinel-kit.yml` with a Python/uv matrix workflow, and updating README/docs to describe the uv bootstrap and CI badge alongside a smoke test that imports every module.",
-        "updatedAt": "2025-11-12T05:06:33.058Z"
+        "updatedAt": "2025-11-12T05:38:51.575Z"
       },
       {
         "id": "2",
@@ -820,9 +824,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-12T05:06:33.060Z",
+      "lastModified": "2025-11-12T05:38:51.577Z",
       "taskCount": 10,
-      "completedCount": 0,
+      "completedCount": 1,
       "tags": [
         "master"
       ]
