@@ -2,14 +2,14 @@
   "master": {
     "tasks": [
       {
-        "id": 1,
+        "id": "1",
         "title": "Bootstrap Sentinel Python package and CI",
         "description": "Create the `sentinelkit` Python package, uv-based bootstrap, and OS-matrix CI to replace the Node-only Sentinel workspace.",
         "details": "- Convert the repo into a uv-native project: add `.tool-versions` (Python 3.12.x), `uv.lock`, and extend `pyproject.toml` so `sentinelkit` installs alongside the existing `specify-cli` package (shared build-system via hatch/uv).\n- Scaffold `sentinelkit/` per PRD structure (contracts/, context/, capsule/, prompt/, cli/, utils/, scripts/, tests/) with namespace packages and placeholder modules that raise `NotImplementedError` until filled.\n- Author `sentinelkit/__init__.py` exporting version info and helpers plus a top-level Typer app entry point entry (`[project.scripts] sentinel = \"sentinelkit.cli.main:app\"`).\n- Add `Makefile`/`scripts/bootstrap.py` wrapper that runs only Python commands: `uv sync`, `uv run sentinel selfcheck`, `uv run pytest -q`.\n- Replace `.github/workflows/sentinel-kit.yml` with `sentinel-ci.yml` that uses `actions/setup-python@v5`, caches uv, runs `uv sync`, `uv run sentinel selfcheck`, and uploads pytest JSON/JUnit artifacts on Windows/Linux/macOS.\n```\n# scripts/bootstrap.py\nimport subprocess\nfor cmd in (\"uv sync\", \"uv run sentinel selfcheck\"):\n    subprocess.check_call(cmd.split())\n```\n- Update `README.md` to remove pnpm instructions and document the single `uv` bootstrap plus the new CI badge.\n- Enforce repo-wide UTF-8/`\n` handling via `sentinelkit/utils/io.py`; use the helpers for decision logs, md-surgeon snippets, capsule generator, and tests, plus add a fixture that fails on CRLF to enforce the policy.\n- Standardize on `uv run` for all in-repo commands (docs, `.mcp.json`, CI) and set `requires-python = \">=3.12\"` in `pyproject.toml`; make `sentinel selfcheck` exit with guidance if the interpreter is older.\n- Add `.pre-commit-config.yaml` with ruff/black/isort and `pytest -q -m sentinel`; document `uv run pre-commit run -a` so contributors keep diffs clean.",
         "testStrategy": "`uv run sentinel selfcheck` should succeed on clean clones for Windows/Linux/macOS; GitHub workflow must pass the matrix. Add a smoke test that imports every sentinelkit module to ensure package integrity.",
         "priority": "medium",
         "dependencies": [],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -17,8 +17,10 @@
             "description": "Restructure pyproject.toml so sentinelkit installs alongside specify-cli via a shared hatch/uv build system.",
             "dependencies": [],
             "details": "Refactor [project] metadata, optional dependencies, and hatch build targets so the new sentinelkit package is declared, versioned, and exported with the existing specify-cli artifacts while staying uv-compatible.",
-            "status": "pending",
-            "testStrategy": "Run `uv pip show sentinelkit specify-cli` after local install to confirm both packages build from the same pyproject configuration."
+            "status": "done",
+            "testStrategy": "Run `uv pip show sentinelkit specify-cli` after local install to confirm both packages build from the same pyproject configuration.",
+            "updatedAt": "2025-11-12T04:57:58.663Z",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -28,8 +30,10 @@
               1
             ],
             "details": "Create .tool-versions pinning Python 3.12.x, generate uv.lock from uv sync, and author sentinelkit/__init__.py that exposes __all__, __version__, and shared helper exports so the package can be imported immediately.",
-            "status": "pending",
-            "testStrategy": "`uv run python -c \"import sentinelkit; print(sentinelkit.__version__)\"` should succeed on a clean checkout."
+            "status": "done",
+            "testStrategy": "`uv run python -c \"import sentinelkit; print(sentinelkit.__version__)\"` should succeed on a clean checkout.",
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T05:06:33.058Z"
           },
           {
             "id": 3,
@@ -41,7 +45,8 @@
             ],
             "details": "Create namespace packages for every required directory, insert placeholder modules raising NotImplementedError, and add sentinelkit/cli/main.py plus `[project.scripts] sentinel = \"sentinelkit.cli.main:app\"` ensuring Typer app imports all namespaces.",
             "status": "pending",
-            "testStrategy": "`uv run python -c \"import sentinelkit.cli.main\"` and `uv run sentinel --help` should execute without ImportError, verifying module scaffolding."
+            "testStrategy": "`uv run python -c \"import sentinelkit.cli.main\"` and `uv run sentinel --help` should execute without ImportError, verifying module scaffolding.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -53,7 +58,8 @@
             ],
             "details": "Implement scripts/bootstrap.py calling the documented uv commands, adjust Makefile targets to wrap the Python bootstrap flow, and ensure no pnpm tooling remains referenced anywhere in bootstrap instructions.",
             "status": "pending",
-            "testStrategy": "From a clean tree run `python scripts/bootstrap.py` and `make bootstrap` to ensure both pathways execute the uv sync + sentinel selfcheck pipeline."
+            "testStrategy": "From a clean tree run `python scripts/bootstrap.py` and `make bootstrap` to ensure both pathways execute the uv sync + sentinel selfcheck pipeline.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -64,7 +70,8 @@
             ],
             "details": "Create a new workflow that installs uv, caches ~/.cache/uv, runs uv sync, sentinel selfcheck, pytest with JSON/JUnit outputs, and uploads artifacts for Windows, Linux, and macOS while removing the old pnpm/Vitest workflow file.",
             "status": "pending",
-            "testStrategy": "Push to a test branch or use `act` where possible; otherwise rely on workflow syntax validation (`gh workflow lint`) and review generated matrix/job steps."
+            "testStrategy": "Push to a test branch or use `act` where possible; otherwise rely on workflow syntax validation (`gh workflow lint`) and review generated matrix/job steps.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -76,19 +83,24 @@
             ],
             "details": "Rewrite README.md (and any related docs) to document uv-only setup and new CI badge, remove pnpm guidance, and add a tests/smoke/test_imports.py that imports each sentinelkit module ensuring placeholders are wired.",
             "status": "pending",
-            "testStrategy": "`uv run pytest tests/smoke/test_imports.py` should pass and README should reflect uv instructions verified via markdown lint or manual review."
+            "testStrategy": "`uv run pytest tests/smoke/test_imports.py` should pass and README should reflect uv instructions verified via markdown lint or manual review.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 9,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Break this into subtasks that cover: extending `pyproject.toml` into a multi-package uv/hatch project for both `specify-cli` and the new `sentinelkit` package, scaffolding the namespace layout (`contracts/`, `context/`, `capsule/`, `prompt/`, `cli/`, `utils/`, `scripts/`, `tests/`) with placeholder modules and a Typer entry point, adding uv metadata (`.tool-versions`, `uv.lock`) plus `sentinelkit/__init__.py`, authoring the Python-only bootstrap script + Makefile updates, replacing `.github/workflows/sentinel-kit.yml` with a Python/uv matrix workflow, and updating README/docs to describe the uv bootstrap and CI badge alongside a smoke test that imports every module.",
+        "updatedAt": "2025-11-12T05:06:33.058Z"
       },
       {
-        "id": 2,
+        "id": "2",
         "title": "Implement Typer CLI root and selfcheck wiring",
         "description": "Build the Typer-based `sentinel` CLI (`sentinel selfcheck`, shared options, environment detection) and hook it into `specify check`.",
         "details": "- Implement `sentinelkit/cli/main.py` with a Typer app exposing subcommands namespace (`contracts`, `context`, `capsule`, `prompts`, `sentinels`, `decisions`, `runbook`, `mcp`).\n- `sentinel selfcheck` should run contract validation, context lint, capsule generator dry-run, sentinel pytest marker, and MCP smoke checks concurrently, aggregating JSON results via `rich` status output.\n- Add shared options (e.g., `--root`, `--format json|pretty`) and ensure exit codes propagate.\n- Extend `src/specify_cli/__init__.py` so `specify check` (and any other health commands) shell out to `uv run sentinel selfcheck`, surfacing actionable errors in the Typer UI already used by Specify CLI.\n```\n@app.command()\ndef selfcheck(json_output: bool = False):\n    checks = {\n        \"contracts\": run(\"sentinel contracts validate --format json\"),\n        \"sentinels\": run(\"pytest -q -m sentinel --json-report\"),\n    }\n    if any(not chk.success for chk in checks.values()):\n        raise typer.Exit(1)\n```\n- Provide `sentinelkit/utils/errors.py` helpers for normalized error payloads (code, message, remediation hint) so downstream gates can reuse them.\n- Define a shared JSON schema (e.g., `sentinelkit/selfcheck_schema.json`) describing `{\"checks\":{...},\"ok\":bool}` so `sentinel selfcheck --json` aggregates contracts/context/capsule/sentinels/MCP results with names, durations, and messages for Specify CLI.\n- Support `--json/--no-color` flags and ensure Specify shells out via `uv run sentinel selfcheck --json`, parsing the schema for Rich output.",
         "testStrategy": "Unit-test the Typer root by stubbing each check and asserting aggregated JSON matches the schema plus exit codes; integration tests run `uv run sentinel selfcheck --json` from Specify CLI for success/failure fixtures.",
         "priority": "medium",
         "dependencies": [
-          1
+          "1"
         ],
         "status": "pending",
         "subtasks": [
@@ -99,7 +111,8 @@
             "dependencies": [],
             "details": "Set up the Typer app factory, configure global options such as `--root` and `--format`, wire subcommand entrypoints (even if they just raise `NotImplementedError` for now), and ensure the executable script entry is added in `pyproject.toml`.",
             "status": "pending",
-            "testStrategy": null
+            "testStrategy": null,
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -110,7 +123,8 @@
             ],
             "details": "Centralize option parsing (e.g., Typer callback) so subcommands get consistent root paths; build an async or threaded executor wrapper that collects structured check results; implement error helper dataclasses/functions producing dicts that can be serialized and logged, and integrate Rich status spinner scaffolding.",
             "status": "pending",
-            "testStrategy": null
+            "testStrategy": null,
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -121,7 +135,8 @@
             ],
             "details": "Compose the concurrency helpers to launch each check (shell or function), stream Rich status updates, gather normalized results via `utils.errors`, and emit JSON when requested; summarize failures and raise `typer.Exit(1)` if any check fails.",
             "status": "pending",
-            "testStrategy": null
+            "testStrategy": null,
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -130,9 +145,10 @@
             "dependencies": [
               3
             ],
-            "details": "Use Typer\u00e2\u20ac\u2122s test client or click runner to simulate CLI invocations, patch subprocess calls for each check, assert Rich/JSON output shape, verify exit codes, and add integration fixtures under `tests/cli` executing the installed console script.",
+            "details": "Use Typerâ€™s test client or click runner to simulate CLI invocations, patch subprocess calls for each check, assert Rich/JSON output shape, verify exit codes, and add integration fixtures under `tests/cli` executing the installed console script.",
             "status": "pending",
-            "testStrategy": "pytest tests/cli/test_selfcheck.py -k selfcheck plus integration CLI invocation via uv run sentinel selfcheck --format json"
+            "testStrategy": "pytest tests/cli/test_selfcheck.py -k selfcheck plus integration CLI invocation via uv run sentinel selfcheck --format json",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -143,20 +159,24 @@
             ],
             "details": "Replace the existing tool-check logic with a subprocess wrapper calling the new Typer command, handle exit codes and error messaging consistently, and add documentation in README/spec guides describing the sentinel CLI root, selfcheck flow, and shared options for existing users.",
             "status": "pending",
-            "testStrategy": null
+            "testStrategy": null,
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Create subtasks for defining the `sentinelkit/cli/main.py` Typer root with subcommand stubs, building the concurrent `sentinel selfcheck` runner plus shared `--root/--format` options and `utils/errors.py`, adding CLI tests (unit + integration) simulating success/failure of the delegated checks, updating `src/specify_cli/__init__.py` so `specify check` shells out to `uv run sentinel selfcheck` with proper Rich output, and documenting CLI usage in README/spec guides."
       },
       {
-        "id": 3,
+        "id": "3",
         "title": "Port contract validation to Python CLI + MCP",
         "description": "Replace Node contract tooling with a Python implementation that supports CLI and MCP flows.",
         "details": "- Implement `sentinelkit/contracts/loader.py` to read `sentinel/contracts/*.yaml` schemas and fixtures with deterministic ordering (use `pathlib.Path.glob` + `sorted`).\n- Use `pydantic` + `jsonschema` (or `yaml` + `jsonschema`) to validate fixtures; support `--id`, `--path`, and `--format` flags for targeted or full runs with machine-readable JSON output.\n- CLI command `sentinel contracts validate` lives in `sentinelkit/cli/contract_validate.py`, invoked via `Typer`, and emits `{'status':'passed','results':[...]} ` (pretty + JSON).\n- Provide a shared validation API for MCP: `sentinelkit/contracts/api.py` returning structured errors (path, schema pointer, remediation).\n```\ndef validate_contract(contract: Path, fixture: Path) -> ValidationResult:\n    schema = yaml.safe_load(contract.read_text())\n    data = yaml.safe_load(fixture.read_text())\n    Draft2020Validator(schema).validate(data)\n```\n- Update sample fixtures/tests under `tests/contracts/` verifying parity with legacy outputs using golden JSON snapshots.\n- Rebuild the validator using PyYAML + `jsonschema` Draft 2020-12 (no pydantic in the hot path) so payload ordering matches the legacy AJV outputs; share helpers between CLI and MCP layers.",
         "testStrategy": "Golden tests compare the new CLI+JSON payloads against the existing Vitest fixtures (e.g., `contracts/users.v1/get_active.json`); schema validation unit tests cover success/failure cases.",
         "priority": "medium",
         "dependencies": [
-          1,
-          2
+          "1",
+          "2"
         ],
         "status": "pending",
         "subtasks": [
@@ -167,7 +187,8 @@
             "dependencies": [],
             "details": "Inspect `.sentinel/scripts/contracts/validator-core.mjs` plus `.sentinel/tests/contracts/*.test.ts` and capture a parity checklist covering schema loading order, ProducedBy enforcement, and JSON payload shape for CLI/MCP consumers.",
             "status": "pending",
-            "testStrategy": "No automated tests; deliver a documented checklist referenced in later tasks."
+            "testStrategy": "No automated tests; deliver a documented checklist referenced in later tasks.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -178,7 +199,8 @@
             ],
             "details": "Use `pathlib.Path.glob` with `sorted` to gather `sentinel/contracts/*.yaml`, pair schemas with fixtures, and expose helpers to fetch by contract id or explicit path while memoizing file metadata to avoid redundant disk reads.",
             "status": "pending",
-            "testStrategy": "Add unit tests covering glob ordering, cache reuse, and selecting contracts by id or path."
+            "testStrategy": "Add unit tests covering glob ordering, cache reuse, and selecting contracts by id or path.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -189,7 +211,8 @@
             ],
             "details": "Implement `validate_contract` and higher-level helpers returning structured error objects (path, schema pointer, remediation) and ensure results serialize cleanly for MCP; include schema caching hooks from the loader.",
             "status": "pending",
-            "testStrategy": "Unit tests cover success/failure cases, ProducedBy violations, and JSON-serializable ValidationResult structures."
+            "testStrategy": "Unit tests cover success/failure cases, ProducedBy violations, and JSON-serializable ValidationResult structures.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -200,7 +223,8 @@
             ],
             "details": "Implement CLI parameter parsing, multi-contract execution, aggregation of pass/fail results, status summaries, and exit codes mirroring the Node tool while reusing API serializers.",
             "status": "pending",
-            "testStrategy": "Integration tests invoke `uv run sentinel contracts validate` across flag combinations and assert JSON output schema."
+            "testStrategy": "Integration tests invoke `uv run sentinel contracts validate` across flag combinations and assert JSON output schema.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -211,20 +235,24 @@
             ],
             "details": "Port existing fixtures, generate baseline JSON payloads via the new CLI/API, store them as snapshots, and add tests that diff current results against the goldens for full run and targeted modes.",
             "status": "pending",
-            "testStrategy": "Snapshot-based pytest cases comparing emitted JSON to stored fixtures plus CLI smoke test `uv run sentinel contracts validate --format json`."
+            "testStrategy": "Snapshot-based pytest cases comparing emitted JSON to stored fixtures plus CLI smoke test `uv run sentinel contracts validate --format json`.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Plan subtasks for re-implementing the contract loader/validator (`sentinelkit/contracts/loader.py`, schema caching, ProducedBy checks) modeled on `.sentinel/scripts/contracts/validator-core.mjs`, exposing a Typer command `sentinel contracts validate` with `--id/--path/--format` options, snapshotting CLI/JSON outputs against fixtures under `tests/contracts/`, adding a reusable API surface for MCP consumers, and wiring regression tests that compare new JSON payloads to the legacy Vitest snapshots."
       },
       {
-        "id": 4,
+        "id": "4",
         "title": "Build Allowed Context discovery & linting in Python",
         "description": "Recreate the allowed-context, context limit linting, and path guardrails using Python utilities.",
         "details": "- Implement `sentinelkit/context/allowed_context.py` to glob `.sentinel/context/**`, normalize paths via `Path.resolve()`, and enforce deterministic ordering + path whitelists identical to `.sentinel/context/limits/context-limits.json`.\n- Port the context limit schema to Python dataclasses (`ContextRule`, `CapsuleRule`) with a JSON loader in `sentinelkit/context/limits.py`.\n- Create `sentinelkit/context/lint.py` CLI entry: `sentinel context lint [--capsule path] [--strict]`. Hard fail when files escape repo root or exceed 300 lines; emit JSON diagnostics consumed by slash commands.\n- Integrate md-surgeon replacement for snippet updates (e.g., README badge blocks) via `sentinelkit/scripts/md_surgeon.py` so docs stay in sync after lint.\n```\ndef lint_context(capsule: Path | None) -> list[Diagnostic]:\n    for entry in discover_allowed_context():\n        if entry.line_count > LIMIT:\n            yield Diagnostic(path=entry.path, rule=\"line-limit\", severity=\"error\")\n```\n- Update `.sentinel/context/fixtures` to mirror new Python logic and add tests for escapes, limit violations, and deterministic outputs.\n- Add a `--strict` flag (warnings escalate to errors) and document the 300-line limit in CLI help; include a fixture capsule at 301 lines to prove enforcement.",
         "testStrategy": "Fixtures under `tests/context/fixtures/capsules/` should include 299/300/301-line cases; `uv run sentinel context lint --strict` must fail the 301-line fixture with a clear path + hint.",
         "priority": "medium",
         "dependencies": [
-          1,
-          2
+          "1",
+          "2"
         ],
         "status": "pending",
         "subtasks": [
@@ -235,7 +263,8 @@
             "dependencies": [],
             "details": "Use `pathlib.Path` for globbing, call `Path.resolve()` plus repo-root checks, reuse existing whitelist JSON, and expose helpers returning sorted context records with line counts.",
             "status": "pending",
-            "testStrategy": "Unit-test discovery against fixture directories to ensure deterministic ordering and path guardrails."
+            "testStrategy": "Unit-test discovery against fixture directories to ensure deterministic ordering and path guardrails.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -246,7 +275,8 @@
             ],
             "details": "Implement loader in `sentinelkit/context/limits.py`, validate schema fields, and expose parsed objects consumed by the linter and discovery code.",
             "status": "pending",
-            "testStrategy": "Add pytest coverage to load sample limit files and assert structure/validation errors."
+            "testStrategy": "Add pytest coverage to load sample limit files and assert structure/validation errors.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -258,7 +288,8 @@
             ],
             "details": "Wire Typer CLI, call discovery + limits, enforce line limits/escapes, emit diagnostics with deterministic ordering, support strict mode, and honor repo root boundaries.",
             "status": "pending",
-            "testStrategy": "CLI-level tests invoking `uv run sentinel context lint --format json` against good/bad fixtures verifying exit codes and payloads."
+            "testStrategy": "CLI-level tests invoking `uv run sentinel context lint --format json` against good/bad fixtures verifying exit codes and payloads.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -271,7 +302,8 @@
             ],
             "details": "Recreate good/bad capsule fixtures, expected JSON snapshots, and pytest cases that assert diagnostics match legacy behavior and deterministic ordering across platforms.",
             "status": "pending",
-            "testStrategy": "Snapshot-style pytest cases comparing CLI outputs to stored JSON plus direct unit tests for limit-violation scenarios."
+            "testStrategy": "Snapshot-style pytest cases comparing CLI outputs to stored JSON plus direct unit tests for limit-violation scenarios.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -283,21 +315,25 @@
             ],
             "details": "Implement reusable path utility helpers, hook lint results to markdown surgeon for README badge updates, and document integration for future modules.",
             "status": "pending",
-            "testStrategy": "Add targeted tests for md-surgeon helper to confirm snippet replacement plus integration test ensuring lint run updates docs when expected."
+            "testStrategy": "Add targeted tests for md-surgeon helper to confirm snippet replacement plus integration test ensuring lint run updates docs when expected.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Generate subtasks that cover porting `.sentinel/scripts/context/lint.mts` into `sentinelkit/context/` modules (discovery, limits dataclasses, lint CLI), reusing deterministic globbing and forbidden path enforcement, wiring CLI options (`sentinel context lint --capsule/--strict`) with JSON output, updating fixtures/tests under `tests/context/` to mirror the Vitest suite, and integrating shared path utilities for other modules."
       },
       {
-        "id": 5,
+        "id": "5",
         "title": "Implement capsule generator, prompt renderer, and agent prompt sync",
         "description": "Port the capsule generator, Eta prompt renderer, and agent prompt scaffolding into the Python toolchain.",
         "details": "- Create `sentinelkit/capsule/generator.py` to hydrate `.specify/specs/<slug>/{spec,plan,tasks}.md` into `.sentinel/templates/capsule.md`, inserting context and enforcement metadata.\n- Reimplement the Eta-based prompt renderer in Python (`sentinelkit/prompt/render.py`) using `jinja2` or `eta-py`, validating router JSON and producing deterministic markdown/snippet outputs.\n- Provide CLI commands: `sentinel capsule generate`, `sentinel prompt render --template router` etc., with options for dry-run, output folder, and JSON logs for slash commands.\n- Add md-surgeon snippets sync to push canonical `.sentinel/prompts/*.md` into agent bundles (`.codex/prompts/`, `.claude/prompts/`, `.cursor/prompts/`, etc.) whenever `specify init --sentinel` runs or when prompts change.\n```\n@app.command()\ndef prompt_render(template: str, agent_bundle: Path):\n    ctx = CapsuleContext.load()\n    rendered = TemplateLoader(template).render(ctx)\n    write_snippet(agent_bundle / f\"speckit.{template}.md\", rendered)\n```\n- Ensure `sentinel context lint` + capsule generator share normalized path utilities so `/speckit.*` gates can trust outputs.\n- Version the router JSON schema (e.g., `sentinelkit/prompt/router_schema.json`) and validate router output before writing prompts; log validation errors with actionable context.\n- Add a cross-platform snapshot round-trip (write ? read ? compare) using `pathlib` to guard against path-separator assumptions in generator/prompt code.",
         "testStrategy": "Snapshot tests must cover router JSON + capsule text; include schema-validation tests where malformed router output raises helpful errors, and add a cross-platform round-trip test that normalizes path separators to prevent regressions.",
         "priority": "medium",
         "dependencies": [
-          1,
-          2,
-          4
+          "1",
+          "2",
+          "4"
         ],
         "status": "pending",
         "subtasks": [
@@ -308,7 +344,8 @@
             "dependencies": [],
             "details": "Catalog hydration inputs/outputs, snippet injection rules, router template variables, and enforcement metadata so later modules can mirror behavior without regressions.",
             "status": "pending",
-            "testStrategy": null
+            "testStrategy": null,
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -319,7 +356,8 @@
             ],
             "details": "Recreate logic from capsule-create.mjs, load specs/plan/tasks, merge context, and emit deterministic markdown even when metadata ordering varies; expose functions usable by CLI.",
             "status": "pending",
-            "testStrategy": "Golden fixture comparison under `tests/capsule/` using sample slug data."
+            "testStrategy": "Golden fixture comparison under `tests/capsule/` using sample slug data.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -330,7 +368,8 @@
             ],
             "details": "Implement template loader, context hydration, deterministic markdown output, JSON schema validation, and snippet writer compatible with multi-agent bundles.",
             "status": "pending",
-            "testStrategy": "Golden router/agent outputs in `tests/prompt/` plus schema validation unit tests."
+            "testStrategy": "Golden router/agent outputs in `tests/prompt/` plus schema validation unit tests.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -342,7 +381,8 @@
             ],
             "details": "Implement utilities for resolving workspace roots, safe snippet injection, README badge updates, and reuse path normalization so context lint and capsule generator trust `/speckit.*` gates.",
             "status": "pending",
-            "testStrategy": "Integration test that triggers sync against temp bundles and asserts files/paths match expected set."
+            "testStrategy": "Integration test that triggers sync against temp bundles and asserts files/paths match expected set.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -355,7 +395,8 @@
             ],
             "details": "Extend Typer app modules, ensure shared options (`--root`, `--format`), return codes, and logging semantics match legacy behavior; integrate snippet sync triggers with `specify init --sentinel` hooks if applicable.",
             "status": "pending",
-            "testStrategy": "CLI-level tests invoking commands via `uv run` with fixtures, asserting outputs and exit codes."
+            "testStrategy": "CLI-level tests invoking commands via `uv run` with fixtures, asserting outputs and exit codes.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -369,20 +410,24 @@
             ],
             "details": "Add fixture directories, golden outputs, CLI runners, and md-surgeon log assertions so future refactors detect regressions; ensure cross-platform path handling is covered.",
             "status": "pending",
-            "testStrategy": "Pytest golden comparisons, CLI snapshots, and temp directory assertions verifying snippet sync + logging."
+            "testStrategy": "Pytest golden comparisons, CLI snapshots, and temp directory assertions verifying snippet sync + logging.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 6,
+        "expansionPrompt": "Break down the work into subtasks for porting the capsule generator (`sentinelkit/capsule/generator.py`) from `.sentinel/scripts/capsule-create.mjs`, reimplementing the Eta prompt renderer in Python (Jinja2 or equivalent) for router/agent modes, recreating md-surgeon-style snippet syncing for README badges and agent bundles, providing Typer commands (`sentinel capsule generate`, `sentinel prompt render`, prompt sync options), writing golden-file tests under `tests/capsule/` and `tests/prompt/`, and sharing normalized path utilities with the context linter."
       },
       {
-        "id": 6,
+        "id": "6",
         "title": "Port sentinel regression tests to pytest with CLI wrappers",
         "description": "Migrate Vitest suites to pytest, add the `sentinel sentinels run` command, and ensure JSON/JUnit artifacts for CI and agents.",
         "details": "- Translate `.sentinel/tests/sentinels/**` to `tests/sentinels/**` using pytest fixtures and markers; store shared fixtures under `tests/fixtures/` mirroring legacy data.\n- Configure `pytest.ini` with `markers = sentinel:...` and enable plugins (`pytest-json-report`, `pytest-junitxml`).\n- Implement `sentinelkit/cli/sentinels.py` command `sentinel sentinels run [--marker sentinel] [--json-report out.json] [--junit junit.xml]` that shells into `pytest` via `python -m pytest` to avoid subprocess path issues on Windows.\n- Return JSON summary (pass/fail counts, durations) matching the Vitest JSON schema consumed by agents.\n```\ndef run_pytest(marker: str | None):\n    args = [\"-m\", marker] if marker else []\n    return pytest.main([\"tests/sentinels\", *args, \"--json-report\", json_path])\n```\n- Update CI selfcheck to call this command instead of pnpm.\n",
         "testStrategy": "`pytest tests/sentinels` must pass locally; add a regression comparing the produced JSON report to stored fixtures for at least one sentinel suite. Include a CLI test verifying exit codes and artifacts when filtering markers.",
         "priority": "medium",
         "dependencies": [
-          1,
-          2
+          "1",
+          "2"
         ],
         "status": "pending",
         "subtasks": [
@@ -393,7 +438,8 @@
             "dependencies": [],
             "details": "Move each Vitest file to a pytest module, switch async helpers and matchers to pytest idioms, and mirror legacy fixture/data usage so the new suites exercise the same sentinel scenarios.",
             "status": "pending",
-            "testStrategy": "Run `pytest tests/sentinels -m sentinel` to ensure suites import and pass."
+            "testStrategy": "Run `pytest tests/sentinels -m sentinel` to ensure suites import and pass.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -404,7 +450,8 @@
             ],
             "details": "Extract common setup logic into pytest fixtures housed under `tests/fixtures/`, wire them via `conftest.py`, and register the `sentinel` marker plus plugin settings in `pytest.ini` to enable json/junit outputs.",
             "status": "pending",
-            "testStrategy": "`pytest --markers` should list `sentinel`; targeted fixture tests confirm reusable data loads correctly."
+            "testStrategy": "`pytest --markers` should list `sentinel`; targeted fixture tests confirm reusable data loads correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -416,7 +463,8 @@
             ],
             "details": "Expose Typer command accepting `--marker`, `--json-report`, and `--junit`, construct pytest args accordingly, call `pytest.main` via `python -m pytest` for Windows safety, and emit JSON summary compatible with existing agent consumers.",
             "status": "pending",
-            "testStrategy": "CLI invocation tests assert exit codes propagate and produced JSON/JUnit files match expectations."
+            "testStrategy": "CLI invocation tests assert exit codes propagate and produced JSON/JUnit files match expectations.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -427,21 +475,25 @@
             ],
             "details": "Modify `.github/workflows/sentinel-kit.yml` and any selfcheck entrypoints to run `sentinel sentinels run`, then add pytest-based regression tests comparing generated reports with stored fixtures to ensure parity with Vitest outputs and CLI exit semantics.",
             "status": "pending",
-            "testStrategy": "CI should call the CLI; local regression tests compare emitted artifact files against golden fixtures to confirm schema compatibility."
+            "testStrategy": "CI should call the CLI; local regression tests compare emitted artifact files against golden fixtures to confirm schema compatibility.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Outline subtasks for translating `.sentinel/tests/sentinels/**` Vitest suites to `tests/sentinels/**` in pytest (fixtures, markers, shared data), configuring `pytest.ini` with `pytest-json-report`/`pytest-junitxml`, implementing `sentinelkit/cli/sentinels.py` to invoke `python -m pytest` with marker/filter/report flags, and adding regression tests that assert JSON/JUnit artifacts and CLI exit codes match the prior vitest behavior."
       },
       {
-        "id": 7,
+        "id": "7",
         "title": "Implement decision ledger CLI and structured runbook updates",
         "description": "Provide Python tooling for DECISIONS.md append, ProducedBy headers, and IMPLEMENTATION.md runbook maintenance.",
         "details": "- Implement `sentinelkit/cli/decision_log.py` command `sentinel decisions append` that takes `--id`, `--author`, `--scope`, `--rationale`, writes to `DECISIONS.md`, and emits a `ProducedBy=` snippet for commits.\n- Add dry-run support and deterministic ordering so CI can diff outputs.\n- Build `sentinelkit/runbook/updater.py` with helper CLI `sentinel runbook append --section stack --note ...` that updates `.sentinel/docs/IMPLEMENTATION.md` sections (Current Enforcement Surface, Execution Flow, Known Gaps, CI Workflow, Stack Context) via Markdown templates.\n```\ndef append_decision(entry: Decision):\n    block = DECISION_TEMPLATE.format(**entry.model_dump())\n    with DECISIONS_PATH.open(\"a\", encoding=\"utf-8\") as fh:\n        fh.write(block)\n```\n- Ensure `/speckit.clarify` automation can call the decision CLI to log `[NEEDS CLARIFICATION]` markers and optionally create CapsuleAuthor router notes.\n- Include provenance metadata in capsule outputs (ProducedBy header) by reusing the CLI helper.\n- Implement file locking (e.g., `portalocker`) so concurrent `sentinel decisions append` calls reserve the next ID safely; retry or error with guidance when the ledger is locked.",
         "testStrategy": "Unit tests should spawn concurrent writers to prove the lock prevents duplicate IDs; dry-run mode must leave the ledger untouched while still emitting ProducedBy headers.",
         "priority": "medium",
         "dependencies": [
-          1,
-          2,
-          5
+          "1",
+          "2",
+          "5"
         ],
         "status": "pending",
         "subtasks": [
@@ -452,7 +504,8 @@
             "dependencies": [],
             "details": "Implement Decision model + helpers to load DECISIONS.md, detect duplicate IDs, format deterministic markdown blocks, handle file locking (portalocker or fasteners), support ProducedBy snippet emission, and add `--dry-run`/`--output` toggles so CI can diff without touching disk.",
             "status": "pending",
-            "testStrategy": "Focus on pure functions for serialization and ID bumping via unit tests, leaving CLI wiring to later subtasks."
+            "testStrategy": "Focus on pure functions for serialization and ID bumping via unit tests, leaving CLI wiring to later subtasks.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -461,7 +514,8 @@
             "dependencies": [],
             "details": "Define structured section registry (Current Enforcement Surface, Execution Flow, Known Gaps, CI Workflow, Stack Context), helpers to append notes with timestamp/author metadata, ensure deterministic ordering, support dry-run output, and expose reusable formatting for future automation.",
             "status": "pending",
-            "testStrategy": "Author golden-file style tests for section append operations once CLI is wired."
+            "testStrategy": "Author golden-file style tests for section append operations once CLI is wired.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -473,7 +527,8 @@
             ],
             "details": "Add command group registrations under the existing `sentinel` Typer app, map CLI options (`--id/--author/--scope/--rationale`, `--section/--note/--dry-run`), ensure ProducedBy snippets can be printed to stdout for capsule provenance, and confirm `/speckit.clarify` automation hooks can shell out cleanly.",
             "status": "pending",
-            "testStrategy": "CLI smoke tests invoking the commands with fixtures to confirm argument parsing and stdout behavior."
+            "testStrategy": "CLI smoke tests invoking the commands with fixtures to confirm argument parsing and stdout behavior.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -486,25 +541,29 @@
             ],
             "details": "Add pytest suites for Decision serialization + locking fallbacks, dry-run ensuring files untouched, ProducedBy snippet text, runbook append snapshot diffs, and Typer CLI invocations (`uv run sentinel decisions append --dry-run`, `sentinel runbook append ...`) within tmp directories.",
             "status": "pending",
-            "testStrategy": "Combination of unit tests for pure helpers plus integration tests using temporary paths/snapshots to assert deterministic outputs."
+            "testStrategy": "Combination of unit tests for pure helpers plus integration tests using temporary paths/snapshots to assert deterministic outputs.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 6,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Create subtasks that cover porting `.sentinel/scripts/decision-log.mjs` into `sentinelkit/cli/decision_log.py` with locking, ProducedBy snippets, and dry-run support, adding runbook maintenance helpers (`sentinelkit/runbook/updater.py`) that update `.sentinel/docs/IMPLEMENTATION.md`, wiring Typer commands for `sentinel decisions append` and `sentinel runbook append`, and writing unit/integration tests for serialization, duplicate detection, and dry-run behavior."
       },
       {
-        "id": 8,
+        "id": "8",
         "title": "Integrate Sentinel CLI with Specify CLI flows and slash-command gates",
         "description": "Wire `specify init --sentinel`, `specify check`, and every `/speckit.*` slash command to the Python Sentinel gates.",
         "details": "- Extend `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Sentinel kit package files (`sentinelkit/`, `.sentinel/prompts`, `.sentinel/agents`, `.sentinel/templates`, `.github/workflows/sentinel-ci.yml`, `.sentinel/docs/IMPLEMENTATION.md` template) into the scaffold, runs `uv sync`, and executes `sentinel selfcheck` once.\n- Update `specify check` to call `sentinel selfcheck` before returning success, surfacing actionable failure panels via Rich.\n- Implement gating for `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`, `/speckit.clarify`, `/speckit.analyze`, `/speckit.checklist`: each slash command should run the relevant Sentinel subcommands (contracts validate, context lint, capsule generate, sentinel tests, decision logging, runbook append) and block with inline diagnostics when failures occur.\n- Auto-sync agent bundles by copying `.sentinel/prompts/*.md` into `.codex/`, `.claude/`, `.cursor/`, etc., during init and whenever prompts change, leveraging Task 5 utilities.\n- Implement dynamic agent roster discovery by scanning `.sentinel/agents/**` and emitting JSON metadata consumed by routers, ensuring CapsuleAuthor workflows can update capsules mid-flight.\n```\ndef speckit_command(ctx):\n    sentinel_cmds = [\"sentinel contracts validate\", \"sentinel context lint\"]\n    for cmd in sentinel_cmds:\n        result = run_uv(cmd)\n        if result.code:\n            raise typer.Exit(1)\n```\n- Define a strict gate order: contracts ? context lint ? capsule dry-run ? prompt render/analyze ? sentinel pytest (`-m sentinel`) ? MCP smokes ? decision ledger/runbook updates. Each `/speckit.*` command should fail fast with the gate name, failing path, and remediation hint.\n- Gate failure output must include three fields: `gate`, `path/tool`, and `remediation`. `/speckit.*` should surface them via Rich panels so reviewers know exactly what failed.",
         "testStrategy": "CLI regression tests should simulate each failing gate and assert `/speckit.*` returns non-zero with `gate`, `path/tool`, and `remediation` fields in the output (e.g., `Gate: contracts`, `Path: .sentinel/contracts/...`, `Fix: run sentinel contracts validate`).",
         "priority": "medium",
         "dependencies": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7"
         ],
         "status": "pending",
         "subtasks": [
@@ -515,7 +574,8 @@
             "dependencies": [],
             "details": "Inventory sentinelkit package directories, .sentinel prompt/agent/template trees, workflow YAML, and docs; note per-platform path handling and how uv-managed projects should reference them for later automation hooks.",
             "status": "pending",
-            "testStrategy": "Peer review checklist ensuring all assets from task description are captured and mapped."
+            "testStrategy": "Peer review checklist ensuring all assets from task description are captured and mapped.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -526,7 +586,8 @@
             ],
             "details": "Add file-copy helpers (reuse Task 5 utilities where possible), ensure idempotent overwrites, stream uv/sentinel command output, and surface errors with actionable guidance when the bootstrap fails.",
             "status": "pending",
-            "testStrategy": "Pytest tmpdir integration verifying files appear, `uv sync` and `sentinel selfcheck` mocks invoked in order, and failures abort init."
+            "testStrategy": "Pytest tmpdir integration verifying files appear, `uv sync` and `sentinel selfcheck` mocks invoked in order, and failures abort init.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -537,7 +598,8 @@
             ],
             "details": "Refactor shared check routine so Sentinel selfcheck runs first, capture JSON/structured output for actionable messaging, and harmonize CLI exit behavior with existing scripts.",
             "status": "pending",
-            "testStrategy": "Unit tests mocking sentinel selfcheck responses to confirm success/failure surfaces; manual run verifying Rich panels render."
+            "testStrategy": "Unit tests mocking sentinel selfcheck responses to confirm success/failure surfaces; manual run verifying Rich panels render.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -549,7 +611,8 @@
             ],
             "details": "Embed new sentinel command sequences, ensure environment detection works for both shells, provide inline diagnostics, and keep existing slash command UX intact while routing through the Python CLI.",
             "status": "pending",
-            "testStrategy": "Script-level tests (bash/ps shellcheck + mocked executions) verifying sentinel commands run in order and abort on non-zero status; golden snapshot of updated markdown templates."
+            "testStrategy": "Script-level tests (bash/ps shellcheck + mocked executions) verifying sentinel commands run in order and abort on non-zero status; golden snapshot of updated markdown templates.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -561,7 +624,8 @@
             ],
             "details": "Wire sync logic into the CLI init flow and watcher utilities, ensure incremental updates trigger correctly, and document new behavior for agent bundle consumers.",
             "status": "pending",
-            "testStrategy": "Functional test simulating prompt edits to confirm sync writes to every bundle directory; watch for duplicates via checksum assertions."
+            "testStrategy": "Functional test simulating prompt edits to confirm sync writes to every bundle directory; watch for duplicates via checksum assertions.",
+            "parentId": "undefined"
           },
           {
             "id": 6,
@@ -572,7 +636,8 @@
             ],
             "details": "Create helper that inspects agent directories, builds structured metadata (name, capabilities, prompt paths), and expose it via CLI/API for use by slash commands and routers.",
             "status": "pending",
-            "testStrategy": "Unit tests with fixture agent directories verifying JSON schema and update detection when agents change."
+            "testStrategy": "Unit tests with fixture agent directories verifying JSON schema and update detection when agents change.",
+            "parentId": "undefined"
           },
           {
             "id": 7,
@@ -587,22 +652,26 @@
             ],
             "details": "Add tmpdir-based integration tests, mock Sentinel command invocations, include Windows/Unix path cases, and ensure CI targets run the new suites.",
             "status": "pending",
-            "testStrategy": "CI job running new pytest modules plus script linters; verify coverage includes bootstrap, slash commands, sync, and roster code paths."
+            "testStrategy": "CI job running new pytest modules plus script linters; verify coverage includes bootstrap, slash commands, sync, and roster code paths.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 9,
+        "recommendedSubtasks": 7,
+        "expansionPrompt": "Plan subtasks for enhancing `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Python Sentinel assets (sentinelkit package, .sentinel prompts/agents/templates, workflows) and runs `uv sync` + `sentinel selfcheck`, updating `specify check` and other health commands to run Sentinel gates, refactoring slash-command templates in `templates/commands/*.md` (and supporting bash/ps scripts) so each `/speckit.*` command invokes the new Sentinel subcommands, adding agent bundle sync hooks, and extending tests/mocks to cover these flows."
       },
       {
-        "id": 9,
+        "id": "9",
         "title": "Deliver MCP stdio server and smoke tests for sentinel tools",
         "description": "Expose `contract_validate`, `sentinel_run`, and `decision_log` over MCP via Python JSON-RPC with automated smoke coverage.",
-        "details": "- Build `sentinelkit/cli/mcp/server.py` implementing a stdio JSON-RPC server (e.g., `asyncio` + `jsonrpcserver`) that registers three tools: `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, `mcp.sentinel.decision_log`.\n- Each tool should reuse the underlying Python modules from Tasks 3, 6, and 7, returning the same JSON payloads expected by Codex/Claude.\n- Provide CLI entry `python -m sentinelkit.cli.mcp.server` plus `sentinel mcp smoke` command that runs initialize \u00e2\u2020\u2019 tools/list \u00e2\u2020\u2019 tools/call for each tool.\n- Update `.mcp.json` template (copied during `specify init --sentinel`) to reference the new Python command (`uvx sentinel mcp server`) instead of pnpm scripts.\n```\nasync def handle_call(request):\n    if request.method == \"contract_validate\":\n        return validate_contracts(**request.params)\n```\n- Add GitHub workflow step and `sentinel selfcheck` hook to run MCP smoke tests.\n- Generate `.mcp.json` entries that run `uv run sentinel mcp server` with deterministic env vars; smoke scripts must invoke the same command.\n- Add per-phase timeouts (initialize/list/call) and a single retry for initialize in the MCP smoke driver; ensure hung tools fail selfcheck with the gate/tool name.",
+        "details": "- Build `sentinelkit/cli/mcp/server.py` implementing a stdio JSON-RPC server (e.g., `asyncio` + `jsonrpcserver`) that registers three tools: `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, `mcp.sentinel.decision_log`.\n- Each tool should reuse the underlying Python modules from Tasks 3, 6, and 7, returning the same JSON payloads expected by Codex/Claude.\n- Provide CLI entry `python -m sentinelkit.cli.mcp.server` plus `sentinel mcp smoke` command that runs initialize â†’ tools/list â†’ tools/call for each tool.\n- Update `.mcp.json` template (copied during `specify init --sentinel`) to reference the new Python command (`uvx sentinel mcp server`) instead of pnpm scripts.\n```\nasync def handle_call(request):\n    if request.method == \"contract_validate\":\n        return validate_contracts(**request.params)\n```\n- Add GitHub workflow step and `sentinel selfcheck` hook to run MCP smoke tests.\n- Generate `.mcp.json` entries that run `uv run sentinel mcp server` with deterministic env vars; smoke scripts must invoke the same command.\n- Add per-phase timeouts (initialize/list/call) and a single retry for initialize in the MCP smoke driver; ensure hung tools fail selfcheck with the gate/tool name.",
         "testStrategy": "MCP test suites should spawn the Python server via `uv run sentinel mcp server`, exercise initialize/list/call flows with configured timeouts/retry, and compare JSON responses to the shared schema; CI smoke must run on all OSes and prove hung phases fail selfcheck with gate/tool labels.",
         "priority": "medium",
         "dependencies": [
-          3,
-          6,
-          7,
-          8
+          "3",
+          "6",
+          "7",
+          "8"
         ],
         "status": "pending",
         "subtasks": [
@@ -613,18 +682,20 @@
             "dependencies": [],
             "details": "Build the server entry that wires jsonrpc handling over stdin/stdout, registers `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, and `mcp.sentinel.decision_log`, and reuses underlying modules from tasks 3, 6, and 7 to return legacy-compatible payloads.",
             "status": "pending",
-            "testStrategy": "Unit-level async tests or fakes to validate dispatcher routes methods correctly."
+            "testStrategy": "Unit-level async tests or fakes to validate dispatcher routes methods correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
             "title": "Add CLI entry points and smoke command",
-            "description": "Expose the MCP server via `python -m sentinelkit.cli.mcp.server` and add a `sentinel mcp smoke` command that drives initialize \u00e2\u2020\u2019 tools/list \u00e2\u2020\u2019 tools/call for all tools.",
+            "description": "Expose the MCP server via `python -m sentinelkit.cli.mcp.server` and add a `sentinel mcp smoke` command that drives initialize â†’ tools/list â†’ tools/call for all tools.",
             "dependencies": [
               1
             ],
             "details": "Register the Python module entry in `pyproject`/Typer CLI, ensure `sentinel mcp smoke` launches the server subprocess, invokes the JSON-RPC handshake (initialize, tools/list, tools/call), and reports failures clearly.",
             "status": "pending",
-            "testStrategy": "CLI test invoking `sentinel mcp smoke` against a known fixture server responding with canned data."
+            "testStrategy": "CLI test invoking `sentinel mcp smoke` against a known fixture server responding with canned data.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -636,7 +707,8 @@
             ],
             "details": "Adjust `.mcp.json`, `.specify` docs, and any init scripts so the new server command (`uvx sentinel mcp server`) is referenced instead of pnpm Node scripts, aligning README instructions and automation hooks.",
             "status": "pending",
-            "testStrategy": "Template tests or snapshot comparisons verifying `.mcp.json` outputs include the new command and no stale Node paths remain."
+            "testStrategy": "Template tests or snapshot comparisons verifying `.mcp.json` outputs include the new command and no stale Node paths remain.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -649,27 +721,31 @@
             ],
             "details": "Write async pytest suite launching the stdio server via subprocess, sending initialize/tools/list/tools/call requests for each tool, comparing JSON payloads to stored fixtures; add GitHub workflow steps and `sentinel selfcheck` hook to run `uv run sentinel mcp smoke`.",
             "status": "pending",
-            "testStrategy": "Pytest smoke suite plus CI job verifying `uv run sentinel mcp smoke` passes across the OS matrix."
+            "testStrategy": "Pytest smoke suite plus CI job verifying `uv run sentinel mcp smoke` passes across the OS matrix.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 7,
+        "recommendedSubtasks": 4,
+        "expansionPrompt": "Break down the task into subtasks for implementing an MCP stdio server under `sentinelkit/cli/mcp/server.py` that exposes contract validation, sentinel runs, and decision log tools via asyncio/jsonrpc, wiring `sentinel mcp smoke` and CLI entry points (`python -m sentinelkit.cli.mcp.server`), updating `.mcp.json` templates and init scaffolding to point to the Python server, and creating pytest smoke tests under `tests/mcp/` that spin up the server, call initialize/tools/list/tools/call, and assert JSON payload parity with the legacy Node responses."
       },
       {
-        "id": 10,
+        "id": "10",
         "title": "Remove Node sentinel enclave and harden cross-platform support",
         "description": "Delete the legacy JS workspace, document the migration, and ensure Linux/macOS/Windows parity with uv-only tooling.",
         "details": "- Remove `.sentinel/package.json`, pnpm lock/workspace files, Node scripts, and PowerShell installers; add a DECISION entry summarizing deprecation + migration plan.\n- Update docs (README, docs/quickstart.md, .specify/README.md, SUPPORT.md) to reference only Python/uv commands and the new Sentinel CLI.\n- Verify `specify init --sentinel` scaffolds no Node artifacts and that `.gitignore` no longer references node_modules.\n- Add Linux hardening notes under `.sentinel/docs/IMPLEMENTATION.md` (distro install instructions for uv). Ensure all subprocess calls use `pathlib` + `shlex` safe quoting to avoid Windows-only assumptions.\n- Ensure CI matrix stays green and badges reflect the Python workflow.\n```\nrm -rf .sentinel/node_modules pnpm-lock.yaml pnpm-workspace.yaml\nappend_decision(\"Removed Node Sentinel workspace in favor of sentinelkit Python stack\")\n```\n- Add a CI step that greps for `pnpm`, `node_modules`, or `vitest` usage outside archival docs to prevent regressions after the Python migration.",
         "testStrategy": "CI job should run `git grep -n \"pnpm\" -- ':!docs/**'` (and similar for `node_modules`/`vitest`) and fail if hits exist; workflow must ensure no `.sentinel/node_modules` or pnpm lockfiles remain.",
         "priority": "medium",
         "dependencies": [
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-          8,
-          9
+          "1",
+          "2",
+          "3",
+          "4",
+          "5",
+          "6",
+          "7",
+          "8",
+          "9"
         ],
         "status": "pending",
         "subtasks": [
@@ -680,7 +756,8 @@
             "dependencies": [],
             "details": "Delete `.sentinel/package.json`, `.sentinel/node_modules/**`, pnpm lock/workspace files, Vitest configs, PowerShell install scripts, and update `.gitignore` to drop `node_modules`/pnpm entries while keeping Python/uv ignores.",
             "status": "pending",
-            "testStrategy": "Run `git status` to confirm removals; execute CI lint job or a targeted script to ensure no Node files remain."
+            "testStrategy": "Run `git status` to confirm removals; execute CI lint job or a targeted script to ensure no Node files remain.",
+            "parentId": "undefined"
           },
           {
             "id": 2,
@@ -691,7 +768,8 @@
             ],
             "details": "Refresh README, docs/quickstart.md, .specify/README.md, and SUPPORT.md so setup and examples reference uv, Sentinel CLI, and cross-platform instructions, removing pnpm/Vitest references and adding Windows/macOS/Linux parity notes.",
             "status": "pending",
-            "testStrategy": "Proofread diff; optionally run `markdownlint`/link checkers to ensure updated commands render correctly."
+            "testStrategy": "Proofread diff; optionally run `markdownlint`/link checkers to ensure updated commands render correctly.",
+            "parentId": "undefined"
           },
           {
             "id": 3,
@@ -703,7 +781,8 @@
             ],
             "details": "Update scaffold templates so no Node artifacts are copied, confirm `.gitignore` aligns, and expand `.sentinel/docs/IMPLEMENTATION.md` with Linux distro uv install + subprocess `pathlib`/`shlex` safety guidance for cross-platform parity.",
             "status": "pending",
-            "testStrategy": "Run `specify init --sentinel` on a temp directory (all OSes if possible) and inspect generated files; run `uv sync && sentinel selfcheck` to validate bootstrap."
+            "testStrategy": "Run `specify init --sentinel` on a temp directory (all OSes if possible) and inspect generated files; run `uv sync && sentinel selfcheck` to validate bootstrap.",
+            "parentId": "undefined"
           },
           {
             "id": 4,
@@ -715,7 +794,8 @@
             ],
             "details": "Introduce pipeline jobs or scripts that grep for `pnpm`, `node_modules`, or `.sentinel/package.json`, fail builds on matches, and ensure badges reflect the Python workflow matrix (Windows/macOS/Linux).",
             "status": "pending",
-            "testStrategy": "Trigger CI locally (or via workflow dispatch) to confirm new checks fail on seeded pnpm strings and pass otherwise; verify badges point to Python workflows."
+            "testStrategy": "Trigger CI locally (or via workflow dispatch) to confirm new checks fail on seeded pnpm strings and pass otherwise; verify badges point to Python workflows.",
+            "parentId": "undefined"
           },
           {
             "id": 5,
@@ -729,15 +809,23 @@
             ],
             "details": "Add a DECISION entry summarizing the removal of the Node sentinel enclave, links to new docs, migration steps for existing users, and notes about the uv-only tooling expectations.",
             "status": "pending",
-            "testStrategy": "Review DECISIONS.md rendering; cross-check referenced sections exist and links resolve."
+            "testStrategy": "Review DECISIONS.md rendering; cross-check referenced sections exist and links resolve.",
+            "parentId": "undefined"
           }
-        ]
+        ],
+        "complexity": 8,
+        "recommendedSubtasks": 5,
+        "expansionPrompt": "Create subtasks for deleting the legacy `.sentinel` Node workspace (package.json, pnpm lock, Vitest configs, scripts) and updating `.gitignore`, rewriting documentation (README, docs/quickstart.md, .specify/README.md, SUPPORT.md) to reference only uv/sentinel CLI flows, ensuring `specify init --sentinel` scaffolds no Node artifacts and adds Linux hardening notes to `.sentinel/docs/IMPLEMENTATION.md`, adding CI/grep checks that block `pnpm`/`node_modules` references, and documenting the deprecation in DECISIONS.md with migration guidance."
       }
     ],
     "metadata": {
-      "created": "2025-11-11T13:22:17.862Z",
-      "updated": "2025-11-11T13:22:17.862Z",
-      "description": "Tasks for master context"
+      "version": "1.0.0",
+      "lastModified": "2025-11-12T05:06:33.060Z",
+      "taskCount": 10,
+      "completedCount": 0,
+      "tags": [
+        "master"
+      ]
     }
   }
 }

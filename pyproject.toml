@@ -10,6 +10,7 @@ dependencies = [
     "platformdirs",
     "readchar",
     "truststore>=0.10.4",
+    "sentinelkit",
 ]
 
 [project.scripts]
@@ -21,3 +22,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/specify_cli"]
+
+[tool.uv.sources]
+sentinelkit = { workspace = true }
+
+[tool.uv.workspace]
+members = ["sentinelkit"]
