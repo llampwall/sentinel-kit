@@ -188,7 +188,7 @@
           "1",
           "2"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -196,9 +196,10 @@
             "description": "Review the existing Node validator-core implementation, fixtures, and Vitest snapshots to document expected inputs, outputs, and ProducedBy rules for the Python port.",
             "dependencies": [],
             "details": "Inspect `.sentinel/scripts/contracts/validator-core.mjs` plus `.sentinel/tests/contracts/*.test.ts` and capture a parity checklist covering schema loading order, ProducedBy enforcement, and JSON payload shape for CLI/MCP consumers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "No automated tests; deliver a documented checklist referenced in later tasks.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T12:17:55.667Z"
           },
           {
             "id": 2,
@@ -208,9 +209,10 @@
               1
             ],
             "details": "Use `pathlib.Path.glob` with `sorted` to gather `sentinel/contracts/*.yaml`, pair schemas with fixtures, and expose helpers to fetch by contract id or explicit path while memoizing file metadata to avoid redundant disk reads.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add unit tests covering glob ordering, cache reuse, and selecting contracts by id or path.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T13:08:30.829Z"
           },
           {
             "id": 3,
@@ -220,9 +222,10 @@
               2
             ],
             "details": "Implement `validate_contract` and higher-level helpers returning structured error objects (path, schema pointer, remediation) and ensure results serialize cleanly for MCP; include schema caching hooks from the loader.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests cover success/failure cases, ProducedBy violations, and JSON-serializable ValidationResult structures.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T14:28:17.609Z"
           },
           {
             "id": 4,
@@ -232,9 +235,10 @@
               3
             ],
             "details": "Implement CLI parameter parsing, multi-contract execution, aggregation of pass/fail results, status summaries, and exit codes mirroring the Node tool while reusing API serializers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration tests invoke `uv run sentinel contracts validate` across flag combinations and assert JSON output schema.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T14:28:29.052Z"
           },
           {
             "id": 5,
@@ -244,15 +248,16 @@
               4
             ],
             "details": "Port existing fixtures, generate baseline JSON payloads via the new CLI/API, store them as snapshots, and add tests that diff current results against the goldens for full run and targeted modes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Snapshot-based pytest cases comparing emitted JSON to stored fixtures plus CLI smoke test `uv run sentinel contracts validate --format json`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T14:28:38.377Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
         "expansionPrompt": "Plan subtasks for re-implementing the contract loader/validator (`sentinelkit/contracts/loader.py`, schema caching, ProducedBy checks) modeled on `.sentinel/scripts/contracts/validator-core.mjs`, exposing a Typer command `sentinel contracts validate` with `--id/--path/--format` options, snapshotting CLI/JSON outputs against fixtures under `tests/contracts/`, adding a reusable API surface for MCP consumers, and wiring regression tests that compare new JSON payloads to the legacy Vitest snapshots.",
-        "updatedAt": "2025-11-12T06:10:16.253Z"
+        "updatedAt": "2025-11-12T14:28:38.377Z"
       },
       {
         "id": "4",
@@ -831,9 +836,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-12T06:10:16.255Z",
+      "lastModified": "2025-11-12T14:28:38.379Z",
       "taskCount": 10,
-      "completedCount": 2,
+      "completedCount": 3,
       "tags": [
         "master"
       ]

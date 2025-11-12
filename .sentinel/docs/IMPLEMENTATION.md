@@ -69,6 +69,22 @@
 - `specify check` now shells out to the Python selfcheck via the new `run_sentinel_selfcheck` hook, surfacing the same Rich output/errors as the standalone CLI.
 - Updated README and local-development docs to explain the selfcheck flow and mention that `specify check` delegates to `uv run sentinel selfcheck` (including `--format json` guidance for automation).
 
+## Task 3.2 Summary
+
+- Added `sentinelkit/contracts/loader.py`, which caches YAML schemas, provides deterministic `iter_contract_fixtures`, and enforces sorted ordering for both schemas and fixtures.
+- Declared new dependencies (`pyyaml`, `jsonschema`) in `sentinelkit/pyproject.toml` so future contract validation work has the required libraries.
+- Introduced `tests/contracts/test_loader.py` to cover cache behaviour, force reload, fixture ordering, and path filtering—matching the legacy Node validator semantics.
+
+## Task 3.3 Summary
+
+- Implemented the contract validation core (`sentinelkit/contracts/api.py`) using the loader plus `jsonschema` Draft 2020 validators with ProducedBy enforcement.
+- Added unit tests (`tests/contracts/test_api.py`) covering success/failure cases, ProducedBy violations, and the `ValidationResult` serialization helpers.
+
+## Task 3.5 Summary
+
+- Added CLI snapshot coverage (`tests/contracts/test_cli_snapshot.py`) that runs `uv run sentinel contracts validate --format json` against sample fixtures and compares the sanitized JSON output to a stored golden (`tests/contracts/snapshots/sample_full.json`).
+- Ensured snapshot normalization replaces absolute paths with `{{ROOT}}` placeholders so future runs remain deterministic across environments.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
