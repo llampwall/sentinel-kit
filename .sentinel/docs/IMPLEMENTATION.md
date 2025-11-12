@@ -1,4 +1,4 @@
-# Implementation
+# Implementation _(Template – update per project; contents below reflect the last Node-era snapshot and have not been maintained)_
 
 ## Current Enforcement Surface
 - `.sentinel/contracts/users.v1.yaml` + `fixtures/users.v1/get_active.json` – sample contract + payload pair that exercises the validation tooling.
