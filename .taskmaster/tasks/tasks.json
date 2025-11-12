@@ -106,7 +106,7 @@
         "dependencies": [
           "1"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -153,9 +153,10 @@
               3
             ],
             "details": "Use Typer's test client or click runner to simulate CLI invocations, patch subprocess calls for each check, assert Rich/JSON output shape, verify exit codes, and add integration fixtures under `tests/cli` executing the installed console script.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "pytest tests/cli/test_selfcheck.py -k selfcheck plus integration CLI invocation via uv run sentinel selfcheck --format json",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T06:09:37.934Z"
           },
           {
             "id": 5,
@@ -165,15 +166,16 @@
               4
             ],
             "details": "Replace the existing tool-check logic with a subprocess wrapper calling the new Typer command, handle exit codes and error messaging consistently, and add documentation in README/spec guides describing the sentinel CLI root, selfcheck flow, and shared options for existing users.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T06:09:46.706Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 5,
         "expansionPrompt": "Create subtasks for defining the `sentinelkit/cli/main.py` Typer root with subcommand stubs, building the concurrent `sentinel selfcheck` runner plus shared `--root/--format` options and `utils/errors.py`, adding CLI tests (unit + integration) simulating success/failure of the delegated checks, updating `src/specify_cli/__init__.py` so `specify check` shells out to `uv run sentinel selfcheck` with proper Rich output, and documenting CLI usage in README/spec guides.",
-        "updatedAt": "2025-11-12T05:55:06.678Z"
+        "updatedAt": "2025-11-12T06:09:46.706Z"
       },
       {
         "id": "3",
@@ -186,7 +188,7 @@
           "1",
           "2"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -249,7 +251,8 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Plan subtasks for re-implementing the contract loader/validator (`sentinelkit/contracts/loader.py`, schema caching, ProducedBy checks) modeled on `.sentinel/scripts/contracts/validator-core.mjs`, exposing a Typer command `sentinel contracts validate` with `--id/--path/--format` options, snapshotting CLI/JSON outputs against fixtures under `tests/contracts/`, adding a reusable API surface for MCP consumers, and wiring regression tests that compare new JSON payloads to the legacy Vitest snapshots."
+        "expansionPrompt": "Plan subtasks for re-implementing the contract loader/validator (`sentinelkit/contracts/loader.py`, schema caching, ProducedBy checks) modeled on `.sentinel/scripts/contracts/validator-core.mjs`, exposing a Typer command `sentinel contracts validate` with `--id/--path/--format` options, snapshotting CLI/JSON outputs against fixtures under `tests/contracts/`, adding a reusable API surface for MCP consumers, and wiring regression tests that compare new JSON payloads to the legacy Vitest snapshots.",
+        "updatedAt": "2025-11-12T06:10:16.253Z"
       },
       {
         "id": "4",
@@ -828,9 +831,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-12T05:55:06.681Z",
+      "lastModified": "2025-11-12T06:10:16.255Z",
       "taskCount": 10,
-      "completedCount": 1,
+      "completedCount": 2,
       "tags": [
         "master"
       ]

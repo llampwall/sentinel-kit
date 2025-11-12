@@ -59,6 +59,16 @@
 - Pretty mode prints a Rich table, `--format json` emits `{"ok": bool, "environment": {...}, "checks": [...]}` so Specify CLI can parse results later.
 - The command now exits non-zero if any check fails and honors `--verbose` to suppress the status spinner.
 
+## Task 2.4 Summary
+
+- Added `tests/cli/test_selfcheck.py`, which uses Typer's `CliRunner` to cover pretty/json success cases plus failure exit-code propagation.
+- Tests monkeypatch `_build_checks` to simulate stubbed checks and assert structured JSON payloads, ensuring the CLI plumbing is verified before real check implementations arrive.
+
+## Task 2.5 Summary
+
+- `specify check` now shells out to the Python selfcheck via the new `run_sentinel_selfcheck` hook, surfacing the same Rich output/errors as the standalone CLI.
+- Updated README and local-development docs to explain the selfcheck flow and mention that `specify check` delegates to `uv run sentinel selfcheck` (including `--format json` guidance for automation).
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

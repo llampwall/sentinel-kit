@@ -1202,9 +1202,29 @@ def check():
     if not any(agent_results.values()):
         console.print("[dim]Tip: Install an AI assistant for the best experience[/dim]")
 
+    console.print("\n[bold]Running Sentinel selfcheck...[/bold]\n")
+    run_sentinel_selfcheck()
+
+
+def run_sentinel_selfcheck() -> None:
+    """Invoke the Sentinel CLI selfcheck via uv."""
+    command = ["uv", "run", "sentinel", "selfcheck", "--root", str(Path.cwd())]
+    try:
+        subprocess.run(command, check=True)
+    except FileNotFoundError:
+        console.print(
+            "[bold red]uv command not found.[/bold red] "
+            "Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
+        )
+        raise typer.Exit(1)
+    except subprocess.CalledProcessError as exc:
+        console.print(f"[bold red]Sentinel selfcheck failed (exit code {exc.returncode}).[/bold red]")
+        raise typer.Exit(exc.returncode)
+    else:
+        console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
+
 def main():
     app()
 
 if __name__ == "__main__":
     main()
-

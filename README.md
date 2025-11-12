@@ -799,3 +799,4 @@ Record every architectural or workflow change in `.sentinel/DECISIONS.md` using 
 
 Following this workflow ensures every artifact references the decision that introduced it.
 <!-- SENTINEL:DECISION-LOG:end -->
+- Run `specify check` to call `uv run sentinel selfcheck` under the hood (or run `uv run sentinel selfcheck` yourself). Use `--format json` when scripting consumption.

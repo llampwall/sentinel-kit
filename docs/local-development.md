@@ -59,7 +59,19 @@ python scripts/bootstrap.py
 
 The bootstrap script performs `uv sync`, `uv run sentinel selfcheck`, and `uv run pytest -q` so the Typer CLI, selfcheck, and smoke tests all pass before you iterate.
 
-## 4. Invoke with uvx Directly From Git (Current Branch)
+## 4. Run Sentinel selfcheck
+
+After syncing dependencies, run the selfcheck to ensure the enforcement suite is healthy:
+
+```bash
+uv run sentinel selfcheck --verbose
+# or inside specify CLI:
+specify check
+```
+
+Use `--format json` for machine-readable output (`specify check` consumes the same schema).
+
+## 5. Invoke with uvx Directly From Git (Current Branch)
 
 `uvx` can run from a local path (or a Git ref) to simulate user flows:
 
