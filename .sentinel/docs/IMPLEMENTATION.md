@@ -47,6 +47,18 @@
 - Added placeholder modules for each namespace plus a shared `cli/state.py` helper that stores the resolved root/output format.
 - The CLI still surfaces placeholders, but `uv run sentinel --help` now shows the full command tree and options.
 
+## Task 2.2 Summary
+
+- Extended `cli/state.py` to capture environment metadata (`is_ci`, platform, python version) alongside the shared root/output format so all commands have consistent context.
+- Implemented normalized error helpers in `sentinelkit/utils/errors.py` (dataclass payloads, serialization helpers, and enriched `SentinelKitError`).
+- Added `cli/executor.py`, a threaded check runner that gathers structured `CheckResult` objects with Rich status updates; this will power the real selfcheck aggregator.
+
+## Task 2.3 Summary
+
+- Implemented the `sentinel selfcheck` command using the shared executor: it fans out named checks (currently placeholders) and aggregates their status.
+- Pretty mode prints a Rich table, `--format json` emits `{"ok": bool, "environment": {...}, "checks": [...]}` so Specify CLI can parse results later.
+- The command now exits non-zero if any check fails and honors `--verbose` to suppress the status spinner.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

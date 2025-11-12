@@ -127,9 +127,10 @@
               1
             ],
             "details": "Centralize option parsing (e.g., Typer callback) so subcommands get consistent root paths; build an async or threaded executor wrapper that collects structured check results; implement error helper dataclasses/functions producing dicts that can be serialized and logged, and integrate Rich status spinner scaffolding.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T05:54:58.344Z"
           },
           {
             "id": 3,
@@ -139,9 +140,10 @@
               2
             ],
             "details": "Compose the concurrency helpers to launch each check (shell or function), stream Rich status updates, gather normalized results via `utils.errors`, and emit JSON when requested; summarize failures and raise `typer.Exit(1)` if any check fails.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-12T05:55:06.678Z"
           },
           {
             "id": 4,
@@ -150,7 +152,7 @@
             "dependencies": [
               3
             ],
-            "details": "Use Typerâ€™s test client or click runner to simulate CLI invocations, patch subprocess calls for each check, assert Rich/JSON output shape, verify exit codes, and add integration fixtures under `tests/cli` executing the installed console script.",
+            "details": "Use Typer's test client or click runner to simulate CLI invocations, patch subprocess calls for each check, assert Rich/JSON output shape, verify exit codes, and add integration fixtures under `tests/cli` executing the installed console script.",
             "status": "pending",
             "testStrategy": "pytest tests/cli/test_selfcheck.py -k selfcheck plus integration CLI invocation via uv run sentinel selfcheck --format json",
             "parentId": "undefined"
@@ -171,7 +173,7 @@
         "complexity": 8,
         "recommendedSubtasks": 5,
         "expansionPrompt": "Create subtasks for defining the `sentinelkit/cli/main.py` Typer root with subcommand stubs, building the concurrent `sentinel selfcheck` runner plus shared `--root/--format` options and `utils/errors.py`, adding CLI tests (unit + integration) simulating success/failure of the delegated checks, updating `src/specify_cli/__init__.py` so `specify check` shells out to `uv run sentinel selfcheck` with proper Rich output, and documenting CLI usage in README/spec guides.",
-        "updatedAt": "2025-11-12T05:40:15.195Z"
+        "updatedAt": "2025-11-12T05:55:06.678Z"
       },
       {
         "id": "3",
@@ -826,7 +828,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-12T05:40:15.197Z",
+      "lastModified": "2025-11-12T05:55:06.681Z",
       "taskCount": 10,
       "completedCount": 1,
       "tags": [
