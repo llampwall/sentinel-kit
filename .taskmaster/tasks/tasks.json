@@ -463,7 +463,7 @@
             "description": "Convert existing Vitest suites under `.sentinel/tests/sentinels/**` into pytest suites inside `tests/sentinels/**`, re-creating equivalent coverage and assertions.",
             "dependencies": [],
             "details": "Move each Vitest file to a pytest module, switch async helpers and matchers to pytest idioms, and mirror legacy fixture/data usage so the new suites exercise the same sentinel scenarios.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `pytest tests/sentinels -m sentinel` to ensure suites import and pass.",
             "parentId": "undefined"
           },
@@ -475,7 +475,7 @@
               1
             ],
             "details": "Extract common setup logic into pytest fixtures housed under `tests/fixtures/`, wire them via `conftest.py`, and register the `sentinel` marker plus plugin settings in `pytest.ini` to enable json/junit outputs.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "`pytest --markers` should list `sentinel`; targeted fixture tests confirm reusable data loads correctly.",
             "parentId": "undefined"
           },

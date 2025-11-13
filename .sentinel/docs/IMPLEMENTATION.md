@@ -155,6 +155,18 @@
 - Captured router/agent prompt outputs in fixtures (`tests/fixtures/prompts_snapshot/**`) and enforce them via `tests/prompts/test_renderer.py`.
 - Expanded the CLI test suite to assert the new commands succeed in temp workspaces, providing regression protection for generator, renderer, and snippet flows.
 
+## Task 6.1 Summary
+
+- Ported the sentinel regression suites to pytest:
+  - `tests/sentinels/test_capsule_context.py` mirrors the legacy Vitest coverage for Allowed Context helpers, ensuring requested seeds are included while maintainer notes stay excluded and missing paths raise errors.
+  - `tests/sentinels/test_users_email_format.py` loads the `users.v1` fixture via the Python contract validator and guards the RFC email regex regression.
+- Folded the sentinel tests into the focused pytest run (`uv run pytest -q tests/sentinels …`), giving us a Python-native sentinel suite ready for future CLI wrappers.
+
+## Task 6.2 Summary
+
+- Added shared pytest fixtures (`tests/conftest.py`) for `repo_root`, `contract_loader`, and `contract_validator` so sentinel tests reuse a single loader/validator without duplicating setup.
+- Refactored the sentinel suites to consume the fixtures, keeping tests lean and deterministic while paving the way for additional sentinel modules.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
