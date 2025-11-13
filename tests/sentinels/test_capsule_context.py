@@ -17,11 +17,11 @@ def test_capsule_context_includes_seeds_and_skips_notes(repo_root: Path) -> None
         root=repo_root,
         seeds=[
             ".specify/specs/005-capsule-gen/spec.md",
-            ".sentinel/scripts/md-surgeon.mjs",
+            ".sentinel/snippets/capsules.md",
         ],
     )
     assert ".specify/specs/005-capsule-gen/spec.md" in allowed
-    assert ".sentinel/scripts/md-surgeon.mjs" in allowed
+    assert ".sentinel/snippets/capsules.md" in allowed
     assert ".sentinel/docs/IMPLEMENTATION.md" not in allowed
 
 
