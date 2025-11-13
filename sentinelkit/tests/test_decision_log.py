@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import portalocker
 import pytest
 
 from sentinelkit.cli import decision_log
@@ -35,7 +36,10 @@ def test_append_updates_ledger(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
 
     assert result.id == "D-0003"
     assert result.wrote_ledger is True
-    assert result.snippets.plain.startswith("ProducedBy=ROUTER RulesHash=ROUTER@2.0 Decision=D-0003")
+    assert (
+        result.snippets.plain
+        == "ProducedBy=ROUTER RulesHash=ROUTER@2.0 Decision=D-0003 (#abcdef1)"
+    )
 
     updated = ledger_path.read_text(encoding="utf-8")
     assert "## NEXT_ID\nD-0004" in updated
@@ -81,3 +85,23 @@ def test_missing_outputs_raises(tmp_path: Path) -> None:
 
     with pytest.raises(DecisionLedgerError):
         ledger.append(payload)
+
+
+def test_lock_contention_raises_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    ledger_path = _copy_fixture(tmp_path)
+    ledger = DecisionLedger(ledger_path, lock_timeout=0.1)
+    monkeypatch.setattr(decision_log, "_git_short_hash", lambda _: "deadbee")
+
+    payload = DecisionPayload(
+        author="Builder",
+        scope="docs",
+        decision="Lock contention",
+        rationale="ensure error message",
+        outputs=["docs/sample.md"],
+    )
+
+    with portalocker.Lock(str(ledger.lock_path), timeout=1, mode="w"):
+        with pytest.raises(DecisionLedgerError) as excinfo:
+            ledger.append(payload)
+
+    assert excinfo.value.payload.code == "decision.lock_timeout"

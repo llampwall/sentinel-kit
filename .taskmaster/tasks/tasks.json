@@ -521,7 +521,7 @@
           "2",
           "5"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -540,9 +540,10 @@
             "description": "Create `sentinelkit/runbook/updater.py` routines to edit `.sentinel/docs/IMPLEMENTATION.md` sections with templates.",
             "dependencies": [],
             "details": "Define structured section registry (Current Enforcement Surface, Execution Flow, Known Gaps, CI Workflow, Stack Context), helpers to append notes with timestamp/author metadata, ensure deterministic ordering, support dry-run output, and expose reusable formatting for future automation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Author golden-file style tests for section append operations once CLI is wired.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T08:21:07.401Z"
           },
           {
             "id": 3,
@@ -553,9 +554,10 @@
               2
             ],
             "details": "Add command group registrations under the existing `sentinel` Typer app, map CLI options (`--id/--author/--scope/--rationale`, `--section/--note/--dry-run`), ensure ProducedBy snippets can be printed to stdout for capsule provenance, and confirm `/speckit.clarify` automation hooks can shell out cleanly.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CLI smoke tests invoking the commands with fixtures to confirm argument parsing and stdout behavior.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T08:36:33.459Z"
           },
           {
             "id": 4,
@@ -567,15 +569,16 @@
               3
             ],
             "details": "Add pytest suites for Decision serialization + locking fallbacks, dry-run ensuring files untouched, ProducedBy snippet text, runbook append snapshot diffs, and Typer CLI invocations (`uv run sentinel decisions append --dry-run`, `sentinel runbook append ...`) within tmp directories.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Combination of unit tests for pure helpers plus integration tests using temporary paths/snapshots to assert deterministic outputs.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T08:43:38.899Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 4,
         "expansionPrompt": "Create subtasks that cover porting `.sentinel/scripts/decision-log.mjs` into `sentinelkit/cli/decision_log.py` with locking, ProducedBy snippets, and dry-run support, adding runbook maintenance helpers (`sentinelkit/runbook/updater.py`) that update `.sentinel/docs/IMPLEMENTATION.md`, wiring Typer commands for `sentinel decisions append` and `sentinel runbook append`, and writing unit/integration tests for serialization, duplicate detection, and dry-run behavior.",
-        "updatedAt": "2025-11-13T08:05:26.265Z"
+        "updatedAt": "2025-11-13T08:43:38.899Z"
       },
       {
         "id": "8",
@@ -848,9 +851,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T08:05:26.270Z",
+      "lastModified": "2025-11-13T08:43:38.901Z",
       "taskCount": 10,
-      "completedCount": 4,
+      "completedCount": 5,
       "tags": [
         "master"
       ]

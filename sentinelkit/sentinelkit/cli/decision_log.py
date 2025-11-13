@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Iterable
 
 import portalocker
+from portalocker import exceptions as portalocker_exceptions
 
 from sentinelkit.utils.errors import SentinelKitError, build_error_payload
 
@@ -108,6 +109,7 @@ class DecisionLedger:
         rules_hash: str | None = None,
         dry_run: bool = False,
         output_path: Path | None = None,
+        decision_id: str | None = None,
     ) -> LedgerAppendResult:
         if not self.ledger_path.exists():
             raise DecisionLedgerError(
@@ -118,51 +120,61 @@ class DecisionLedger:
                 )
             )
 
-        with portalocker.Lock(str(self.lock_path), timeout=self.lock_timeout, mode="w"):
-            content = self.ledger_path.read_text(encoding="utf-8")
-            current_id = _extract_next_id(content)
-            _assert_id_unused(content, current_id)
-            entry = _DecisionEntry(
-                id=current_id,
-                date=_normalize_date(payload.date_override),
-                author=_require(payload.author, "author"),
-                scope=_require(payload.scope, "scope"),
-                decision=_require(payload.decision, "decision"),
-                rationale=_require(payload.rationale, "rationale"),
-                outputs=_normalize_outputs(payload.outputs),
-                supersedes=_normalize_supersedes(payload.supersedes),
-            )
-            bumped = _bump_id(current_id)
-            updated_content = _render_updated_ledger(content, bumped, entry.format())
+        try:
+            with portalocker.Lock(str(self.lock_path), timeout=self.lock_timeout, mode="w"):
+                content = self.ledger_path.read_text(encoding="utf-8")
+                current_id = _extract_next_id(content)
+                entry_id = _normalize_decision_id(decision_id, current_id)
+                _assert_id_unused(content, entry_id)
+                entry = _DecisionEntry(
+                    id=entry_id,
+                    date=_normalize_date(payload.date_override),
+                    author=_require(payload.author, "author"),
+                    scope=_require(payload.scope, "scope"),
+                    decision=_require(payload.decision, "decision"),
+                    rationale=_require(payload.rationale, "rationale"),
+                    outputs=_normalize_outputs(payload.outputs),
+                    supersedes=_normalize_supersedes(payload.supersedes),
+                )
+                bumped = _bump_id(entry_id)
+                updated_content = _render_updated_ledger(content, bumped, entry.format())
 
-            preview_path = None
-            if output_path:
-                preview_path = Path(output_path)
-                preview_path.parent.mkdir(parents=True, exist_ok=True)
-                preview_path.write_text(updated_content, encoding="utf-8", newline="\n")
+                preview_path = None
+                if output_path:
+                    preview_path = Path(output_path)
+                    preview_path.parent.mkdir(parents=True, exist_ok=True)
+                    preview_path.write_text(updated_content, encoding="utf-8", newline="\n")
 
-            wrote_ledger = False
-            if not dry_run:
-                self.ledger_path.write_text(updated_content, encoding="utf-8", newline="\n")
-                wrote_ledger = True
+                wrote_ledger = False
+                if not dry_run:
+                    self.ledger_path.write_text(updated_content, encoding="utf-8", newline="\n")
+                    wrote_ledger = True
 
-            agent_token = _normalize_agent(agent or payload.author)
-            snippets = _build_snippets(
-                agent=agent_token,
-                rules_hash=rules_hash or f"{agent_token}@1.0",
-                decision_id=current_id,
-                git_hash=_git_short_hash(self.ledger_path.parent),
-            )
+                agent_token = _normalize_agent(agent or payload.author)
+                snippets = _build_snippets(
+                    agent=agent_token,
+                    rules_hash=rules_hash or f"{agent_token}@1.0",
+                    decision_id=entry_id,
+                    git_hash=_git_short_hash(self.ledger_path.parent),
+                )
 
-            return LedgerAppendResult(
-                id=current_id,
-                entry=entry.format(),
-                ledger_path=self.ledger_path,
-                wrote_ledger=wrote_ledger,
-                dry_run=dry_run,
-                output_path=preview_path,
-                snippets=snippets,
-            )
+                return LedgerAppendResult(
+                    id=entry_id,
+                    entry=entry.format(),
+                    ledger_path=self.ledger_path,
+                    wrote_ledger=wrote_ledger,
+                    dry_run=dry_run,
+                    output_path=preview_path,
+                    snippets=snippets,
+                )
+        except portalocker_exceptions.LockException as exc:
+            raise DecisionLedgerError(
+                build_error_payload(
+                    code="decision.lock_timeout",
+                    message="Decision ledger is locked by another process. Please retry after it finishes.",
+                    remediation="If the lock file is stale, delete DECISIONS.md.lock manually before rerunning.",
+                )
+            ) from exc
 
 
 def _extract_next_id(content: str) -> str:
@@ -257,6 +269,28 @@ def _render_updated_ledger(content: str, next_id: str, entry: str) -> str:
 
 def _normalize_agent(agent: str) -> str:
     return agent.strip().upper()
+
+
+def _normalize_decision_id(override: str | None, current: str) -> str:
+    if override is None:
+        return current
+    normalized = override.strip().upper()
+    if not ID_PATTERN.match(normalized):
+        raise DecisionLedgerError(
+            build_error_payload(
+                code="decision.invalid_id",
+                message=f"Decision id '{override}' must match pattern D-####.",
+            )
+        )
+    if normalized != current:
+        raise DecisionLedgerError(
+            build_error_payload(
+                code="decision.id_mismatch",
+                message=f"Provided id '{normalized}' does not match NEXT_ID '{current}'.",
+                remediation="Run without --id or update the ledger's NEXT_ID block if a manual override is required.",
+            )
+        )
+    return normalized
 
 
 def _git_short_hash(cwd: Path) -> str:

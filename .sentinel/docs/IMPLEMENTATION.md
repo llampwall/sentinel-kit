@@ -179,6 +179,24 @@
 - Added dry-run/preview support so CI can request `--dry-run --output preview.md` without mutating `DECISIONS.md`, while standard appends atomically bump `NEXT_ID`, write the new entry, and emit snippets that include the current git short hash.
 - Created regression fixtures + pytest coverage (`sentinelkit/tests/fixtures/DECISIONS.sample.md`, `tests/test_decision_log.py`) that validate ID bumping, ledger mutation, dry-run preview behavior, and required-field validation.
 
+## Task 7.2 Summary
+
+- Implemented the runbook utilities package (`sentinelkit/runbook/updater.py`) with a section registry (Current Enforcement Surface, Execution Flow, Known Gaps, CI Workflow, Stack Context), deterministic placeholders, and note formatting helpers (timestamp + author metadata).
+- `RunbookUpdater.append(...)` now auto-seeds missing sections inside `.sentinel/docs/IMPLEMENTATION.md`, removes the “no entries yet” placeholder for the targeted section, appends normalized notes, and supports dry-run previews via `--output` paths for CI.
+- Added pytest coverage (`tests/test_runbook_updater.py`) validating section creation, placeholder removal, dry-run previews, and unknown-section error handling.
+
+## Task 7.3 Summary
+
+- Wired Typer commands for `sentinel decisions append` and `sentinel runbook append`, pulling from the shared CLI context so automation (e.g., `/speckit.clarify`) can log decisions and runbook notes relative to `--root` with consistent JSON/pretty output and structured error handling.
+- Decisions CLI now shells out to the Python ledger core with support for scope/outputs lists, optional ProducedBy overrides, dry-run previews, and snippet emission; runbook CLI handles section slug validation, ISO8601 timestamp overrides, and preview files for CI diffs.
+- Added integration coverage via `tests/test_cli_decisions_runbook.py`, ensuring both commands mutate their respective artifacts (or dry-run) and emit the ProducedBy snippet + runbook entries expected by downstream automation.
+
+## Task 7.4 Summary
+
+- Expanded the decision ledger unit tests to include ProducedBy snippet assertions, missing-output validation, and lock contention handling that now surfaces a `decision.lock_timeout` error when another writer holds the `.lock` file (`tests/test_decision_log.py`).
+- Added CLI-focused regression tests that exercise `sentinel decisions append --dry-run --output preview.md` and the runbook counterpart to guarantee ledgers/runbooks remain untouched during previews while JSON output flags `dry_run: true` (`tests/test_cli_decisions_runbook.py`).
+- Ensured runbook updater coverage still verifies placeholder removal/deterministic inserts while the CLI suite now covers both standard and dry-run flows, satisfying the integration-test requirement for Task 7.4.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
