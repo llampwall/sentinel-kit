@@ -12,9 +12,9 @@ app = typer.Typer(help="SentinelKit MCP utilities (placeholder).")
 
 @app.command("server", help="Launch the MCP stdio server.")
 def launch(ctx: typer.Context) -> None:
-    """Placeholder MCP server command."""
-    _ = get_context(ctx)
-    server.serve()
+    """Start the asyncio MCP server rooted at the provided repository path."""
+    context = get_context(ctx)
+    server.serve(root=context.root)
 
 
 __all__ = ["app"]

@@ -238,6 +238,12 @@
 - Added regression coverage for the cross-shell sentinel gate helper via `tests/scripts/test_run_sentinel_gate.py`, which stubs the `uv` binary, runs the bash script under WSL/Git Bash, and asserts the expected contract/context/capsule/test gates execute for `specify` and `implement`.
 - Strengthened the CLI suite by verifying the new agents roster command plus existing prompt/capsule/snippets flows still work after the gate wiring (`tests/cli/test_cli_commands.py`), and kept the Sentinel scaffold integration test green to cover prompt syncing (`tests/specify_cli/test_sentinel_scaffold.py`).
 
+## Task 9.1 Summary
+
+- Implemented the asyncio JSON-RPC stdio server in `sentinelkit/cli/mcp/server.py`, wiring the `initialize`, `tools/list`, and `tools/call` handlers plus the three Sentinel tools (`mcp.sentinel.contract_validate`, `.sentinel_run`, `.decision_log`) that reuse the existing validator, pytest runner, and ledger helpers while emitting MCP-compliant payloads.
+- Updated the Typer namespace so `sentinel mcp server` (and `python -m sentinelkit.cli.mcp.server`) launches the new dispatcher rooted at the selected repo path, framing stdio messages via `Content-Length` and handling graceful shutdown/exit semantics.
+- Added regression coverage in `sentinelkit/tests/test_mcp_server.py`, which seeds a temp repo, dispatches initialize/list/tool calls synchronously via the async handler, and asserts contract validation summaries, sentinel run responses, decision-log dry runs, and unknown-tool errors all behave deterministically.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
