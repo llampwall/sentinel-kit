@@ -45,6 +45,12 @@ jobs:
       - name: Sentinel selfcheck
         run: uv run sentinel selfcheck --verbose
 
+      - name: Prepare test-results
+        run: uv run python -c "from pathlib import Path; Path('test-results').mkdir(exist_ok=True)"
+
+      - name: Run sentinel regressions
+        run: uv run sentinel sentinels run --json-report test-results/sentinels.json --junit test-results/sentinels.xml
+
       - name: Run tests
         run: uv run pytest -q --junitxml=test-results/junit.xml
 

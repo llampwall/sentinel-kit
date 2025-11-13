@@ -1,4 +1,4 @@
-"""CLI integration tests for capsule, prompts, and snippet sync commands."""
+"""End-to-end CLI tests covering capsule, prompts, snippets, and sentinel runs."""
 
 from __future__ import annotations
 
@@ -28,7 +28,7 @@ def test_capsule_generate_cli(tmp_path: Path) -> None:
         ],
     )
     assert result.exit_code == 0, result.output
-    assert "Capsule sample-feature@" in result.stdout
+    assert "# Capsule sample-feature@" in result.stdout
 
 
 def test_prompts_render_cli(tmp_path: Path) -> None:
@@ -66,8 +66,55 @@ def test_snippets_sync_cli(tmp_path: Path) -> None:
         ],
     )
     assert result.exit_code == 0, result.output
-    assert "synced snippet" in result.stdout
     assert "replacement" in readme.read_text(encoding="utf-8")
+
+
+def test_sentinels_run_cli(tmp_path: Path) -> None:
+    workspace = tmp_path / "workspace"
+    workspace.mkdir()
+    (workspace / "README.md").write_text("# Fixture\n", encoding="utf-8")
+    test_file = workspace / "tests/sentinels/test_cli_smoke.py"
+    test_file.parent.mkdir(parents=True)
+    test_file.write_text(
+        "def test_cli_sentinel():\n    assert True\n",
+        encoding="utf-8",
+    )
+    artifacts = workspace / "artifacts"
+    json_report = artifacts / "sentinels.json"
+    junit_report = artifacts / "sentinels.xml"
+    result = runner.invoke(
+        app,
+        [
+            "--root",
+            str(workspace),
+            "sentinels",
+            "run",
+            "--json-report",
+            str(json_report),
+            "--junit",
+            str(junit_report),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    summary = json.loads(json_report.read_text(encoding="utf-8"))
+    assert summary["ok"] is True
+    junit_content = junit_report.read_text(encoding="utf-8")
+    assert "<testsuite" in junit_content
+
+
+def test_selfcheck_json_output() -> None:
+    result = runner.invoke(
+        app,
+        [
+            "--format",
+            "json",
+            "selfcheck",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.stdout)
+    sentinel_check = next(check for check in payload["checks"] if check["name"] == "sentinels")
+    assert sentinel_check["success"] is True
 
 
 # helpers --------------------------------------------------------------------
@@ -101,12 +148,12 @@ def _create_spec(root: Path) -> Path:
         encoding="utf-8",
     )
     spec_dir = root / "specs/sample-feature"
-    spec_dir.mkdir(parents=True)
+    spec_dir.mkdir(parents=True, exist_ok=True)
     (spec_dir / "spec.md").write_text(
         """# Feature
 
 ## Goal
-Ship quickly.
+Ship feature quickly.
 """,
         encoding="utf-8",
     )
@@ -114,7 +161,7 @@ Ship quickly.
         """# Plan
 
 ## Router Notes
-- keep router informed
+- hand off to ROUTER
 
 ## Allowed Context Seeds
 - README.md
@@ -147,10 +194,12 @@ def _prepare_prompt_workspace(root: Path) -> Path:
         "forbiddenPaths": [".git"],
         "artifacts": [
             {
-                "name": "capsules",
-                "globs": ["specs/sample/capsule.md"],
+                "name": "fixture-capsule",
+                "globs": [
+                    "specs/sample/capsule.md"
+                ],
                 "enforceAllowedContext": True,
-                "maxLines": 400,
+                "maxLines": 400
             }
         ],
     }

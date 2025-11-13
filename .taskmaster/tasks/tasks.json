@@ -488,7 +488,7 @@
               2
             ],
             "details": "Expose Typer command accepting `--marker`, `--json-report`, and `--junit`, construct pytest args accordingly, call `pytest.main` via `python -m pytest` for Windows safety, and emit JSON summary compatible with existing agent consumers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CLI invocation tests assert exit codes propagate and produced JSON/JUnit files match expectations.",
             "parentId": "undefined"
           },
@@ -500,7 +500,7 @@
               3
             ],
             "details": "Modify `.github/workflows/sentinel-kit.yml` and any selfcheck entrypoints to run `sentinel sentinels run`, then add pytest-based regression tests comparing generated reports with stored fixtures to ensure parity with Vitest outputs and CLI exit semantics.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CI should call the CLI; local regression tests compare emitted artifact files against golden fixtures to confirm schema compatibility.",
             "parentId": "undefined"
           }

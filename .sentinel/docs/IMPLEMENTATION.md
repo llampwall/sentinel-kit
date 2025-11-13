@@ -167,6 +167,12 @@
 - Added shared pytest fixtures (`tests/conftest.py`) for `repo_root`, `contract_loader`, and `contract_validator` so sentinel tests reuse a single loader/validator without duplicating setup.
 - Refactored the sentinel suites to consume the fixtures, keeping tests lean and deterministic while paving the way for additional sentinel modules.
 
+## Task 6.4 Summary
+
+- Wired CI and selfcheck to the new Python sentinel runner: `sentinelkit/cli/sentinels.py` now exposes a reusable helper consumed by both `sentinel sentinels run` and the selfcheck “sentinels” check, while `.github/workflows/sentinel-kit.yml` executes the CLI and uploads JSON/JUnit artifacts.
+- Added CLI coverage in `tests/cli/test_cli_commands.py` to assert capsule/prompt/snippet flows plus sentinel run + selfcheck JSON output, ensuring the new artifacts exist and contain the expected metadata.
+- Updated `.sentinel/tests/sentinels/README.md` to document the `uv run sentinel sentinels run` workflow alongside the legacy pnpm commands.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from typing import Dict
 
 import typer
@@ -13,6 +14,7 @@ from sentinelkit.utils.errors import build_error_payload
 
 from .executor import CheckResult, run_checks
 from .state import CLIContext, get_context
+from .sentinels import run_sentinel_pytest
 
 __all__ = ["run"]
 
@@ -73,7 +75,7 @@ def _build_checks() -> Dict[str, callable]:
         "contracts": _placeholder_check("contracts", "Contract validation pending implementation."),
         "context": _placeholder_check("context", "Context lint pending implementation."),
         "capsule": _placeholder_check("capsule", "Capsule generator dry-run pending implementation."),
-        "sentinels": _placeholder_check("sentinels", "Sentinel pytest marker pending implementation."),
+        "sentinels": _sentinel_check,
         "mcp": _placeholder_check("mcp", "MCP smoke tests pending implementation."),
     }
 
@@ -90,3 +92,26 @@ def _placeholder_check(name: str, message: str):
         return CheckResult(name=name, success=success, duration=0.0, data=data, error=error)
 
     return runner
+
+
+def _sentinel_check(context: CLIContext) -> CheckResult:
+    """Run sentinel pytest suite and surface status."""
+
+    start = time.perf_counter()
+    try:
+        exit_code, summary = run_sentinel_pytest(root=context.root, quiet=True)
+        success = exit_code == 0
+        return CheckResult(
+            name="sentinels",
+            success=success,
+            duration=time.perf_counter() - start,
+            data=summary,
+            error=None if success else build_error_payload(code="sentinels.failed", message="Sentinel tests failed."),
+        )
+    except Exception as exc:  # pragma: no cover - defensive
+        return CheckResult(
+            name="sentinels",
+            success=False,
+            duration=time.perf_counter() - start,
+            error=build_error_payload(code="sentinels.error", message=str(exc)),
+        )
