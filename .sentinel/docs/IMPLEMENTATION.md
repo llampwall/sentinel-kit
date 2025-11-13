@@ -173,6 +173,12 @@
 - Added CLI coverage in `tests/cli/test_cli_commands.py` to assert capsule/prompt/snippet flows plus sentinel run + selfcheck JSON output, ensuring the new artifacts exist and contain the expected metadata.
 - Updated `.sentinel/tests/sentinels/README.md` to document the `uv run sentinel sentinels run` workflow alongside the legacy pnpm commands.
 
+## Task 7.1 Summary
+
+- Ported the Node decision-log workflow into Python (`sentinelkit/cli/decision_log.py`) with dataclasses for payloads/results, NEXT_ID parsing, deterministic entry rendering, ProducedBy snippet builders, and cross-platform file locking via `portalocker`.
+- Added dry-run/preview support so CI can request `--dry-run --output preview.md` without mutating `DECISIONS.md`, while standard appends atomically bump `NEXT_ID`, write the new entry, and emit snippets that include the current git short hash.
+- Created regression fixtures + pytest coverage (`sentinelkit/tests/fixtures/DECISIONS.sample.md`, `tests/test_decision_log.py`) that validate ID bumping, ledger mutation, dry-run preview behavior, and required-field validation.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
