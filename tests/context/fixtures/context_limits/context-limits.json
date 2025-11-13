@@ -1,0 +1,31 @@
+{
+  "defaultMaxLines": 300,
+  "warningThreshold": 0.8,
+  "forbiddenPaths": [
+    ".git",
+    "node_modules"
+  ],
+  "artifacts": [
+    {
+      "name": "capsules",
+      "globs": [
+        ".specify/specs/*/capsule.md"
+      ],
+      "enforceAllowedContext": true
+    },
+    {
+      "name": "router-prompts",
+      "globs": [
+        ".sentinel/prompts/router.prompt.eta.md"
+      ],
+      "maxLines": 120
+    }
+  ],
+  "overrides": [
+    {
+      "pattern": ".specify/specs/005-capsule-gen/capsule.md",
+      "maxLines": 320,
+      "reason": "Sample override for docs-heavy capsule"
+    }
+  ]
+}

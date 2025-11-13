@@ -1,0 +1,26 @@
+{
+  "defaultMaxLines": 20,
+  "warningThreshold": 0.75,
+  "forbiddenPaths": [".git"],
+  "artifacts": [
+    {
+      "name": "test-capsules",
+      "globs": [
+        "tests/context/fixtures/capsules/*.md"
+      ],
+      "enforceAllowedContext": true
+    }
+  ],
+  "overrides": [
+    {
+      "pattern": "tests/context/fixtures/capsules/too-long.md",
+      "maxLines": 4,
+      "reason": "Intentional override for tests"
+    },
+    {
+      "pattern": "tests/context/fixtures/capsules/warning.md",
+      "maxLines": 6,
+      "reason": "Trigger warning threshold coverage"
+    }
+  ]
+}

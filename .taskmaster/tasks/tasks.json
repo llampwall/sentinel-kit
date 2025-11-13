@@ -270,7 +270,7 @@
           "1",
           "2"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -278,9 +278,10 @@
             "description": "Create `sentinelkit/context/allowed_context.py` to glob `.sentinel/context/**`, resolve paths, enforce whitelists, and return deterministic entries.",
             "dependencies": [],
             "details": "Use `pathlib.Path` for globbing, call `Path.resolve()` plus repo-root checks, reuse existing whitelist JSON, and expose helpers returning sorted context records with line counts.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit-test discovery against fixture directories to ensure deterministic ordering and path guardrails.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T02:22:22.774Z"
           },
           {
             "id": 2,
@@ -290,9 +291,10 @@
               1
             ],
             "details": "Implement loader in `sentinelkit/context/limits.py`, validate schema fields, and expose parsed objects consumed by the linter and discovery code.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add pytest coverage to load sample limit files and assert structure/validation errors.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T02:38:57.619Z"
           },
           {
             "id": 3,
@@ -303,9 +305,10 @@
               2
             ],
             "details": "Wire Typer CLI, call discovery + limits, enforce line limits/escapes, emit diagnostics with deterministic ordering, support strict mode, and honor repo root boundaries.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CLI-level tests invoking `uv run sentinel context lint --format json` against good/bad fixtures verifying exit codes and payloads.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T02:39:05.890Z"
           },
           {
             "id": 4,
@@ -337,7 +340,8 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Generate subtasks that cover porting `.sentinel/scripts/context/lint.mts` into `sentinelkit/context/` modules (discovery, limits dataclasses, lint CLI), reusing deterministic globbing and forbidden path enforcement, wiring CLI options (`sentinel context lint --capsule/--strict`) with JSON output, updating fixtures/tests under `tests/context/` to mirror the Vitest suite, and integrating shared path utilities for other modules."
+        "expansionPrompt": "Generate subtasks that cover porting `.sentinel/scripts/context/lint.mts` into `sentinelkit/context/` modules (discovery, limits dataclasses, lint CLI), reusing deterministic globbing and forbidden path enforcement, wiring CLI options (`sentinel context lint --capsule/--strict`) with JSON output, updating fixtures/tests under `tests/context/` to mirror the Vitest suite, and integrating shared path utilities for other modules.",
+        "updatedAt": "2025-11-13T02:39:05.890Z"
       },
       {
         "id": "5",
@@ -836,7 +840,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-12T14:28:38.379Z",
+      "lastModified": "2025-11-13T02:39:05.895Z",
       "taskCount": 10,
       "completedCount": 3,
       "tags": [
