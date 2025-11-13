@@ -117,6 +117,27 @@ def test_selfcheck_json_output() -> None:
     assert sentinel_check["success"] is True
 
 
+def test_agents_roster_cli(tmp_path: Path) -> None:
+    _prepare_prompt_workspace(tmp_path)
+    result = runner.invoke(
+        app,
+        [
+            "--root",
+            str(tmp_path),
+            "--format",
+            "json",
+            "agents",
+            "roster",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.stdout)
+    assert payload["ok"] is True
+    ids = {agent["id"] for agent in payload["agents"]}
+    assert "builder" in ids
+    assert "router" in ids
+
+
 # helpers --------------------------------------------------------------------
 
 

@@ -1,8 +1,23 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
 scripts:
-  sh: scripts/bash/create-new-feature.sh --json "{ARGS}"
-  ps: scripts/powershell/create-new-feature.ps1 -Json "{ARGS}"
+  sh: |
+    TMP_JSON=$(mktemp)
+    scripts/bash/create-new-feature.sh --json "{ARGS}" | tee "$TMP_JSON"
+    STATUS=${PIPESTATUS[0]}
+    if [ $STATUS -ne 0 ]; then rm -f "$TMP_JSON"; exit $STATUS; fi
+    scripts/bash/run-sentinel-gate.sh --gate specify --paths-json "$TMP_JSON"
+    STATUS=$?
+    rm -f "$TMP_JSON"
+    exit $STATUS
+  ps: |
+    $tmp = New-TemporaryFile
+    scripts/powershell/create-new-feature.ps1 -Json "{ARGS}" | Tee-Object -FilePath $tmp.FullName
+    if ($LASTEXITCODE -ne 0) { Remove-Item $tmp.FullName -Force; exit $LASTEXITCODE }
+    scripts/powershell/run-sentinel-gate.ps1 -Gate specify -PathsJson $tmp.FullName
+    $code = $LASTEXITCODE
+    Remove-Item $tmp.FullName -Force
+    if ($code -ne 0) { exit $code }
 ---
 
 ## User Input
@@ -65,6 +80,8 @@ Given that feature description, do this:
 3. Load `templates/spec-template.md` to understand required sections.
 
 4. Follow this execution flow:
+
+   > Sentinel Gate: After the scaffold is created the helper script runs `sentinel contracts validate`, `sentinel context lint`, and a dry-run capsule generation to ensure the new spec is healthy. Fix problems they surface before writing additional content.
 
     1. Parse user description from Input
        If empty: ERROR "No feature description provided"

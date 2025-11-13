@@ -215,6 +215,24 @@
 - Improved the helper itself to accept arbitrary roots and surface Rich panels on subprocess failures, keeping operator feedback consistent across init/check workflows.
 - Verified existing CLI suites (`tests/cli/test_selfcheck.py`, `tests/cli/test_cli_commands.py`) still pass after the wiring change; no new regressions observed.
 
+## Task 8.4 Summary
+
+- Added reusable Sentinel gate runners (`scripts/bash/run-sentinel-gate.sh`, `scripts/powershell/run-sentinel-gate.ps1`) that call the Python CLI (`sentinel contracts validate`, `sentinel context lint`, capsule dry-runs, sentinel pytest) depending on the slash-command context.
+- Updated every `/speckit.*` template (specify/plan/tasks/implement/clarify/analyze/checklist/constitution) to chain the new gate scripts after their prerequisite helpers so failures block immediately with actionable CLI output.
+- Clarify and implement templates now explicitly instruct agents to log provenance via `sentinel decisions append` and update the runbook via `sentinel runbook append`, ensuring decision ledger + runbook stay in sync with gated workflows.
+
+## Task 8.5 Summary
+
+- Added agent prompt sync hooks to `specify init --sentinel`: after copying Sentinel assets the CLI now copies `.sentinel/prompts/*` into every supported agent bundle (`.codex/prompts`, `.claude/prompts`, etc.), tracking progress via the init stepper (`src/specify_cli/__init__.py:150`).
+- Refactored the scaffold helper to expose `sync_agent_prompt_bundles`, ensuring future watchers (or other tasks) can reuse the functionality without duplicating copy logic.
+- Extended the sentinel scaffold pytest to assert the Codex prompt bundle is populated, preventing regressions in future refactors (`tests/specify_cli/test_sentinel_scaffold.py:13`).
+
+## Task 8.6 Summary
+
+- Implemented dynamic agent roster discovery via a new CLI namespace (`sentinel agents roster`) that scans `.sentinel/agents/**` using the existing `prompt/agents.py` loader and emits structured JSON (or a Rich table) describing id/name/rulesHash/mounts/routing keywords.
+- Wired the new namespace into the Typer root so routers/CapsuleAuthor workflows (and slash-command automation) can fetch agent metadata on demand.
+- Added CLI coverage (`tests/cli/test_cli_commands.py`) that provisions a temporary agent workspace and asserts the roster command returns the expected agents in JSON mode.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

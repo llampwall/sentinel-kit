@@ -186,6 +186,22 @@ SENTINEL_RUNBOOK_TEMPLATE = (
     ".sentinel/docs/IMPLEMENTATION.md",
 )
 
+AGENT_PROMPT_DIRS = {
+    "claude": Path(".claude/prompts"),
+    "gemini": Path(".gemini/prompts"),
+    "cursor-agent": Path(".cursor/prompts"),
+    "qwen": Path(".qwen/prompts"),
+    "opencode": Path(".opencode/prompts"),
+    "codex": Path(".codex/prompts"),
+    "windsurf": Path(".windsurf/prompts"),
+    "kilocode": Path(".kilocode/prompts"),
+    "auggie": Path(".augment/prompts"),
+    "codebuddy": Path(".codebuddy/prompts"),
+    "roo": Path(".roo/prompts"),
+    "amp": Path(".agents/prompts"),
+    "q": Path(".amazonq/prompts"),
+}
+
 BANNER = """
 ███████╗██████╗ ███████╗ ██████╗██╗███████╗██╗   ██╗
 ██╔════╝██╔══██╗██╔════╝██╔════╝██║██╔════╝╚██╗ ██╔╝
@@ -924,6 +940,22 @@ def _copy_runbook_template(project_path: Path) -> None:
     shutil.copy2(src, dest)
 
 
+def sync_agent_prompt_bundles(project_path: Path) -> int:
+    """Copy canonical Sentinel prompts into supported agent bundles."""
+    prompts_dir = REPO_ROOT / ".sentinel" / "prompts"
+    if not prompts_dir.exists():
+        return 0
+    copied = 0
+    for target in AGENT_PROMPT_DIRS.values():
+        dest_dir = project_path / target
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        for prompt_file in prompts_dir.iterdir():
+            if prompt_file.is_file():
+                shutil.copy2(prompt_file, dest_dir / prompt_file.name)
+                copied += 1
+    return copied
+
+
 def run_uv_sync_in_project(project_path: Path) -> None:
     """Run uv sync inside the scaffold, falling back to unlocked sync on failure."""
     commands = [
@@ -988,6 +1020,19 @@ def apply_sentinel_scaffold(project_path: Path, tracker: StepTracker | None = No
     else:
         if tracker:
             tracker.complete(copy_key, f"{total} assets")
+
+    prompts_key = "sentinel-prompts"
+    if tracker:
+        tracker.start(prompts_key, "sync agent prompts")
+    try:
+        prompt_count = sync_agent_prompt_bundles(project_path)
+    except Exception as exc:
+        if tracker:
+            tracker.error(prompts_key, str(exc))
+        raise
+    else:
+        if tracker:
+            tracker.complete(prompts_key, f"{prompt_count} files")
 
     sync_key = "sentinel-uv"
     if tracker:
@@ -1188,6 +1233,7 @@ def init(
         tracker_steps.extend(
             [
                 ("sentinel-copy", "Copy Sentinel assets"),
+                ("sentinel-prompts", "Sync agent prompts"),
                 ("sentinel-uv", "Sync Sentinel dependencies"),
                 ("sentinel-selfcheck", "Run Sentinel selfcheck"),
             ]

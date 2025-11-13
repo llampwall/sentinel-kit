@@ -644,9 +644,10 @@
               3
             ],
             "details": "Embed new sentinel command sequences, ensure environment detection works for both shells, provide inline diagnostics, and keep existing slash command UX intact while routing through the Python CLI.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Script-level tests (bash/ps shellcheck + mocked executions) verifying sentinel commands run in order and abort on non-zero status; golden snapshot of updated markdown templates.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T12:32:23.745Z"
           },
           {
             "id": 5,
@@ -657,9 +658,10 @@
               4
             ],
             "details": "Wire sync logic into the CLI init flow and watcher utilities, ensure incremental updates trigger correctly, and document new behavior for agent bundle consumers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Functional test simulating prompt edits to confirm sync writes to every bundle directory; watch for duplicates via checksum assertions.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T13:10:08.396Z"
           },
           {
             "id": 6,
@@ -669,9 +671,10 @@
               5
             ],
             "details": "Create helper that inspects agent directories, builds structured metadata (name, capabilities, prompt paths), and expose it via CLI/API for use by slash commands and routers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests with fixture agent directories verifying JSON schema and update detection when agents change.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T13:10:17.087Z"
           },
           {
             "id": 7,
@@ -693,7 +696,7 @@
         "complexity": 9,
         "recommendedSubtasks": 7,
         "expansionPrompt": "Plan subtasks for enhancing `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Python Sentinel assets (sentinelkit package, .sentinel prompts/agents/templates, workflows) and runs `uv sync` + `sentinel selfcheck`, updating `specify check` and other health commands to run Sentinel gates, refactoring slash-command templates in `templates/commands/*.md` (and supporting bash/ps scripts) so each `/speckit.*` command invokes the new Sentinel subcommands, adding agent bundle sync hooks, and extending tests/mocks to cover these flows.",
-        "updatedAt": "2025-11-13T11:49:05.000Z"
+        "updatedAt": "2025-11-13T13:10:17.087Z"
       },
       {
         "id": "9",
@@ -855,7 +858,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T11:49:05.002Z",
+      "lastModified": "2025-11-13T13:10:17.089Z",
       "taskCount": 10,
       "completedCount": 5,
       "tags": [

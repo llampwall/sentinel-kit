@@ -1,8 +1,23 @@
 ---
 description: Perform a non-destructive cross-artifact consistency and quality analysis across spec.md, plan.md, and tasks.md after task generation.
 scripts:
-  sh: scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks
-  ps: scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks
+  sh: |
+    TMP_JSON=$(mktemp)
+    scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks | tee "$TMP_JSON"
+    STATUS=${PIPESTATUS[0]}
+    if [ $STATUS -ne 0 ]; then rm -f "$TMP_JSON"; exit $STATUS; fi
+    scripts/bash/run-sentinel-gate.sh --gate analyze --paths-json "$TMP_JSON"
+    STATUS=$?
+    rm -f "$TMP_JSON"
+    exit $STATUS
+  ps: |
+    $tmp = New-TemporaryFile
+    scripts/powershell/check-prerequisites.ps1 -Json -RequireTasks -IncludeTasks | Tee-Object -FilePath $tmp.FullName
+    if ($LASTEXITCODE -ne 0) { Remove-Item $tmp.FullName -Force; exit $LASTEXITCODE }
+    scripts/powershell/run-sentinel-gate.ps1 -Gate analyze -PathsJson $tmp.FullName
+    $code = $LASTEXITCODE
+    Remove-Item $tmp.FullName -Force
+    if ($code -ne 0) { exit $code }
 ---
 
 ## User Input
@@ -16,6 +31,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Goal
 
 Identify inconsistencies, duplications, ambiguities, and underspecified items across the three core artifacts (`spec.md`, `plan.md`, `tasks.md`) before implementation. This command MUST run only after `/speckit.tasks` has successfully produced a complete `tasks.md`.
+
+> Sentinel Gate: The script automatically runs `sentinel contracts validate` and `sentinel context lint` before analysis. Resolve any failures they surface before proceeding with manual review.
 
 ## Operating Constraints
 

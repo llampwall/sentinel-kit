@@ -30,5 +30,6 @@ def test_apply_sentinel_scaffold_copies_assets(tmp_path: Path, monkeypatch: pyte
     assert (tmp_path / "sentinelkit" / "pyproject.toml").exists()
     assert (tmp_path / ".sentinel" / "docs" / "IMPLEMENTATION.md").exists()
     assert (tmp_path / ".github" / "workflows" / "sentinel-ci.yml").exists()
+    assert (tmp_path / ".codex" / "prompts" / "sentinel.router.md").exists()
     assert ("uv", tmp_path) in calls
     assert ("selfcheck", tmp_path) in calls

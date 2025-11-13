@@ -1,8 +1,23 @@
 ---
 description: Identify underspecified areas in the current feature spec by asking up to 5 highly targeted clarification questions and encoding answers back into the spec.
 scripts:
-   sh: scripts/bash/check-prerequisites.sh --json --paths-only
-   ps: scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly
+  sh: |
+    TMP_JSON=$(mktemp)
+    scripts/bash/check-prerequisites.sh --json --paths-only | tee "$TMP_JSON"
+    STATUS=${PIPESTATUS[0]}
+    if [ $STATUS -ne 0 ]; then rm -f "$TMP_JSON"; exit $STATUS; fi
+    scripts/bash/run-sentinel-gate.sh --gate clarify --paths-json "$TMP_JSON"
+    STATUS=$?
+    rm -f "$TMP_JSON"
+    exit $STATUS
+  ps: |
+    $tmp = New-TemporaryFile
+    scripts/powershell/check-prerequisites.ps1 -Json -PathsOnly | Tee-Object -FilePath $tmp.FullName
+    if ($LASTEXITCODE -ne 0) { Remove-Item $tmp.FullName -Force; exit $LASTEXITCODE }
+    scripts/powershell/run-sentinel-gate.ps1 -Gate clarify -PathsJson $tmp.FullName
+    $code = $LASTEXITCODE
+    Remove-Item $tmp.FullName -Force
+    if ($code -ne 0) { exit $code }
 ---
 
 ## User Input
@@ -12,6 +27,8 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+> Sentinel Gate: The helper script automatically runs `sentinel contracts validate`, `sentinel context lint`, and a dry-run `sentinel capsule generate` against the active feature folder. Resolve any failures before proceeding with clarifications.
 
 ## Outline
 
@@ -159,7 +176,17 @@ Execution steps:
 
 7. Write the updated spec back to `FEATURE_SPEC`.
 
-8. Report completion (after questioning loop ends or early termination):
+8. **Decision ledger entry**: After clarifications are integrated, log them via the Python CLI so the provenance is captured:
+
+   ```bash
+   uv run sentinel decisions append --author "CLARIFIER" --scope "$FEATURE_DIR/spec.md" \
+     --decision "Clarify scope for <feature>" --rationale "Summarize what changed" \
+     --outputs "$FEATURE_DIR/spec.md"
+   ```
+
+   The command prints a ProducedBy snippet—add it to relevant files or commit messages. If no code changes are made yet, keep the snippet for later.
+
+9. Report completion (after questioning loop ends or early termination):
    - Number of questions asked & answered.
    - Path to updated spec.
    - Sections touched (list names).
