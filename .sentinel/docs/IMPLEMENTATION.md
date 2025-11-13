@@ -85,6 +85,36 @@
 - Added CLI snapshot coverage (`tests/contracts/test_cli_snapshot.py`) that runs `uv run sentinel contracts validate --format json` against sample fixtures and compares the sanitized JSON output to a stored golden (`tests/contracts/snapshots/sample_full.json`).
 - Ensured snapshot normalization replaces absolute paths with `{{ROOT}}` placeholders so future runs remain deterministic across environments.
 
+## Task 4.1 Summary
+
+- Replaced the stubbed Allowed Context discovery module with a full implementation in `sentinelkit/context/allowed_context.py`, including `AllowedContextEntry` dataclass metadata, repo-root auto-discovery, duplicate suppression, deterministic ordering, and line-count bookkeeping.
+- Added guardrail helpers (`normalize_include`, `assert_include_exists`) that raise structured `AllowedContextError`s on root escapes, missing files, or malformed entries, ensuring capsules can only include files inside the repo.
+- Introduced fixture-backed pytest coverage (`tests/context/test_allowed_context.py` + `tests/context/fixtures/allowed_context/**`) to verify deterministic discovery, deduplication, and error handling.
+
+## Task 4.2 Summary
+
+- Implemented the Python context limit schema loader in `sentinelkit/context/limits.py` using dataclasses (`ContextRule`, `CapsuleRule`, `ContextLimits`), JSON Schema validation (Draft 7), and normalized path handling with caching.
+- The loader now supports YAML/JSON configs, override-specific line budgets, warning-threshold validation, and exposes `to_dict()` for future diagnostics/JSON output.
+- Added fixtures and tests (`tests/context/fixtures/context_limits/context-limits.json`, `tests/context/test_limits.py`) covering artifact parsing, default threshold behavior, and validation failures.
+
+## Task 4.3 Summary
+
+- Built the Allowed Context linter in `sentinelkit/context/lint.py`, mirroring the legacy JS behavior: collects artifact targets via the limits config, enforces per-file line budgets/overrides, and validates capsule Allowed Context lists (missing section, invalid/missing include, forbidden paths, duplicates).
+- Wired the Typer CLI (`sentinel context lint`) to the new engine with support for `--capsule`, `--strict`, `--config`, `--schema`, and `--format json`, including structured error reporting that integrates with the global CLI context.
+- Added capsule fixtures + pytest suite (`tests/context/fixtures/capsules/*.md`, `tests/context/fixtures/context_limits/lint-config.json`, `tests/context/test_context_lint.py`) plus ran `uv run pytest -q tests/context` to confirm coverage for diagnostics, strict-mode exit gating, and repo-root escaping.
+
+## Task 4.4 Summary
+
+- Rebuilt `.sentinel/context/fixtures` with reusable capsules (`line-299/300/301`, escape, forbidden, duplicate, missing-context, missing-include) plus a dedicated fixture config (`context-limits.fixture.json`) so both humans and tests can quickly demonstrate the 300-line guardrail and Allowed Context rules.
+- Added regression tests in `tests/context/test_context_fixtures.py` that run the Python linter against the new fixtures, covering near-limit warnings, hard failures at 301 lines, missing Allowed Context sections, forbidden/duplicate entries, and deterministic diagnostic ordering.
+- Tweaked the line-count helper in `sentinelkit/context/lint.py` to mirror the Allowed Context counter (no off-by-one when files end with `\n`) and ran `uv run pytest -q tests/context` to validate the refreshed fixtures and suite (now 19 tests).
+
+## Task 4.5 Summary
+
+- Ported the md-surgeon workflow to Python (`sentinelkit/scripts/md_surgeon.py`) with parity features (marker replacement, heading/append modes, code-fence validation, `.bak` backups, CLI entry point) plus a pytest suite in `tests/scripts/test_md_surgeon.py`.
+- Wired `sentinel context lint` with a `--sync-docs` flag that reuses the new md-surgeon helper to refresh the README `SENTINEL:CAPSULES` block from `.sentinel/snippets/capsules.md`, ensuring documentation stays aligned whenever lint runs.
+- Updated `.sentinel/snippets/capsules.md` and the corresponding README section to reflect the Python workflow (`uv run sentinel context lint --strict --sync-docs`, pytest regressions, md-surgeon invocation), keeping capsule guidance consistent with the new tooling.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

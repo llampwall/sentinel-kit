@@ -26,8 +26,6 @@ __all__ = ["Diagnostic", "LintSummary", "ContextLintError", "lint_context"]
 
 Severity = Literal["error", "warning"]
 
-_LINE_SPLITTER = re.compile(r"\r?\n")
-
 
 @dataclass(slots=True, frozen=True)
 class Diagnostic:
@@ -397,7 +395,8 @@ def _is_forbidden(entry: str, forbidden: Sequence[str]) -> bool:
 def _count_lines(content: str) -> int:
     if not content:
         return 0
-    return len(_LINE_SPLITTER.split(content))
+    newline_count = content.count("\n")
+    return newline_count if content.endswith("\n") else newline_count + 1
 
 
 def _normalize_path(value: str) -> str:

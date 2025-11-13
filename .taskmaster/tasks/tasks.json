@@ -270,7 +270,7 @@
           "1",
           "2"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -320,9 +320,10 @@
               3
             ],
             "details": "Recreate good/bad capsule fixtures, expected JSON snapshots, and pytest cases that assert diagnostics match legacy behavior and deterministic ordering across platforms.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Snapshot-style pytest cases comparing CLI outputs to stored JSON plus direct unit tests for limit-violation scenarios.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T03:03:05.401Z"
           },
           {
             "id": 5,
@@ -333,15 +334,16 @@
               4
             ],
             "details": "Implement reusable path utility helpers, hook lint results to markdown surgeon for README badge updates, and document integration for future modules.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Add targeted tests for md-surgeon helper to confirm snippet replacement plus integration test ensuring lint run updates docs when expected.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T03:03:14.705Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 5,
         "expansionPrompt": "Generate subtasks that cover porting `.sentinel/scripts/context/lint.mts` into `sentinelkit/context/` modules (discovery, limits dataclasses, lint CLI), reusing deterministic globbing and forbidden path enforcement, wiring CLI options (`sentinel context lint --capsule/--strict`) with JSON output, updating fixtures/tests under `tests/context/` to mirror the Vitest suite, and integrating shared path utilities for other modules.",
-        "updatedAt": "2025-11-13T02:39:05.890Z"
+        "updatedAt": "2025-11-13T03:03:14.705Z"
       },
       {
         "id": "5",
@@ -840,9 +842,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T02:39:05.895Z",
+      "lastModified": "2025-11-13T03:03:14.708Z",
       "taskCount": 10,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "master"
       ]
