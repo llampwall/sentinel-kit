@@ -115,6 +115,29 @@
 - Wired `sentinel context lint` with a `--sync-docs` flag that reuses the new md-surgeon helper to refresh the README `SENTINEL:CAPSULES` block from `.sentinel/snippets/capsules.md`, ensuring documentation stays aligned whenever lint runs.
 - Updated `.sentinel/snippets/capsules.md` and the corresponding README section to reflect the Python workflow (`uv run sentinel context lint --strict --sync-docs`, pytest regressions, md-surgeon invocation), keeping capsule guidance consistent with the new tooling.
 
+## Task 5.1 Summary
+
+- Audited the legacy Node capsule + prompt toolchain:
+  - `.sentinel/scripts/capsule-create.mjs` remains the only implementation that parses spec/plan/tasks, hashes capsules, enforces the 300-line budget, and writes `capsule.md`. Python exposes only stubs (`sentinelkit/capsule/generator.py`, `cli/capsule.py`), so the generator, template renderer, and ProducedBy header logic must be ported wholesale.
+  - `.sentinel/scripts/orch/prompt-render.mjs` and `orch/agents.mjs` load agent metadata, validate router payloads, render Eta templates, and write router logs. No Python equivalent exists yet (`sentinelkit/prompt/**` and `cli/prompts.py` are placeholders), meaning router/capsule prompt rendering still depends on Node + Eta.
+  - Snippet workflows still rely on `.sentinel/snippets/*.md` plus md-surgeon markers in README/UPSTREAM/etc.; only the capsule snippet is wired to the new Python md-surgeon.
+- Identified priorities for upcoming subtasks:
+  1. Port capsule template rendering + hashing into Python, using the new Allowed Context + limits modules and exposing the generator via Typer/CLI + tests.
+  2. Reimplement agent discovery, prompt template rendering, and router logging in Python (Eta replacement TBD) and surface them through `sentinel prompts render`.
+  3. Generalize the md-surgeon bridge so other snippets (workflow badge, MCP validator, decision log) can be refreshed from Python commands, keeping docs in sync after lint/prompt/capsule runs.
+
+## Task 5.2 Summary
+
+- Implemented the capsule generator in Python, covering spec/plan/tasks parsing, SHA-based capsule IDs, ProducedBy header rendering, Allowed Context seeding via the discovery module, template replacement, and the 300-line budget guard (`sentinelkit/capsule/generator.py`).
+- Exposed the generator through `sentinel capsule generate` with `--spec`, `--decision`, `--agent`, `--rules-hash`, and `--dry-run`, returning structured errors for missing files or line-budget violations.
+- Added pytest coverage (`tests/capsule/test_generator.py`) with fixture templates proving deterministic output, Allowed Context injection, and enforcement of the line cap.
+
+## Task 5.3 Summary
+
+- Ported the Eta prompt renderer into Python using Jinja templates (`sentinelkit/prompt/templates/*.md.j2`) plus a new `PromptRenderer` that loads agents, validates capsules via the Python linter, renders router/agent prompts, and writes router logs (`sentinelkit/prompt/render.py`, `sentinelkit/prompt/agents.py`).
+- Updated the Typer CLI (`sentinelkit/cli/prompts.py`) to support `uv run sentinel prompts render --mode {router|capsule}` with options for `--capsule`, `--agent`, `--output`, and `--router-json`, surfacing structured errors on lint/template failures.
+- Added pytest coverage (`tests/prompts/test_renderer.py`) that exercises router/agent prompt rendering and router log creation with temporary capsules, agents, and context-limit configs.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

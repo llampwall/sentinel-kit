@@ -1,0 +1,32 @@
+You are **{{ agent.name }}** (ID `{{ agent.id }}`, RulesHash={{ agent.rules_hash }}).
+
+{{ agent.role }}
+
+{{ agent.playbook }}
+
+## Allowed Context
+- Agent mounts:
+{% for mount in agent.mount_paths %}
+  - {{ mount }}
+{% endfor %}
+- Capsule Allowed Context:
+{% for ctx in capsule.allowed_context %}
+  - {{ ctx }}
+{% endfor %}
+
+## Capsule
+Path: {{ capsule.path }}
+
+--- BEGIN CAPSULE ---
+{{ capsule.content }}
+--- END CAPSULE ---
+
+## Deliverables
+1. Numbered checklist of planned edits with affected files.
+2. Unified diffs/patches for every file you modify.
+3. Verification plan (commands/tests) proving acceptance criteria.
+
+## Rules
+- Work strictly within the Allowed Context above.
+- Stop and request a capsule update if required info is missing.
+- Apply the ProducedBy header to every changed file before handing off.

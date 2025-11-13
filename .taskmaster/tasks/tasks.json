@@ -357,7 +357,7 @@
           "2",
           "4"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -365,9 +365,10 @@
             "description": "Review `.sentinel/scripts/capsule-create.mjs`, `md-surgeon.mjs`, and Eta templates to map required behaviors and inputs for the Python port.",
             "dependencies": [],
             "details": "Catalog hydration inputs/outputs, snippet injection rules, router template variables, and enforcement metadata so later modules can mirror behavior without regressions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": null,
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T03:13:31.959Z"
           },
           {
             "id": 2,
@@ -377,9 +378,10 @@
               1
             ],
             "details": "Recreate logic from capsule-create.mjs, load specs/plan/tasks, merge context, and emit deterministic markdown even when metadata ordering varies; expose functions usable by CLI.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Golden fixture comparison under `tests/capsule/` using sample slug data.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T03:30:18.890Z"
           },
           {
             "id": 3,
@@ -389,9 +391,10 @@
               1
             ],
             "details": "Implement template loader, context hydration, deterministic markdown output, JSON schema validation, and snippet writer compatible with multi-agent bundles.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Golden router/agent outputs in `tests/prompt/` plus schema validation unit tests.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T03:30:26.601Z"
           },
           {
             "id": 4,
@@ -438,7 +441,8 @@
         ],
         "complexity": 8,
         "recommendedSubtasks": 6,
-        "expansionPrompt": "Break down the work into subtasks for porting the capsule generator (`sentinelkit/capsule/generator.py`) from `.sentinel/scripts/capsule-create.mjs`, reimplementing the Eta prompt renderer in Python (Jinja2 or equivalent) for router/agent modes, recreating md-surgeon-style snippet syncing for README badges and agent bundles, providing Typer commands (`sentinel capsule generate`, `sentinel prompt render`, prompt sync options), writing golden-file tests under `tests/capsule/` and `tests/prompt/`, and sharing normalized path utilities with the context linter."
+        "expansionPrompt": "Break down the work into subtasks for porting the capsule generator (`sentinelkit/capsule/generator.py`) from `.sentinel/scripts/capsule-create.mjs`, reimplementing the Eta prompt renderer in Python (Jinja2 or equivalent) for router/agent modes, recreating md-surgeon-style snippet syncing for README badges and agent bundles, providing Typer commands (`sentinel capsule generate`, `sentinel prompt render`, prompt sync options), writing golden-file tests under `tests/capsule/` and `tests/prompt/`, and sharing normalized path utilities with the context linter.",
+        "updatedAt": "2025-11-13T03:30:26.601Z"
       },
       {
         "id": "6",
@@ -842,7 +846,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T03:03:14.708Z",
+      "lastModified": "2025-11-13T03:30:26.603Z",
       "taskCount": 10,
       "completedCount": 4,
       "tags": [

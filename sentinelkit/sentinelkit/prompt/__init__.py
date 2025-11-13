@@ -1,5 +1,5 @@
-"""Prompt rendering namespace (placeholder)."""
+"""Prompt rendering namespace."""
 
-from . import render
+from .render import PromptRenderer, PromptRenderingError
 
-__all__ = ["render"]
+__all__ = ["PromptRenderer", "PromptRenderingError"]
