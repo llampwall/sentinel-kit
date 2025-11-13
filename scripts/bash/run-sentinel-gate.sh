@@ -12,6 +12,7 @@ EOF
 }
 
 PYTHON_BIN="${PYTHON_BIN:-python}"
+UV_BIN="${SENTINEL_GATE_UV:-uv}"
 if ! command -v "$PYTHON_BIN" >/dev/null 2>&1; then
     if command -v python3 >/dev/null 2>&1; then
         PYTHON_BIN="python3"
@@ -129,7 +130,7 @@ run_uv() {
     local description="$1"
     shift
     echo "[sentinel-gate] $description"
-    if ! uv run sentinel --root "$REPO_ROOT" "$@"; then
+    if ! "$UV_BIN" run sentinel --root "$REPO_ROOT" "$@"; then
         echo "[sentinel-gate] FAILED: $description" >&2
         exit 1
     fi

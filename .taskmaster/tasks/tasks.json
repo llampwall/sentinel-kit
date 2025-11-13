@@ -596,7 +596,7 @@
           "6",
           "7"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -688,15 +688,16 @@
               6
             ],
             "details": "Add tmpdir-based integration tests, mock Sentinel command invocations, include Windows/Unix path cases, and ensure CI targets run the new suites.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CI job running new pytest modules plus script linters; verify coverage includes bootstrap, slash commands, sync, and roster code paths.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T13:26:57.346Z"
           }
         ],
         "complexity": 9,
         "recommendedSubtasks": 7,
         "expansionPrompt": "Plan subtasks for enhancing `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Python Sentinel assets (sentinelkit package, .sentinel prompts/agents/templates, workflows) and runs `uv sync` + `sentinel selfcheck`, updating `specify check` and other health commands to run Sentinel gates, refactoring slash-command templates in `templates/commands/*.md` (and supporting bash/ps scripts) so each `/speckit.*` command invokes the new Sentinel subcommands, adding agent bundle sync hooks, and extending tests/mocks to cover these flows.",
-        "updatedAt": "2025-11-13T13:10:17.087Z"
+        "updatedAt": "2025-11-13T13:26:57.346Z"
       },
       {
         "id": "9",
@@ -858,9 +859,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T13:10:17.089Z",
+      "lastModified": "2025-11-13T13:26:57.348Z",
       "taskCount": 10,
-      "completedCount": 5,
+      "completedCount": 6,
       "tags": [
         "master"
       ]

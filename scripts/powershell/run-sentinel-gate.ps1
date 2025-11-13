@@ -12,6 +12,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+$uv = if ($env:SENTINEL_GATE_UV) { $env:SENTINEL_GATE_UV } else { "uv" }
 
 function Get-JsonValue {
     param(
@@ -71,7 +72,7 @@ function Invoke-SentinelCommand {
     )
 
     Write-Host "[sentinel-gate] $Description" -ForegroundColor Cyan
-    & uv run sentinel --root $RepoRoot @Arguments
+    & $uv run sentinel --root $RepoRoot @Arguments
     if ($LASTEXITCODE -ne 0) {
         throw "Sentinel gate failed: $Description"
     }

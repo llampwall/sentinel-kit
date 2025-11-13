@@ -233,6 +233,11 @@
 - Wired the new namespace into the Typer root so routers/CapsuleAuthor workflows (and slash-command automation) can fetch agent metadata on demand.
 - Added CLI coverage (`tests/cli/test_cli_commands.py`) that provisions a temporary agent workspace and asserts the roster command returns the expected agents in JSON mode.
 
+## Task 8.7 Summary
+
+- Added regression coverage for the cross-shell sentinel gate helper via `tests/scripts/test_run_sentinel_gate.py`, which stubs the `uv` binary, runs the bash script under WSL/Git Bash, and asserts the expected contract/context/capsule/test gates execute for `specify` and `implement`.
+- Strengthened the CLI suite by verifying the new agents roster command plus existing prompt/capsule/snippets flows still work after the gate wiring (`tests/cli/test_cli_commands.py`), and kept the Sentinel scaffold integration test green to cover prompt syncing (`tests/specify_cli/test_sentinel_scaffold.py`).
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
