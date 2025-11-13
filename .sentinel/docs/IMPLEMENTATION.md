@@ -261,6 +261,24 @@
 - Added deterministic pytest coverage: `sentinelkit/tests/test_cli_mcp.py` now exercises the CLI smoke command plus the selfcheck integration, and a repo-level suite (`tests/mcp/test_mcp_smoke.py`) runs the full `python -m sentinelkit.cli.main ... mcp smoke` flow to ensure the server spins up correctly.
 - CI now runs the smoke command explicitly (`sentinel-ci.yml`), keeping the gate green across platforms; the README/snippets already document the new workflow so contributors run the same verification locally.
 
+## Task 10.2 Summary
+
+- Rewrote the contributor docs (`docs/quickstart.md`, `SUPPORT.md`) to emphasize the uv-based bootstrap, `sentinel selfcheck`, and cross-platform guidance so users no longer hit pnpm/Vitest references.
+- Confirmed the README and .specify/README.md sections already mention the Python MCP commands, keeping the messaging consistent across release notes and quickstart pages.
+- Updated `README.md` and `.specify/README.md` (and their backups) earlier to mention `uvx sentinel mcp server`/`uvx sentinel mcp smoke`, so the entire docset now describes the pure‑Python workflow that replaces the Node enclave.
+
+## Task 10.3 Summary
+
+- Verified `specify init --sentinel` now copies only the Python assets listed in `SENTINEL_FILE_ASSETS`/`SENTINEL_DIR_ASSETS`, so freshly scaffolded repos contain `sentinelkit`, `.sentinel/contracts`, `context`, prompts, snippets, and the README/template material without any Node scripts or pnpm lockfiles.
+- Added Linux hardening notes: `uv` installs via the Astral shell installer or distro packages are required, run `uv sync --locked --dev` from the project root, and always invoke `uv run sentinel selfcheck` before `/speckit.*` commands so Linux workspaces share the same gates as other OSes.
+- Documented safety practices for subprocess launches (`src/specify_cli/__init__.py` uses `pathlib`/`shlex.join` helpers and the Typer tracker to avoid shell quoting issues), ensuring the bridge between Specify and Sentinel stays resilient on Windows, macOS, and Linux.
+
+## Task 10.4 Summary
+
+- Added a `scripts/check_node_artifacts.py` guard that inspects the tree for banned files/keywords (pnpm, node_modules, Vitest configs) and exits non-zero when they appear, preventing regressions.
+- The Sentinel CI now runs this guard via `uv run python scripts/check_node_artifacts.py` after the MCP smoke, so `pnpm-lock.yaml`, `.sentinel/package.json`, and textual references to pnpm/node_modules/vitest cannot slip back into the repo unnoticed.
+- With the badge/workflow already pointing at the Python pipeline and the new guard in place, the enforcement story now clearly documents that only uv tools are supported across Windows/Linux/macOS.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

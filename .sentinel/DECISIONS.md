@@ -3,7 +3,7 @@
 # Decisions Ledger
 
 ## NEXT_ID
-D-0019
+D-0020
 
 ## Format
 
@@ -180,4 +180,13 @@ Scope: .github/workflows/sentinel-kit.yml
 Decision: Add sentinel-kit workflow skeleton
 Rationale: CI needs a shared setup job with pnpm/uv caching and OS matrix before wiring downstream gates.
 Outputs: .github/workflows/sentinel-kit.yml
+Supersedes: none
+
+ID: D-0019
+Date: 2025-11-13
+Author: Builder
+Scope: README.md; docs/quickstart.md; SUPPORT.md; .specify/README.md; .sentinel/docs/*; .github/pull_request_template.md; scripts/check_node_artifacts.py; .github/workflows/sentinel-ci.yml
+Decision: Remove the Node/pnpm Sentinel enclave and teach teams to use the uv-only stack
+Rationale: The Sentinel migration now guarantees a pure Python workspace, so the ledger should explain why pnpm/node_modules/vitest artifacts were dropped and document the new uv/selfcheck/mcp flows plus the CI guard we added.
+Outputs: README.md, docs/quickstart.md, SUPPORT.md, .specify/README.md, .specify/README.md.bak, .sentinel/docs/IMPLEMENTATION.md, .sentinel/snippets/*.md, .github/pull_request_template.md, scripts/check_node_artifacts.py, .github/workflows/sentinel-ci.yml
 Supersedes: none

@@ -45,14 +45,6 @@ sdd-*/
 
 # Logs
 logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-dev-debug.log
-.pnpm-debug.log*
-# Dependency directories
-node_modules/
-.sentinel/node_modules/
 # Environment variables
 # Editor directories and files
 .idea

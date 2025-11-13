@@ -357,7 +357,7 @@
           "2",
           "4"
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -442,7 +442,7 @@
         "complexity": 8,
         "recommendedSubtasks": 6,
         "expansionPrompt": "Break down the work into subtasks for porting the capsule generator (`sentinelkit/capsule/generator.py`) from `.sentinel/scripts/capsule-create.mjs`, reimplementing the Eta prompt renderer in Python (Jinja2 or equivalent) for router/agent modes, recreating md-surgeon-style snippet syncing for README badges and agent bundles, providing Typer commands (`sentinel capsule generate`, `sentinel prompt render`, prompt sync options), writing golden-file tests under `tests/capsule/` and `tests/prompt/`, and sharing normalized path utilities with the context linter.",
-        "updatedAt": "2025-11-13T03:30:26.601Z"
+        "updatedAt": "2025-11-13T14:51:45.956Z"
       },
       {
         "id": "6",
@@ -455,7 +455,7 @@
           "1",
           "2"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -507,7 +507,8 @@
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Outline subtasks for translating `.sentinel/tests/sentinels/**` Vitest suites to `tests/sentinels/**` in pytest (fixtures, markers, shared data), configuring `pytest.ini` with `pytest-json-report`/`pytest-junitxml`, implementing `sentinelkit/cli/sentinels.py` to invoke `python -m pytest` with marker/filter/report flags, and adding regression tests that assert JSON/JUnit artifacts and CLI exit codes match the prior vitest behavior."
+        "expansionPrompt": "Outline subtasks for translating `.sentinel/tests/sentinels/**` Vitest suites to `tests/sentinels/**` in pytest (fixtures, markers, shared data), configuring `pytest.ini` with `pytest-json-report`/`pytest-junitxml`, implementing `sentinelkit/cli/sentinels.py` to invoke `python -m pytest` with marker/filter/report flags, and adding regression tests that assert JSON/JUnit artifacts and CLI exit codes match the prior vitest behavior.",
+        "updatedAt": "2025-11-13T14:51:21.009Z"
       },
       {
         "id": "7",
@@ -791,7 +792,7 @@
           "8",
           "9"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -799,9 +800,10 @@
             "description": "Remove the obsolete `.sentinel` Node workspace artifacts and ensure ignores reference only Python tooling.",
             "dependencies": [],
             "details": "Delete `.sentinel/package.json`, `.sentinel/node_modules/**`, pnpm lock/workspace files, Vitest configs, PowerShell install scripts, and update `.gitignore` to drop `node_modules`/pnpm entries while keeping Python/uv ignores.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `git status` to confirm removals; execute CI lint job or a targeted script to ensure no Node files remain.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:49:08.379Z"
           },
           {
             "id": 2,
@@ -811,9 +813,10 @@
               1
             ],
             "details": "Refresh README, docs/quickstart.md, .specify/README.md, and SUPPORT.md so setup and examples reference uv, Sentinel CLI, and cross-platform instructions, removing pnpm/Vitest references and adding Windows/macOS/Linux parity notes.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Proofread diff; optionally run `markdownlint`/link checkers to ensure updated commands render correctly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:49:17.085Z"
           },
           {
             "id": 3,
@@ -824,9 +827,10 @@
               2
             ],
             "details": "Update scaffold templates so no Node artifacts are copied, confirm `.gitignore` aligns, and expand `.sentinel/docs/IMPLEMENTATION.md` with Linux distro uv install + subprocess `pathlib`/`shlex` safety guidance for cross-platform parity.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `specify init --sentinel` on a temp directory (all OSes if possible) and inspect generated files; run `uv sync && sentinel selfcheck` to validate bootstrap.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:49:30.137Z"
           },
           {
             "id": 4,
@@ -837,9 +841,10 @@
               3
             ],
             "details": "Introduce pipeline jobs or scripts that grep for `pnpm`, `node_modules`, or `.sentinel/package.json`, fail builds on matches, and ensure badges reflect the Python workflow matrix (Windows/macOS/Linux).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger CI locally (or via workflow dispatch) to confirm new checks fail on seeded pnpm strings and pass otherwise; verify badges point to Python workflows.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:49:42.155Z"
           },
           {
             "id": 5,
@@ -852,21 +857,23 @@
               4
             ],
             "details": "Add a DECISION entry summarizing the removal of the Node sentinel enclave, links to new docs, migration steps for existing users, and notes about the uv-only tooling expectations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review DECISIONS.md rendering; cross-check referenced sections exist and links resolve.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:50:40.674Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Create subtasks for deleting the legacy `.sentinel` Node workspace (package.json, pnpm lock, Vitest configs, scripts) and updating `.gitignore`, rewriting documentation (README, docs/quickstart.md, .specify/README.md, SUPPORT.md) to reference only uv/sentinel CLI flows, ensuring `specify init --sentinel` scaffolds no Node artifacts and adds Linux hardening notes to `.sentinel/docs/IMPLEMENTATION.md`, adding CI/grep checks that block `pnpm`/`node_modules` references, and documenting the deprecation in DECISIONS.md with migration guidance."
+        "expansionPrompt": "Create subtasks for deleting the legacy `.sentinel` Node workspace (package.json, pnpm lock, Vitest configs, scripts) and updating `.gitignore`, rewriting documentation (README, docs/quickstart.md, .specify/README.md, SUPPORT.md) to reference only uv/sentinel CLI flows, ensuring `specify init --sentinel` scaffolds no Node artifacts and adds Linux hardening notes to `.sentinel/docs/IMPLEMENTATION.md`, adding CI/grep checks that block `pnpm`/`node_modules` references, and documenting the deprecation in DECISIONS.md with migration guidance.",
+        "updatedAt": "2025-11-13T14:50:40.674Z"
       }
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T14:22:20.863Z",
+      "lastModified": "2025-11-13T14:51:45.958Z",
       "taskCount": 10,
-      "completedCount": 7,
+      "completedCount": 10,
       "tags": [
         "master"
       ]

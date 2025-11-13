@@ -237,13 +237,12 @@ Capsules turn a Spec-Kit feature (`.specify/specs/<slug>`) into a router-ready h
 - Agents mount this file read-only when they need project-wide context, but capsules stay slim—add explicit excerpts to Router Notes when relevant.
 
 
-Every fixture under `.sentinel/contracts/fixtures/**` should validate against its schema before merge. Run the validator from the `.sentinel/` workspace:
+Every fixture under `.sentinel/contracts/fixtures/**` should validate against its schema before merge. Run the Python validator from the repository root:
 
 ```bash
-cd .sentinel
-pnpm validate:contracts                     # validate all fixtures
-pnpm validate:contracts -- --contract users.v1
-pnpm validate:contracts -- --fixture contracts/fixtures/users.v1/get_active.json
+uv run sentinel contracts validate
+uv run sentinel contracts validate --contract users.v1
+uv run sentinel contracts validate --fixture .sentinel/contracts/fixtures/users.v1/get_active.json
 ```
 
 Pass `--watch` to re-run automatically when contracts or fixtures change. The command prints a JSON summary; CI will treat any failures as blocking.
@@ -466,23 +465,19 @@ Our research and experimentation focus on:
 
 - **Linux/macOS/Windows**
 - [Supported](#-supported-ai-agents) AI coding agent.
-- [uv 0.4+](https://docs.astral.sh/uv/) for package management
+- [uv 0.4+](https://docs.astral.sh/uv/) for package management.
 - [Python 3.12+](https://www.python.org/downloads/) (pinned via `.tool-versions`)
-- [Node.js 20.17.x](https://nodejs.org/) (see `.node-version`)
-- [pnpm 9.x](https://pnpm.io/installation) (enable via `corepack`)
 - [Git](https://git-scm.com/downloads)
 
 > [!TIP]
-> Run `uv tool install --from pyproject.toml specify-cli` from the repository root after installing Python 3.12. Then enable Corepack and activate pnpm 9.x:
+> After installing Python 3.12 and uv, run:
 >
 > ```bash
-> corepack enable
-> corepack prepare pnpm@9.12.0 --activate
+> uv tool install --from pyproject.toml specify-cli
+> uv sync --locked --dev
 > ```
 >
-> Version pins for Python, Node.js, and pnpm live in `.tool-versions` so contributors and CI runners stay aligned automatically.
-
-For Windows environments, pass proxy or registry flags via `-PnpmFlags "--registry=https://registry.npmjs.org/"` or export `PNPM_FLAGS` before running the script.
+> This installs both `specify` and `sentinel` CLIs, then synchronizes dependencies for the Python-only workspace.
 
 If you encounter issues with an agent, please open an issue so we can refine the integration.
 

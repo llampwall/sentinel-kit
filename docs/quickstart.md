@@ -2,24 +2,19 @@
 
 This guide will help you get started with Spec-Driven Development using Spec Kit.
 
-> NEW: All automation scripts now provide both Bash (`.sh`) and PowerShell (`.ps1`) variants. The `specify` CLI auto-selects based on OS unless you pass `--script sh|ps`.
+> **Python-first note:** SentinelKit and Specify now ship as a single uv-native workspace. No Node or Vitest is required anymore; everything runs through `uv`/`uvx`.
 
 ## The 4-Step Process
 
 ### 1. Install Specify
 
-Initialize your project depending on the coding agent you're using:
+Initialize your project using the uv toolchain:
 
 ```bash
 uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
 ```
 
-Pick script type explicitly (optional):
-
-```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --script ps  # Force PowerShell
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME> --script sh  # Force POSIX shell
-```
+`uvx` auto-selects the correct shell for your platform, so no separate `--script` flag is needed. The bootstrap runs `uv sync` followed by `uv run sentinel selfcheck`, so you get a ready-to-go workspace on Windows, macOS, or Linux.
 
 ### 2. Create the Spec
 
@@ -110,11 +105,11 @@ implement specs/002-create-taskify/plan.md
 
 ## Key Principles
 
-- **Be explicit** about what you're building and why
-- **Don't focus on tech stack** during specification phase
-- **Iterate and refine** your specifications before implementation
-- **Validate** the plan before coding begins
-- **Let the AI agent handle** the implementation details
+- **Be explicit** about what you're building and why.
+- **Let `uv run sentinel selfcheck` guard** your automation to ensure contracts, context, MCP, and sentinel pytest gates are green before you ship.
+- **Stay platform-agnostic**: the repo runs identically on Windows, Linux, and macOS once you use the shared uv toolchain.
+- **Iterate and refine** your specs before giving them to the implementation agent.
+- **Explain the “why”** first so downstream agents can choose the right enforcement surfaces.
 
 ## Next Steps
 

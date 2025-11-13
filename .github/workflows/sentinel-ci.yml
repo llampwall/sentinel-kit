@@ -48,6 +48,9 @@ jobs:
       - name: MCP smoke
         run: uv run python -m sentinelkit.cli.main --root . --format json mcp smoke --timeout-call 90
 
+      - name: Node artifact guard
+        run: uv run python scripts/check_node_artifacts.py
+
       - name: Prepare test-results
         run: uv run python -c "from pathlib import Path; Path('test-results').mkdir(exist_ok=True)"
 
