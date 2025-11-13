@@ -712,7 +712,7 @@
           "7",
           "8"
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -720,9 +720,10 @@
             "description": "Create `sentinelkit/cli/mcp/server.py` providing a stdio-based asyncio JSON-RPC server that exposes the three sentinel tools.",
             "dependencies": [],
             "details": "Build the server entry that wires jsonrpc handling over stdin/stdout, registers `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, and `mcp.sentinel.decision_log`, and reuses underlying modules from tasks 3, 6, and 7 to return legacy-compatible payloads.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit-level async tests or fakes to validate dispatcher routes methods correctly.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:21:44.278Z"
           },
           {
             "id": 2,
@@ -732,9 +733,10 @@
               1
             ],
             "details": "Register the Python module entry in `pyproject`/Typer CLI, ensure `sentinel mcp smoke` launches the server subprocess, invokes the JSON-RPC handshake (initialize, tools/list, tools/call), and reports failures clearly.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CLI test invoking `sentinel mcp smoke` against a known fixture server responding with canned data.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:21:53.318Z"
           },
           {
             "id": 3,
@@ -745,9 +747,10 @@
               2
             ],
             "details": "Adjust `.mcp.json`, `.specify` docs, and any init scripts so the new server command (`uvx sentinel mcp server`) is referenced instead of pnpm Node scripts, aligning README instructions and automation hooks.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Template tests or snapshot comparisons verifying `.mcp.json` outputs include the new command and no stale Node paths remain.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:22:12.767Z"
           },
           {
             "id": 4,
@@ -759,14 +762,16 @@
               3
             ],
             "details": "Write async pytest suite launching the stdio server via subprocess, sending initialize/tools/list/tools/call requests for each tool, comparing JSON payloads to stored fixtures; add GitHub workflow steps and `sentinel selfcheck` hook to run `uv run sentinel mcp smoke`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Pytest smoke suite plus CI job verifying `uv run sentinel mcp smoke` passes across the OS matrix.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T14:22:20.861Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Break down the task into subtasks for implementing an MCP stdio server under `sentinelkit/cli/mcp/server.py` that exposes contract validation, sentinel runs, and decision log tools via asyncio/jsonrpc, wiring `sentinel mcp smoke` and CLI entry points (`python -m sentinelkit.cli.mcp.server`), updating `.mcp.json` templates and init scaffolding to point to the Python server, and creating pytest smoke tests under `tests/mcp/` that spin up the server, call initialize/tools/list/tools/call, and assert JSON payload parity with the legacy Node responses."
+        "expansionPrompt": "Break down the task into subtasks for implementing an MCP stdio server under `sentinelkit/cli/mcp/server.py` that exposes contract validation, sentinel runs, and decision log tools via asyncio/jsonrpc, wiring `sentinel mcp smoke` and CLI entry points (`python -m sentinelkit.cli.mcp.server`), updating `.mcp.json` templates and init scaffolding to point to the Python server, and creating pytest smoke tests under `tests/mcp/` that spin up the server, call initialize/tools/list/tools/call, and assert JSON payload parity with the legacy Node responses.",
+        "updatedAt": "2025-11-13T14:22:20.861Z"
       },
       {
         "id": "10",
@@ -859,9 +864,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T13:26:57.348Z",
+      "lastModified": "2025-11-13T14:22:20.863Z",
       "taskCount": 10,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "master"
       ]

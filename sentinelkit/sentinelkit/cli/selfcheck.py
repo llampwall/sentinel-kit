@@ -10,6 +10,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from sentinelkit.cli.mcp.smoke import run_smoke
 from sentinelkit.utils.errors import build_error_payload
 
 from .executor import CheckResult, run_checks
@@ -76,7 +77,7 @@ def _build_checks() -> Dict[str, callable]:
         "context": _placeholder_check("context", "Context lint pending implementation."),
         "capsule": _placeholder_check("capsule", "Capsule generator dry-run pending implementation."),
         "sentinels": _sentinel_check,
-        "mcp": _placeholder_check("mcp", "MCP smoke tests pending implementation."),
+        "mcp": _mcp_check,
     }
 
 
@@ -115,3 +116,24 @@ def _sentinel_check(context: CLIContext) -> CheckResult:
             duration=time.perf_counter() - start,
             error=build_error_payload(code="sentinels.error", message=str(exc)),
         )
+
+
+def _mcp_check(context: CLIContext) -> CheckResult:
+    """Run MCP smoke tests and surface status."""
+
+    start = time.perf_counter()
+    summary = run_smoke(context.root)
+    duration = time.perf_counter() - start
+    data = summary.to_dict()
+    if summary.ok:
+        return CheckResult(name="mcp", success=True, duration=duration, data=data)
+
+    failed_step = next((step for step in summary.steps if not step.success), None)
+    detail = failed_step.detail if failed_step else "MCP smoke failed."
+    error = build_error_payload(
+        code="mcp.failed",
+        message=detail or "MCP smoke failed.",
+        remediation="Run `uvx sentinel mcp smoke --timeout-call 60` for more detail.",
+        details={"failed_step": failed_step.name if failed_step else None},
+    )
+    return CheckResult(name="mcp", success=False, duration=duration, data=data, error=error)

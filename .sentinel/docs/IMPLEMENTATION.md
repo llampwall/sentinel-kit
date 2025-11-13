@@ -244,6 +244,23 @@
 - Updated the Typer namespace so `sentinel mcp server` (and `python -m sentinelkit.cli.mcp.server`) launches the new dispatcher rooted at the selected repo path, framing stdio messages via `Content-Length` and handling graceful shutdown/exit semantics.
 - Added regression coverage in `sentinelkit/tests/test_mcp_server.py`, which seeds a temp repo, dispatches initialize/list/tool calls synchronously via the async handler, and asserts contract validation summaries, sentinel run responses, decision-log dry runs, and unknown-tool errors all behave deterministically.
 
+## Task 9.2 Summary
+
+- Authored the smoke runner (`sentinelkit/cli/mcp/smoke.py`) that spawns `python -m sentinelkit.cli.mcp.server`, drives initialize → tools/list → tools/call with per-phase timeouts, retries initialize once, and executes dry-run decision-log calls with preview cleanup to avoid ledger mutations.
+- Extended the Typer namespace so `sentinel mcp smoke` exposes CLI-configurable timeouts, pretty/JSON summaries (with Rich tables), and failure exit codes suitable for `sentinel selfcheck`/CI wiring.
+- Added CLI regression coverage (`sentinelkit/tests/test_cli_mcp.py`) that bootstraps a minimal repo, invokes `sentinel mcp smoke --format json`, verifies all tool payloads are returned, and ensures the dry-run preview file is removed after the smoke completes.
+
+## Task 9.3 Summary
+
+- Updated the canonical MCP snippet (`.sentinel/snippets/mcp-contract-validate.md`) plus the workflow badge snippet to drop the pnpm servers in favor of the single Python entry point, documenting `uvx sentinel mcp server`/`uvx sentinel mcp smoke` and the simplified `.mcp.json` configuration.
+- Propagated the new guidance to user-facing docs: `README.md`, `.specify/README.md`, their backup copies, and the pull-request checklist now reference the Python MCP server/smoke command so scaffolds and contributors no longer see the deprecated pnpm scripts.
+
+## Task 9.4 Summary
+
+- Replaced the MCP placeholder in `sentinelkit/cli/selfcheck.py` with a real check that invokes the new smoke runner, surfaces structured results, and fails with actionable remediation when the JSON-RPC pipeline breaks (also wired into `sentinel selfcheck`).
+- Added deterministic pytest coverage: `sentinelkit/tests/test_cli_mcp.py` now exercises the CLI smoke command plus the selfcheck integration, and a repo-level suite (`tests/mcp/test_mcp_smoke.py`) runs the full `python -m sentinelkit.cli.main ... mcp smoke` flow to ensure the server spins up correctly.
+- CI now runs the smoke command explicitly (`sentinel-ci.yml`), keeping the gate green across platforms; the README/snippets already document the new workflow so contributors run the same verification locally.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

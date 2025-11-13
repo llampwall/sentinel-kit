@@ -45,6 +45,9 @@ jobs:
       - name: Sentinel selfcheck
         run: uv run sentinel selfcheck --verbose
 
+      - name: MCP smoke
+        run: uv run python -m sentinelkit.cli.main --root . --format json mcp smoke --timeout-call 90
+
       - name: Prepare test-results
         run: uv run python -c "from pathlib import Path; Path('test-results').mkdir(exist_ok=True)"
 

@@ -4,7 +4,7 @@
 - [ ] Decision added via `node .sentinel/scripts/decision-log.mjs`
 - [ ] Sentinels run locally: `pnpm --dir=.sentinel vitest run --config vitest.config.sentinel.ts --reporter=json`
 - [ ] Context linter: `pnpm --dir=.sentinel context:lint`
-- [ ] MCP smoke (optional, recommended): `pnpm --dir=.sentinel mcp:sentinel-run:smoke`
+- [ ] MCP smoke (optional, recommended): `uvx sentinel mcp smoke`
 
 ## Summary
 Describe the change, linked tasks, and any follow-up required.

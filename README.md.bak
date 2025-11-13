@@ -128,37 +128,30 @@ Failures in any step block merges and artifacts are uploaded for debugging.
 
 <!-- SENTINEL:MCP-CONTRACT-VALIDATE:start -->
 <!-- ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0014 -->
-### MCP contract validator
+### MCP sentinel tooling
 
-Use the Python CLI when you need JSON-RPC tooling access without leaving your editor.
+Use the Python MCP server when you need JSON-RPC access to contracts, sentinel tests, or the decision ledger without leaving your editor.
 
 **Commands**
-- uv run sentinel contracts validate (CLI front door for contract validation; logic is landing as the migration progresses).
-- uv run sentinel mcp server starts the stdio server (press Ctrl+C to stop).
-
-### MCP sentinel + decision log servers
-
-The Typer CLI exposes placeholders for the legacy workflows while we finish the migration:
-
-- uv run sentinel context lint - context lint entry point.
-- uv run sentinel decisions ... - decision log entry point.
+- `uvx sentinel mcp server` starts the stdio JSON-RPC server (press `Ctrl+C` to stop). It serves `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, and `mcp.sentinel.decision_log`.
+- `uvx sentinel mcp smoke` runs the initialize → tools/list → tools/call handshake against the Python server (add `--timeout-call 60` when sentinel suites take longer).
 
 **.mcp.json snippet**
-`json
+```json
 {
   "mcpServers": {
     "sentinel": {
-      "command": "uv",
-      "args": ["run", "sentinel", "mcp", "server"],
+      "command": "uvx",
+      "args": ["sentinel", "mcp", "server"],
       "env": {
         "PYTHONUTF8": "1"
       }
     }
   }
 }
-`
-- Add API keys or additional env vars per server inside env as needed.
-- The server watches .sentinel/contracts/** and .sentinel/DECISIONS.md, so you can keep it running while editing.
+```
+- Add API keys or additional env vars inside `env` as needed (e.g., `SENTINEL_DECISION_AGENT` overrides ProducedBy defaults).
+- The server watches `.sentinel/contracts/**`, `tests/sentinels/**`, and `.sentinel/DECISIONS.md`, so you can keep it running while editing.
 <!-- SENTINEL:MCP-CONTRACT-VALIDATE:end -->
 
 <!-- SENTINEL:PROMPT-RENDER:start -->

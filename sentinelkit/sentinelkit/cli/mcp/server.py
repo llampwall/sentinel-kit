@@ -264,7 +264,7 @@ class SentinelMCPServer:
             quiet=True,
         )
         summary = dict(summary)
-        summary["exit_code"] = exit_code
+        summary["exit_code"] = int(exit_code)
         summary["marker"] = marker
         return ToolResponse.from_json(summary, is_error=exit_code != 0)
 
