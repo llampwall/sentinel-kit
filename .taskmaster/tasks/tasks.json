@@ -630,9 +630,10 @@
               2
             ],
             "details": "Refactor shared check routine so Sentinel selfcheck runs first, capture JSON/structured output for actionable messaging, and harmonize CLI exit behavior with existing scripts.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests mocking sentinel selfcheck responses to confirm success/failure surfaces; manual run verifying Rich panels render.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T11:49:05.000Z"
           },
           {
             "id": 4,
@@ -692,7 +693,7 @@
         "complexity": 9,
         "recommendedSubtasks": 7,
         "expansionPrompt": "Plan subtasks for enhancing `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Python Sentinel assets (sentinelkit package, .sentinel prompts/agents/templates, workflows) and runs `uv sync` + `sentinel selfcheck`, updating `specify check` and other health commands to run Sentinel gates, refactoring slash-command templates in `templates/commands/*.md` (and supporting bash/ps scripts) so each `/speckit.*` command invokes the new Sentinel subcommands, adding agent bundle sync hooks, and extending tests/mocks to cover these flows.",
-        "updatedAt": "2025-11-13T11:28:01.697Z"
+        "updatedAt": "2025-11-13T11:49:05.000Z"
       },
       {
         "id": "9",
@@ -854,7 +855,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T11:28:01.699Z",
+      "lastModified": "2025-11-13T11:49:05.002Z",
       "taskCount": 10,
       "completedCount": 5,
       "tags": [

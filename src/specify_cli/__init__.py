@@ -1332,8 +1332,16 @@ def init(
     console.print(enhancements_panel)
 
 @app.command()
-def check():
-    """Check that all required tools are installed."""
+def check(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        dir_okay=True,
+        file_okay=False,
+        help="Repository root to run Sentinel checks from (defaults to current directory).",
+    )
+):
+    """Check required tools and run Sentinel selfcheck."""
     show_banner()
     console.print("[bold]Checking for installed tools...[/bold]\n")
 
@@ -1352,29 +1360,51 @@ def check():
         if requires_cli:
             agent_results[agent_key] = check_tool(agent_key, tracker=tracker)
         else:
-            # IDE-based agent - skip CLI check and mark as optional
             tracker.skip(agent_key, "IDE-based, no CLI check")
-            agent_results[agent_key] = False  # Don't count IDE agents as "found"
+            agent_results[agent_key] = False
 
-    # Check VS Code variants (not in agent config)
     tracker.add("code", "Visual Studio Code")
-    code_ok = check_tool("code", tracker=tracker)
+    check_tool("code", tracker=tracker)
 
     tracker.add("code-insiders", "Visual Studio Code Insiders")
-    code_insiders_ok = check_tool("code-insiders", tracker=tracker)
+    check_tool("code-insiders", tracker=tracker)
 
     console.print(tracker.render())
-
-    console.print("\n[bold green]Specify CLI is ready to use![/bold green]")
-
-    if not git_ok:
-        console.print("[dim]Tip: Install git for repository management[/dim]")
-
-    if not any(agent_results.values()):
-        console.print("[dim]Tip: Install an AI assistant for the best experience[/dim]")
-
     console.print("\n[bold]Running Sentinel selfcheck...[/bold]\n")
-    run_sentinel_selfcheck()
+
+    sentinel_tracker = StepTracker("Sentinel Gate")
+    sentinel_tracker.add("sentinel-pre", "Summarize tool coverage")
+    sentinel_tracker.complete("sentinel-pre", "tools enumerated")
+    sentinel_tracker.add("sentinel-run", "sentinel selfcheck")
+    console.print(sentinel_tracker.render())
+
+    try:
+        sentinel_tracker.start("sentinel-run", f"uv run sentinel selfcheck --root {root}")
+        run_sentinel_selfcheck(root=root)
+        sentinel_tracker.complete("sentinel-run", "ok")
+    except typer.Exit as exc:
+        sentinel_tracker.error("sentinel-run", f"exit {exc.exit_code}")
+        console.print(
+            Panel(
+                "Sentinel selfcheck failed. Resolve the diagnostics above before running slash commands.",
+                title="[red]Sentinel Gate Failed[/red]",
+                border_style="red",
+            )
+        )
+        raise
+    except Exception as exc:
+        sentinel_tracker.error("sentinel-run", str(exc))
+        console.print(
+            Panel(
+                f"Sentinel selfcheck encountered an unexpected error: {exc}",
+                title="[red]Sentinel Gate Error[/red]",
+                border_style="red",
+            )
+        )
+        raise typer.Exit(1)
+    else:
+        console.print(sentinel_tracker.render())
+        console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
 
 
 def run_sentinel_selfcheck(root: Path | None = None) -> None:
@@ -1390,7 +1420,13 @@ def run_sentinel_selfcheck(root: Path | None = None) -> None:
         )
         raise typer.Exit(1)
     except subprocess.CalledProcessError as exc:
-        console.print(f"[bold red]Sentinel selfcheck failed (exit code {exc.returncode}).[/bold red]")
+        console.print(
+            Panel(
+                f"Sentinel selfcheck failed (exit code {exc.returncode}). See logs above for details.",
+                title="[red]Sentinel Selfcheck[/red]",
+                border_style="red",
+            )
+        )
         raise typer.Exit(exc.returncode)
     else:
         console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")

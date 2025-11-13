@@ -209,6 +209,12 @@
 - Added progress tracking + Rich messaging for the Sentinel steps (`sentinel-copy`, `sentinel-uv`, `sentinel-selfcheck`) so operators can see exactly which phase is running; failures bubble up with actionable guidance (missing uv, selfcheck errors, etc.).
 - Created pytest coverage in `tests/specify_cli/test_sentinel_scaffold.py` that exercises `apply_sentinel_scaffold` in a tmpdir, asserting that key files (pyproject, scripts/bootstrap.py, sentinelkit package, `.sentinel/docs/IMPLEMENTATION.md`, CI workflow) land in the destination while the uv/selfcheck runners are invoked.
 
+## Task 8.3 Summary
+
+- Updated `specify check` so it always runs the Sentinel gate via the shared `run_sentinel_selfcheck` helper, complete with Rich tracker output and structured failure messaging. The command now accepts `--root` to control where the selfcheck runs, matching the init behavior.
+- Improved the helper itself to accept arbitrary roots and surface Rich panels on subprocess failures, keeping operator feedback consistent across init/check workflows.
+- Verified existing CLI suites (`tests/cli/test_selfcheck.py`, `tests/cli/test_cli_commands.py`) still pass after the wiring change; no new regressions observed.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.
