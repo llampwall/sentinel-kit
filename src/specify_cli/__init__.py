@@ -33,7 +33,7 @@ import shutil
 import shlex
 import json
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Iterable, List
 
 import typer
 import httpx
@@ -155,6 +155,52 @@ AGENT_CONFIG = {
 SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
 CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+
+DEFAULT_COPY_IGNORE = ["__pycache__", "*.pyc", "*.pyo", ".DS_Store", "Thumbs.db"]
+
+SENTINEL_FILE_ASSETS = [
+    ("pyproject.toml", "pyproject.toml"),
+    ("uv.lock", "uv.lock"),
+    (".tool-versions", ".tool-versions"),
+    ("Makefile", "Makefile"),
+    ("scripts/bootstrap.py", "scripts/bootstrap.py"),
+    (".github/workflows/sentinel-ci.yml", ".github/workflows/sentinel-ci.yml"),
+]
+
+SENTINEL_DIR_ASSETS = [
+    ("sentinelkit", "sentinelkit"),
+    (".sentinel/agents", ".sentinel/agents"),
+    (".sentinel/context", ".sentinel/context"),
+    (".sentinel/contracts", ".sentinel/contracts"),
+    (".sentinel/prompts", ".sentinel/prompts"),
+    (".sentinel/router_log", ".sentinel/router_log"),
+    (".sentinel/snippets", ".sentinel/snippets"),
+    (".sentinel/status", ".sentinel/status"),
+    (".sentinel/templates", ".sentinel/templates"),
+]
+
+SENTINEL_RUNBOOK_TEMPLATE = (
+    ".sentinel/docs/IMPLEMENTATION.template.md",
+    ".sentinel/docs/IMPLEMENTATION.md",
+)
+
+AGENT_PROMPT_DIRS = {
+    "claude": Path(".claude/prompts"),
+    "gemini": Path(".gemini/prompts"),
+    "cursor-agent": Path(".cursor/prompts"),
+    "qwen": Path(".qwen/prompts"),
+    "opencode": Path(".opencode/prompts"),
+    "codex": Path(".codex/prompts"),
+    "windsurf": Path(".windsurf/prompts"),
+    "kilocode": Path(".kilocode/prompts"),
+    "auggie": Path(".augment/prompts"),
+    "codebuddy": Path(".codebuddy/prompts"),
+    "roo": Path(".roo/prompts"),
+    "amp": Path(".agents/prompts"),
+    "q": Path(".amazonq/prompts"),
+}
 
 BANNER = """
 ███████╗██████╗ ███████╗ ██████╗██╗███████╗██╗   ██╗
@@ -862,11 +908,164 @@ def ensure_executable_scripts(project_path: Path, tracker: StepTracker | None = 
             for f in failures:
                 console.print(f"  - {f}")
 
+
+def _copy_file_asset(src_rel: str, dest_rel: str, project_path: Path) -> None:
+    src = REPO_ROOT / src_rel
+    if not src.exists():
+        raise FileNotFoundError(f"Sentinel asset '{src_rel}' is missing from the toolchain.")
+    dest = project_path / dest_rel
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
+
+
+def _copy_dir_asset(src_rel: str, dest_rel: str, project_path: Path, ignore: Iterable[str] | None = None) -> None:
+    src = REPO_ROOT / src_rel
+    if not src.exists():
+        raise FileNotFoundError(f"Sentinel directory '{src_rel}' is missing from the toolchain.")
+    dest = project_path / dest_rel
+    if ignore:
+        ignore_fn = shutil.ignore_patterns(*ignore)
+    else:
+        ignore_fn = None
+    shutil.copytree(src, dest, dirs_exist_ok=True, ignore=ignore_fn)
+
+
+def _copy_runbook_template(project_path: Path) -> None:
+    src_rel, dest_rel = SENTINEL_RUNBOOK_TEMPLATE
+    src = REPO_ROOT / src_rel
+    if not src.exists():
+        raise FileNotFoundError("Sentinel runbook template is missing.")
+    dest = project_path / dest_rel
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src, dest)
+
+
+def sync_agent_prompt_bundles(project_path: Path) -> int:
+    """Copy canonical Sentinel prompts into supported agent bundles."""
+    prompts_dir = REPO_ROOT / ".sentinel" / "prompts"
+    if not prompts_dir.exists():
+        return 0
+    copied = 0
+    for target in AGENT_PROMPT_DIRS.values():
+        dest_dir = project_path / target
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        for prompt_file in prompts_dir.iterdir():
+            if prompt_file.is_file():
+                shutil.copy2(prompt_file, dest_dir / prompt_file.name)
+                copied += 1
+    return copied
+
+
+def run_uv_sync_in_project(project_path: Path) -> None:
+    """Run uv sync inside the scaffold, falling back to unlocked sync on failure."""
+    commands = [
+        ["uv", "sync", "--locked", "--all-groups"],
+        ["uv", "sync", "--locked"],
+        ["uv", "sync", "--dev"],
+    ]
+    last_error: subprocess.CalledProcessError | None = None
+    for idx, command in enumerate(commands):
+        try:
+            subprocess.run(command, cwd=project_path, check=True)
+            return
+        except FileNotFoundError as exc:
+            console.print(
+                "[bold red]uv command not found while syncing Sentinel workspace.[/bold red] "
+                "Install uv (https://docs.astral.sh/uv/) and re-run `specify init --sentinel`."
+            )
+            raise typer.Exit(1) from exc
+        except subprocess.CalledProcessError as exc:
+            last_error = exc
+            if idx < len(commands) - 1:
+                console.print(
+                    Panel(
+                        f"uv sync command {' '.join(command[1:])} failed with exit code {exc.returncode}. "
+                        "Retrying with a more permissive command...",
+                        title="[yellow]uv sync retry[/yellow]",
+                        border_style="yellow",
+                    )
+                )
+            else:
+                break
+    if last_error:
+        console.print(
+            "[bold red]uv sync failed after multiple attempts. See logs above for details.[/bold red]"
+        )
+        raise typer.Exit(last_error.returncode)
+
+
+def run_sentinel_selfcheck_in_project(project_path: Path) -> None:
+    run_sentinel_selfcheck(root=project_path)
+
+
+def apply_sentinel_scaffold(project_path: Path, tracker: StepTracker | None = None) -> None:
+    """Copy Sentinel assets into the scaffold and run the bootstrap commands."""
+    copy_key = "sentinel-copy"
+    if tracker:
+        tracker.start(copy_key, "copying assets")
+    try:
+        total = 0
+        for src_rel, dest_rel in SENTINEL_FILE_ASSETS:
+            _copy_file_asset(src_rel, dest_rel, project_path)
+            total += 1
+        for src_rel, dest_rel in SENTINEL_DIR_ASSETS:
+            _copy_dir_asset(src_rel, dest_rel, project_path, DEFAULT_COPY_IGNORE)
+            total += 1
+        _copy_runbook_template(project_path)
+        total += 1
+    except Exception as exc:
+        if tracker:
+            tracker.error(copy_key, str(exc))
+        raise
+    else:
+        if tracker:
+            tracker.complete(copy_key, f"{total} assets")
+
+    prompts_key = "sentinel-prompts"
+    if tracker:
+        tracker.start(prompts_key, "sync agent prompts")
+    try:
+        prompt_count = sync_agent_prompt_bundles(project_path)
+    except Exception as exc:
+        if tracker:
+            tracker.error(prompts_key, str(exc))
+        raise
+    else:
+        if tracker:
+            tracker.complete(prompts_key, f"{prompt_count} files")
+
+    sync_key = "sentinel-uv"
+    if tracker:
+        tracker.start(sync_key, "uv sync")
+    try:
+        run_uv_sync_in_project(project_path)
+    except Exception as exc:
+        if tracker:
+            tracker.error(sync_key, str(exc))
+        raise
+    else:
+        if tracker:
+            tracker.complete(sync_key, "uv sync ok")
+
+    selfcheck_key = "sentinel-selfcheck"
+    if tracker:
+        tracker.start(selfcheck_key, "sentinel selfcheck")
+    try:
+        run_sentinel_selfcheck_in_project(project_path)
+    except Exception as exc:
+        if tracker:
+            tracker.error(selfcheck_key, str(exc))
+        raise
+    else:
+        if tracker:
+            tracker.complete(selfcheck_key, "selfcheck ok")
+
 @app.command()
 def init(
     project_name: str = typer.Argument(None, help="Name for your new project directory (optional if using --here, or use '.' for current directory)"),
     ai_assistant: str = typer.Option(None, "--ai", help="AI assistant to use: claude, gemini, copilot, cursor-agent, qwen, opencode, codex, windsurf, kilocode, auggie, codebuddy, amp, or q"),
     script_type: str = typer.Option(None, "--script", help="Script type to use: sh or ps"),
+    sentinel: bool = typer.Option(False, "--sentinel", help="Include SentinelKit enforcement scaffolding and run uv sync + sentinel selfcheck."),
     ignore_agent_tools: bool = typer.Option(False, "--ignore-agent-tools", help="Skip checks for AI agent tools like Claude Code"),
     no_git: bool = typer.Option(False, "--no-git", help="Skip git repository initialization"),
     here: bool = typer.Option(False, "--here", help="Initialize project in the current directory instead of creating a new one"),
@@ -954,6 +1153,7 @@ def init(
 
     if not here:
         setup_lines.append(f"{'Target Path':<15} [dim]{project_path}[/dim]")
+    setup_lines.append(f"{'Sentinel':<15} " + ("[green]enabled[/green]" if sentinel else "[dim]disabled[/dim]"))
 
     console.print(Panel("\n".join(setup_lines), border_style="cyan", padding=(1, 2)))
 
@@ -1021,17 +1221,31 @@ def init(
     tracker.complete("ai-select", f"{selected_ai}")
     tracker.add("script-select", "Select script type")
     tracker.complete("script-select", selected_script)
-    for key, label in [
+    tracker_steps: List[tuple[str, str]] = [
         ("fetch", "Fetch latest release"),
         ("download", "Download template"),
         ("extract", "Extract template"),
         ("zip-list", "Archive contents"),
         ("extracted-summary", "Extraction summary"),
         ("chmod", "Ensure scripts executable"),
-        ("cleanup", "Cleanup"),
-        ("git", "Initialize git repository"),
-        ("final", "Finalize")
-    ]:
+    ]
+    if sentinel:
+        tracker_steps.extend(
+            [
+                ("sentinel-copy", "Copy Sentinel assets"),
+                ("sentinel-prompts", "Sync agent prompts"),
+                ("sentinel-uv", "Sync Sentinel dependencies"),
+                ("sentinel-selfcheck", "Run Sentinel selfcheck"),
+            ]
+        )
+    tracker_steps.extend(
+        [
+            ("cleanup", "Cleanup"),
+            ("git", "Initialize git repository"),
+            ("final", "Finalize"),
+        ]
+    )
+    for key, label in tracker_steps:
         tracker.add(key, label)
 
     # Track git error message outside Live context so it persists
@@ -1047,6 +1261,9 @@ def init(
             download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, github_token=github_token)
 
             ensure_executable_scripts(project_path, tracker=tracker)
+
+            if sentinel:
+                apply_sentinel_scaffold(project_path, tracker=tracker)
 
             if not no_git:
                 tracker.start("git")
@@ -1161,8 +1378,16 @@ def init(
     console.print(enhancements_panel)
 
 @app.command()
-def check():
-    """Check that all required tools are installed."""
+def check(
+    root: Path = typer.Option(
+        Path("."),
+        "--root",
+        dir_okay=True,
+        file_okay=False,
+        help="Repository root to run Sentinel checks from (defaults to current directory).",
+    )
+):
+    """Check required tools and run Sentinel selfcheck."""
     show_banner()
     console.print("[bold]Checking for installed tools...[/bold]\n")
 
@@ -1181,30 +1406,79 @@ def check():
         if requires_cli:
             agent_results[agent_key] = check_tool(agent_key, tracker=tracker)
         else:
-            # IDE-based agent - skip CLI check and mark as optional
             tracker.skip(agent_key, "IDE-based, no CLI check")
-            agent_results[agent_key] = False  # Don't count IDE agents as "found"
+            agent_results[agent_key] = False
 
-    # Check VS Code variants (not in agent config)
     tracker.add("code", "Visual Studio Code")
-    code_ok = check_tool("code", tracker=tracker)
+    check_tool("code", tracker=tracker)
 
     tracker.add("code-insiders", "Visual Studio Code Insiders")
-    code_insiders_ok = check_tool("code-insiders", tracker=tracker)
+    check_tool("code-insiders", tracker=tracker)
 
     console.print(tracker.render())
+    console.print("\n[bold]Running Sentinel selfcheck...[/bold]\n")
 
-    console.print("\n[bold green]Specify CLI is ready to use![/bold green]")
+    sentinel_tracker = StepTracker("Sentinel Gate")
+    sentinel_tracker.add("sentinel-pre", "Summarize tool coverage")
+    sentinel_tracker.complete("sentinel-pre", "tools enumerated")
+    sentinel_tracker.add("sentinel-run", "sentinel selfcheck")
+    console.print(sentinel_tracker.render())
 
-    if not git_ok:
-        console.print("[dim]Tip: Install git for repository management[/dim]")
+    try:
+        sentinel_tracker.start("sentinel-run", f"uv run sentinel selfcheck --root {root}")
+        run_sentinel_selfcheck(root=root)
+        sentinel_tracker.complete("sentinel-run", "ok")
+    except typer.Exit as exc:
+        sentinel_tracker.error("sentinel-run", f"exit {exc.exit_code}")
+        console.print(
+            Panel(
+                "Sentinel selfcheck failed. Resolve the diagnostics above before running slash commands.",
+                title="[red]Sentinel Gate Failed[/red]",
+                border_style="red",
+            )
+        )
+        raise
+    except Exception as exc:
+        sentinel_tracker.error("sentinel-run", str(exc))
+        console.print(
+            Panel(
+                f"Sentinel selfcheck encountered an unexpected error: {exc}",
+                title="[red]Sentinel Gate Error[/red]",
+                border_style="red",
+            )
+        )
+        raise typer.Exit(1)
+    else:
+        console.print(sentinel_tracker.render())
+        console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
 
-    if not any(agent_results.values()):
-        console.print("[dim]Tip: Install an AI assistant for the best experience[/dim]")
+
+def run_sentinel_selfcheck(root: Path | None = None) -> None:
+    """Invoke the Sentinel CLI selfcheck via uv."""
+    root_path = Path(root) if root else Path.cwd()
+    command = ["uv", "run", "sentinel", "selfcheck", "--root", str(root_path)]
+    try:
+        subprocess.run(command, check=True, cwd=root_path)
+    except FileNotFoundError:
+        console.print(
+            "[bold red]uv command not found.[/bold red] "
+            "Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
+        )
+        raise typer.Exit(1)
+    except subprocess.CalledProcessError as exc:
+        console.print(
+            Panel(
+                f"Sentinel selfcheck failed (exit code {exc.returncode}). See logs above for details.",
+                title="[red]Sentinel Selfcheck[/red]",
+                border_style="red",
+            )
+        )
+        raise typer.Exit(exc.returncode)
+    else:
+        console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
 
 def main():
     app()
 
 if __name__ == "__main__":
     main()
-

@@ -1,0 +1,37 @@
+{
+  "ok": false,
+  "results": [
+    {
+      "ok": false,
+      "contract": "sample",
+      "fixture": "{{ROOT}}/.sentinel/contracts/fixtures/sample/invalid.json",
+      "errors": [
+        {
+          "message": "'value' is a required property",
+          "instance_path": "",
+          "schema_path": "required",
+          "remediation": null
+        }
+      ]
+    },
+    {
+      "ok": false,
+      "contract": "sample",
+      "fixture": "{{ROOT}}/.sentinel/contracts/fixtures/sample/missing.json",
+      "errors": [
+        {
+          "message": "Fixture missing ProducedBy header: {{ROOT}}/.sentinel/contracts/fixtures/sample/missing.json",
+          "instance_path": "",
+          "schema_path": "ProducedBy",
+          "remediation": "Include ProducedBy=AGENT RulesHash=AGENT@X.Y Decision=D-####"
+        }
+      ]
+    },
+    {
+      "ok": true,
+      "contract": "sample",
+      "fixture": "{{ROOT}}/.sentinel/contracts/fixtures/sample/valid.json",
+      "errors": []
+    }
+  ]
+}

@@ -1,8 +1,23 @@
 ---
 description: Execute the implementation planning workflow using the plan template to generate design artifacts.
 scripts:
-  sh: scripts/bash/setup-plan.sh --json
-  ps: scripts/powershell/setup-plan.ps1 -Json
+  sh: |
+    TMP_JSON=$(mktemp)
+    scripts/bash/setup-plan.sh --json | tee "$TMP_JSON"
+    STATUS=${PIPESTATUS[0]}
+    if [ $STATUS -ne 0 ]; then rm -f "$TMP_JSON"; exit $STATUS; fi
+    scripts/bash/run-sentinel-gate.sh --gate plan --paths-json "$TMP_JSON"
+    STATUS=$?
+    rm -f "$TMP_JSON"
+    exit $STATUS
+  ps: |
+    $tmp = New-TemporaryFile
+    scripts/powershell/setup-plan.ps1 -Json | Tee-Object -FilePath $tmp.FullName
+    if ($LASTEXITCODE -ne 0) { Remove-Item $tmp.FullName -Force; exit $LASTEXITCODE }
+    scripts/powershell/run-sentinel-gate.ps1 -Gate plan -PathsJson $tmp.FullName
+    $code = $LASTEXITCODE
+    Remove-Item $tmp.FullName -Force
+    if ($code -ne 0) { exit $code }
 agent_scripts:
   sh: scripts/bash/update-agent-context.sh __AGENT__
   ps: scripts/powershell/update-agent-context.ps1 -AgentType __AGENT__
@@ -19,6 +34,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Outline
 
 1. **Setup**: Run `{SCRIPT}` from repo root and parse JSON for FEATURE_SPEC, IMPL_PLAN, SPECS_DIR, BRANCH. For single quotes in args like "I'm Groot", use escape syntax: e.g 'I'\''m Groot' (or double-quote if possible: "I'm Groot").
+
+> Sentinel Gate: Contracts + context lint already ran via the helper script. Fix any drift they highlighted before design begins; otherwise derived artifacts will be invalid.
 
 2. **Load context**: Read FEATURE_SPEC and `/memory/constitution.md`. Load IMPL_PLAN template (already copied).
 

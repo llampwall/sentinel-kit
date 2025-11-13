@@ -47,7 +47,31 @@ specify --help
 
 Re-running after code edits requires no reinstall because of editable mode.
 
-## 4. Invoke with uvx Directly From Git (Current Branch)
+## SentinelKit Bootstrap (Python)
+
+When you need the Sentinel enforcement tooling locally, run:
+
+```bash
+uv sync
+python scripts/bootstrap.py
+# or: make bootstrap
+```
+
+The bootstrap script performs `uv sync`, `uv run sentinel selfcheck`, and `uv run pytest -q` so the Typer CLI, selfcheck, and smoke tests all pass before you iterate.
+
+## 4. Run Sentinel selfcheck
+
+After syncing dependencies, run the selfcheck to ensure the enforcement suite is healthy:
+
+```bash
+uv run sentinel selfcheck --verbose
+# or inside specify CLI:
+specify check
+```
+
+Use `--format json` for machine-readable output (`specify check` consumes the same schema).
+
+## 5. Invoke with uvx Directly From Git (Current Branch)
 
 `uvx` can run from a local path (or a Git ref) to simulate user flows:
 

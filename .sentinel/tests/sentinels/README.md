@@ -16,7 +16,10 @@ Sentinel tests codify previously fixed bugs so regressions are caught before mer
     make sentinel-install     # macOS/Linux
     pwsh ./scripts/setup.ps1  # Windows
 
-    # run sentinels
+    # run sentinels (Python)
+    uv run sentinel sentinels run
+
+    # legacy pnpm workflow (deprecated)
     cd .sentinel
     pnpm test:sentinels                     # full suite
     pnpm test:sentinels -- --filter [slug]  # targeted run

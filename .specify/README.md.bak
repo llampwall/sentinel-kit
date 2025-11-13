@@ -4,51 +4,30 @@
 
 <!-- SENTINEL:MCP-CONTRACT-VALIDATE:start -->
 <!-- ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0014 -->
-### MCP contract validator
+### MCP sentinel tooling
 
-Use the MCP server when you need JSON-RPC tooling access to the contract fixtures without leaving your editor.
+Use the Python MCP server when you need JSON-RPC access to contracts, sentinel tests, or the decision ledger without leaving your editor.
 
 **Commands**
-- `pnpm --dir=.sentinel mcp:contract-validate` starts the stdio server (press `Ctrl+C` to stop).
-- `pnpm --dir=.sentinel mcp:contract-validate:smoke` runs the initialize → tools/list → tools/call handshake.
-
-### MCP sentinel + decision log servers
-
-- `pnpm --dir=.sentinel mcp:sentinel-run` exposes the `sentinel_run` tool (accepts optional `filter`).
-- `pnpm --dir=.sentinel mcp:sentinel-run:smoke` verifies the server before CI.
-- `pnpm --dir=.sentinel mcp:decision-log` wraps the decision-log CLI for ledger append.
-- `pnpm --dir=.sentinel mcp:decision-log:smoke` sanity-checks the append path.
+- `uvx sentinel mcp server` starts the stdio JSON-RPC server (press `Ctrl+C` to stop). It serves `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, and `mcp.sentinel.decision_log`.
+- `uvx sentinel mcp smoke` runs the initialize → tools/list → tools/call handshake against the Python server (add `--timeout-call 60` when sentinel suites take longer).
 
 **.mcp.json snippet**
 ```json
 {
   "mcpServers": {
-    "contract-validate": {
-      "command": "pnpm",
-      "args": ["--dir=.sentinel", "mcp:contract-validate"],
+    "sentinel": {
+      "command": "uvx",
+      "args": ["sentinel", "mcp", "server"],
       "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "sentinel-run": {
-      "command": "pnpm",
-      "args": ["--dir=.sentinel", "mcp:sentinel-run"],
-      "env": {
-        "NODE_ENV": "production"
-      }
-    },
-    "decision-log": {
-      "command": "pnpm",
-      "args": ["--dir=.sentinel", "mcp:decision-log"],
-      "env": {
-        "NODE_ENV": "production"
+        "PYTHONUTF8": "1"
       }
     }
   }
 }
 ```
-- Add API keys or additional env vars per server inside `env` as needed.
-- The servers watch `.sentinel/contracts/**` and `.sentinel/DECISIONS.md`, so you can keep them running while editing.
+- Add API keys or additional env vars inside `env` as needed (e.g., `SENTINEL_DECISION_AGENT` overrides ProducedBy defaults).
+- The server watches `.sentinel/contracts/**`, `tests/sentinels/**`, and `.sentinel/DECISIONS.md`, so you can keep it running while editing.
 <!-- SENTINEL:MCP-CONTRACT-VALIDATE:end -->
 
 

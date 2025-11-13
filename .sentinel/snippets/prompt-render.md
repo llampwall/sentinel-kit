@@ -1,18 +1,18 @@
 <!-- ProducedBy=BUILDER RulesHash=BUILDER@1.1 Decision=D-0011 -->
 ### Prompt renderer workflow
 
-The Eta-based renderer lives in `.sentinel/scripts/orch/prompt-render.mjs`. Use it to hand capsules to the router and lead agents with the correct context and logging.
+The Python renderer now lives under `sentinelkit.prompt.render` and is exposed via the Typer CLI (`uv run sentinel prompts render`). Use it to hand capsules to the router and lead agents with the correct context, logging, and Allowed Context validation.
 
-- Before rendering, the CLI now lints the capsule's Allowed Context via `pnpm --dir=.sentinel context:lint`. Invalid include lists (missing files, forbidden paths, or empty sections) abort the render with actionable errors, so fix the capsule before retrying.
+- Before rendering, the CLI automatically lints the capsule via `sentinel context lint`. Invalid include lists (missing files, forbidden paths, or empty sections) abort the render with actionable errors—fix the capsule before retrying.
 
 1. **Render prompts** from the repo root:
    ```bash
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.mjs \
+   uv run sentinel prompts render \
      --mode router \
      --capsule .specify/specs/<slug>/capsule.md \
      [--output router.md]
 
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.mjs \
+   uv run sentinel prompts render \
      --mode capsule \
      --capsule .specify/specs/<slug>/capsule.md \
      --agent builder \
@@ -22,20 +22,16 @@ The Eta-based renderer lives in `.sentinel/scripts/orch/prompt-render.mjs`. Use 
    - Capsule paths are relative to repo root; pass absolute paths if running elsewhere.
 2. **Validate router decisions** (optional but recommended) by supplying the router’s JSON file:
    ```bash
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.mjs \
+   uv run sentinel prompts render \
      --mode router \
      --capsule .specify/specs/<slug>/capsule.md \
      --router-json ./router-output.json
    ```
-   This enforces the JSON schema (leadAgent, requiredOutputs[], contextToMount[], notes) and appends an entry to `.sentinel/router_log/<timestamp>-<slug>.jsonl` with a hashed capsule path.
-3. **Smoke-test** the end-to-end flow anytime the renderer changes:
-   ```bash
-   pnpm --dir=.sentinel node scripts/orch/prompt-render.smoke.mjs [capsule] [agent]
-   ```
-   The smoke script renders router, then capsule mode (defaults to `005-capsule-gen` + `builder`) and prints previews + prompt lengths.
+   This enforces the router JSON schema (leadAgent, requiredOutputs[], contextToMount[], notes) and appends an entry to `.sentinel/router_log/<timestamp>-<slug>.jsonl` with a hashed capsule path.
+3. **Smoke-test** the end-to-end flow anytime the renderer changes by rendering both router and capsule prompts (with `--output`) and spot-checking the log file.
 4. **Tests**:
    ```bash
-   pnpm --dir=.sentinel vitest run tests/orch/agents.test.ts tests/orch/prompt-render.test.ts
+   uv run pytest -q tests/prompts/test_renderer.py
    ```
    These cover agent discovery, template rendering, router schema validation, log writes, and CLI flows.
 

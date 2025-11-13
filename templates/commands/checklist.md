@@ -1,8 +1,23 @@
 ---
 description: Generate a custom checklist for the current feature based on user requirements.
 scripts:
-  sh: scripts/bash/check-prerequisites.sh --json
-  ps: scripts/powershell/check-prerequisites.ps1 -Json
+  sh: |
+    TMP_JSON=$(mktemp)
+    scripts/bash/check-prerequisites.sh --json | tee "$TMP_JSON"
+    STATUS=${PIPESTATUS[0]}
+    if [ $STATUS -ne 0 ]; then rm -f "$TMP_JSON"; exit $STATUS; fi
+    scripts/bash/run-sentinel-gate.sh --gate checklist --paths-json "$TMP_JSON"
+    STATUS=$?
+    rm -f "$TMP_JSON"
+    exit $STATUS
+  ps: |
+    $tmp = New-TemporaryFile
+    scripts/powershell/check-prerequisites.ps1 -Json | Tee-Object -FilePath $tmp.FullName
+    if ($LASTEXITCODE -ne 0) { Remove-Item $tmp.FullName -Force; exit $LASTEXITCODE }
+    scripts/powershell/run-sentinel-gate.ps1 -Gate checklist -PathsJson $tmp.FullName
+    $code = $LASTEXITCODE
+    Remove-Item $tmp.FullName -Force
+    if ($code -ne 0) { exit $code }
 ---
 
 ## Checklist Purpose: "Unit Tests for English"
@@ -33,6 +48,8 @@ $ARGUMENTS
 ```
 
 You **MUST** consider the user input before proceeding (if not empty).
+
+> Sentinel Gate: The helper script already executed `sentinel contracts validate` and `sentinel context lint`. Fix any failures they reported before authoring the checklist; otherwise the requirements analysis will be misleading.
 
 ## Execution Steps
 

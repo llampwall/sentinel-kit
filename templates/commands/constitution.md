@@ -1,5 +1,8 @@
 ---
 description: Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync
+scripts:
+  sh: scripts/bash/run-sentinel-gate.sh --gate constitution
+  ps: scripts/powershell/run-sentinel-gate.ps1 -Gate constitution
 ---
 
 ## User Input
@@ -13,6 +16,8 @@ You **MUST** consider the user input before proceeding (if not empty).
 ## Outline
 
 You are updating the project constitution at `/memory/constitution.md`. This file is a TEMPLATE containing placeholder tokens in square brackets (e.g. `[PROJECT_NAME]`, `[PRINCIPLE_1_NAME]`). Your job is to (a) collect/derive concrete values, (b) fill the template precisely, and (c) propagate any amendments across dependent artifacts.
+
+> Sentinel Gate: Before editing begins the script runs `sentinel contracts validate` and `sentinel context lint` against the repo. Resolve any failures they emit; otherwise constitution updates are blocked.
 
 Follow this execution flow:
 
