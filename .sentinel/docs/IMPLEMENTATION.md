@@ -197,6 +197,18 @@
 - Added CLI-focused regression tests that exercise `sentinel decisions append --dry-run --output preview.md` and the runbook counterpart to guarantee ledgers/runbooks remain untouched during previews while JSON output flags `dry_run: true` (`tests/test_cli_decisions_runbook.py`).
 - Ensured runbook updater coverage still verifies placeholder removal/deterministic inserts while the CLI suite now covers both standard and dry-run flows, satisfying the integration-test requirement for Task 7.4.
 
+## Task 8.1 Summary
+
+- Authored `.sentinel/docs/sentinel_asset_mapping.md`, a source-to-destination checklist covering every Sentinel asset that `specify init --sentinel` must copy (workspace files, SentinelKit package, `.sentinel/**`, CI workflow) plus the exclusions and bootstrap command contract (`uv sync --locked`, `uv run sentinel selfcheck`).
+- Added `.sentinel/docs/IMPLEMENTATION.template.md`, a clean runbook template that the scaffold can rename to `IMPLEMENTATION.md`, pre-populated with the placeholders expected by `sentinel runbook append`.
+- Document now captures per-platform notes (Path handling, uv invocation) so later subtasks can wire the copy/bootstrapping logic without re-auditing the repo.
+
+## Task 8.2 Summary
+
+- Extended `specify init` with a `--sentinel` flag that triggers the new `apply_sentinel_scaffold` helper: it copies every mapped asset (workspace files, SentinelKit package, `.sentinel/**`, CI workflow, runbook template) from the toolchain repo into the freshly scaffolded project (`src/specify_cli/__init__.py:115`), then runs `uv sync` (with graceful fallbacks) and `sentinel selfcheck` from the project root so contributors land on a green workspace automatically.
+- Added progress tracking + Rich messaging for the Sentinel steps (`sentinel-copy`, `sentinel-uv`, `sentinel-selfcheck`) so operators can see exactly which phase is running; failures bubble up with actionable guidance (missing uv, selfcheck errors, etc.).
+- Created pytest coverage in `tests/specify_cli/test_sentinel_scaffold.py` that exercises `apply_sentinel_scaffold` in a tmpdir, asserting that key files (pyproject, scripts/bootstrap.py, sentinelkit package, `.sentinel/docs/IMPLEMENTATION.md`, CI workflow) land in the destination while the uv/selfcheck runners are invoked.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

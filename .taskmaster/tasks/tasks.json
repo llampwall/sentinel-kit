@@ -596,7 +596,7 @@
           "6",
           "7"
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -604,9 +604,10 @@
             "description": "Catalog every Sentinel asset that must be copied during `specify init --sentinel`, confirm destination paths within the scaffold, and document required bootstrap commands.",
             "dependencies": [],
             "details": "Inventory sentinelkit package directories, .sentinel prompt/agent/template trees, workflow YAML, and docs; note per-platform path handling and how uv-managed projects should reference them for later automation hooks.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Peer review checklist ensuring all assets from task description are captured and mapped.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T09:37:04.828Z"
           },
           {
             "id": 2,
@@ -616,9 +617,10 @@
               1
             ],
             "details": "Add file-copy helpers (reuse Task 5 utilities where possible), ensure idempotent overwrites, stream uv/sentinel command output, and surface errors with actionable guidance when the bootstrap fails.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Pytest tmpdir integration verifying files appear, `uv sync` and `sentinel selfcheck` mocks invoked in order, and failures abort init.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2025-11-13T11:28:01.697Z"
           },
           {
             "id": 3,
@@ -689,7 +691,8 @@
         ],
         "complexity": 9,
         "recommendedSubtasks": 7,
-        "expansionPrompt": "Plan subtasks for enhancing `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Python Sentinel assets (sentinelkit package, .sentinel prompts/agents/templates, workflows) and runs `uv sync` + `sentinel selfcheck`, updating `specify check` and other health commands to run Sentinel gates, refactoring slash-command templates in `templates/commands/*.md` (and supporting bash/ps scripts) so each `/speckit.*` command invokes the new Sentinel subcommands, adding agent bundle sync hooks, and extending tests/mocks to cover these flows."
+        "expansionPrompt": "Plan subtasks for enhancing `src/specify_cli/__init__.py` so `specify init --sentinel` copies the Python Sentinel assets (sentinelkit package, .sentinel prompts/agents/templates, workflows) and runs `uv sync` + `sentinel selfcheck`, updating `specify check` and other health commands to run Sentinel gates, refactoring slash-command templates in `templates/commands/*.md` (and supporting bash/ps scripts) so each `/speckit.*` command invokes the new Sentinel subcommands, adding agent bundle sync hooks, and extending tests/mocks to cover these flows.",
+        "updatedAt": "2025-11-13T11:28:01.697Z"
       },
       {
         "id": "9",
@@ -851,7 +854,7 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2025-11-13T08:43:38.901Z",
+      "lastModified": "2025-11-13T11:28:01.699Z",
       "taskCount": 10,
       "completedCount": 5,
       "tags": [
