@@ -1,9 +1,9 @@
-# SentinelKit (Python Edition)
+# Sentinel-Kit
 
-SentinelKit is the enforcement layer that keeps [Spec‑Kit](https://github.com/github/spec-kit) honest.  
+Sentinel-Kit is the enforcement layer that keeps [Spec‑Kit](https://github.com/github/spec-kit) honest.  
 Everything in this repo is implemented in Python and distributed via `uv`, so bootstrapping Sentinel on any platform is just a couple of commands.
 
-> **Note:** SentinelKit bundles the Spec‑Kit workflow the project depends on—you don’t need to install the upstream repo separately. The message above is simply a nod to Spec‑Kit’s origins: `/speckit.*` still create the specs/plans/tasks, and SentinelKit layers the enforcement and CLI surfaced in this README.
+> **Note:** Sentinel-Kit bundles the Spec‑Kit workflow the project depends on—you don’t need to install the upstream repo separately. The message above is simply a nod to Spec‑Kit’s origins: `/speckit.*` still create the specs/plans/tasks, and Sentinel-Kit layers the enforcement and CLI surfaced in this README.
 
 ---
 
@@ -22,7 +22,7 @@ Everything in this repo is implemented in Python and distributed via `uv`, so bo
 
 ## Why Sentinel?
 
-Specs are executable contracts. SentinelKit makes sure we live up to them by enforcing:
+Specs are executable contracts. Sentinel-Kit makes sure we live up to them by enforcing:
 
 - **Contracts** – deterministic validation of every fixture against its schema.
 - **Context** – Allowed Context linting, capsule line budgets, and prompt scaffolding.
@@ -129,7 +129,7 @@ The smoke runner is wired into `sentinel selfcheck` and the CI workflow. Dry-run
 
 - **Bootstrap:** `uv sync --locked --dev` (with fallbacks), `uv run sentinel selfcheck`, `uv run pytest -q`.
 - **Sentinel suites:** `uv run sentinel sentinels run --json-report test-results/sentinels.json --junit test-results/sentinels.xml`.
-- **MCP smoke:** `uv run python -m sentinelkit.cli.main mcp smoke --format json`.
+- **MCP smoke:** `uv run python -m Sentinel-Kit.cli.main mcp smoke --format json`.
 - **Check for banned Node artifacts:** `uv run python scripts/check_node_artifacts.py`.
 - **CI (`.github/workflows/sentinel-ci.yml`)** runs all of the above on Ubuntu/macOS/Windows, uploads artifacts, and fails fast on any regression.
 
@@ -159,11 +159,11 @@ Key documents:
 - [docs/quickstart.md](docs/quickstart.md) – uv-based bootstrap instructions.
 - [SUPPORT.md](SUPPORT.md) – sync/selfcheck/test workflow before filing issues.
 - [.specify/README.md](.specify/README.md) – agent-facing instructions embedded in Spec-Kit scaffolds.
-- [Spec‑Kit docs](https://github.com/github/spec-kit#readme) – the upstream spec rails that SentinelKit enforces. Always start there for `/speckit.*` behaviors, then layer Sentinel gates on top.
+- [Spec‑Kit docs](https://github.com/github/spec-kit#readme) – the upstream spec rails that Sentinel-Kit enforces. Always start there for `/speckit.*` behaviors, then layer Sentinel gates on top.
 - `.sentinel/snippets/*` – reusable snippets for README badges, MCP guidance, capsules, etc.
 
 If you find issues or have feature requests, open an issue or pull request on GitHub—just make sure `uv run sentinel selfcheck` is green first.
 
 ---
 
-Happy shipping! The whole point of SentinelKit is to give you deterministic guards so your specs stay true across repos, operating systems, and agents. If `selfcheck` passes, you’re good to merge. !*** End Patch
+Happy shipping! The whole point of Sentinel-Kit is to give you deterministic guards so your specs stay true across repos, operating systems, and agents. If `selfcheck` passes, you’re good to merge. !*** End Patch
