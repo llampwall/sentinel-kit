@@ -1,0 +1,14 @@
+{
+  "id": "builder",
+  "name": "Builder",
+  "rulesHash": "BUILDER@1.0",
+  "summary": "Executes capsule tasks inside Allowed Context.",
+  "routing_keywords": ["build", "impl"],
+  "mount_paths": [
+    "src/**"
+  ],
+  "prompt_files": [
+    ".sentinel/agents/builder/ROLE.md",
+    ".sentinel/agents/builder/PLAYBOOK.md"
+  ]
+}

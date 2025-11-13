@@ -12,6 +12,7 @@ from sentinelkit.utils.errors import SentinelKitError, build_error_payload
 __all__ = [
     "CapsuleGenerator",
     "CapsuleGeneratorError",
+    "CapsuleResult",
 ]
 
 MAX_LINES = 300
@@ -48,7 +49,7 @@ class CapsuleGenerator:
         agent: str = "ROUTER",
         rules_hash: str | None = None,
         write: bool = True,
-    ) -> Path:
+    ) -> CapsuleResult:
         spec_path = self._validate_spec_dir(spec_dir)
         inputs = self._load_inputs(spec_path)
         capsule_id = self._hash_capsule(spec_path.name, inputs)
@@ -66,7 +67,7 @@ class CapsuleGenerator:
         out_path = spec_path / "capsule.md"
         if write:
             out_path.write_text(content, encoding="utf-8", newline="\n")
-        return out_path
+        return CapsuleResult(path=out_path, content=content)
 
     def _validate_spec_dir(self, spec_dir: Path | str) -> Path:
         path = Path(spec_dir)
@@ -247,3 +248,7 @@ class CapsuleGenerator:
 
 
 __all__ = ["CapsuleGenerator", "CapsuleGeneratorError"]
+@dataclass(slots=True)
+class CapsuleResult:
+    path: Path
+    content: str

@@ -14,11 +14,10 @@ FIXTURE_SPEC = Path("tests/fixtures/specs/sample-feature")
 def test_generate_capsule_writes_output(tmp_path: Path) -> None:
     spec_dir = _prepare_fixture(tmp_path)
     generator = CapsuleGenerator(root=tmp_path)
-    out_path = generator.generate(spec_dir=spec_dir, decision="D-9999", agent="ROUTER")
-    assert out_path.exists()
-    content = out_path.read_text(encoding="utf-8")
-    assert "# Capsule sample-feature@" in content
-    assert "Allowed Context" in content
+    result = generator.generate(spec_dir=spec_dir, decision="D-9999", agent="ROUTER")
+    assert result.path.exists()
+    assert "# Capsule sample-feature@" in result.content
+    assert "Allowed Context" in result.content
 
 
 def test_generate_capsule_respects_line_budget(tmp_path: Path) -> None:

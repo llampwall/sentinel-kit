@@ -21,6 +21,7 @@ from sentinelkit.context.limits import (
     load_context_limits,
 )
 from sentinelkit.utils.errors import SentinelKitError, build_error_payload
+from sentinelkit.utils.paths import normalize_path
 
 __all__ = ["Diagnostic", "LintSummary", "ContextLintError", "lint_context"]
 
@@ -220,7 +221,7 @@ def _resolve_max_lines(
 
 
 def _build_matcher(pattern: str) -> re.Pattern[str]:
-    normalized = _normalize_path(pattern)
+    normalized = normalize_path(pattern)
     regex = re.escape(normalized)
     regex = regex.replace(r"\*\*", ".*")
     regex = regex.replace(r"\*", "[^/]*")
@@ -397,12 +398,3 @@ def _count_lines(content: str) -> int:
         return 0
     newline_count = content.count("\n")
     return newline_count if content.endswith("\n") else newline_count + 1
-
-
-def _normalize_path(value: str) -> str:
-    cleaned = value.strip().replace("\\", "/")
-    while cleaned.startswith("./"):
-        cleaned = cleaned[2:]
-    while "//" in cleaned:
-        cleaned = cleaned.replace("//", "/")
-    return cleaned or "."

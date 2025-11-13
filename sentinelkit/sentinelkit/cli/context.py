@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Annotated, Optional, Tuple
+from typing import Annotated, Optional, List
 
 import typer
 
 from sentinelkit.context.lint import ContextLintError, LintSummary, lint_context
-from sentinelkit.scripts.md_surgeon import MarkdownSurgeonError, SurgeonOptions, synchronize_snippet
+from sentinelkit.scripts.snippets import SnippetSyncError, sync_snippets
 from sentinelkit.utils.errors import build_error_payload, serialize_error
 
 from .state import CLIContext, OutputFormat, get_context
@@ -21,7 +21,7 @@ app = typer.Typer(help="Context linting and utilities.")
 def lint(
     ctx: typer.Context,
     capsule: Annotated[
-        Tuple[Path, ...],
+        Optional[List[Path]],
         typer.Option(
             "--capsule",
             "-c",
@@ -31,7 +31,7 @@ def lint(
             dir_okay=False,
             file_okay=True,
         ),
-    ] = (),
+    ] = None,
     strict: bool = typer.Option(False, "--strict", help="Treat warnings as errors."),
     config: Annotated[
         Optional[Path],
@@ -65,7 +65,7 @@ def lint(
     context = get_context(ctx)
     try:
         summary = lint_context(
-            capsules=capsule,
+            capsules=capsule or None,
             strict=strict,
             root=context.root,
             config_path=config,
@@ -120,30 +120,8 @@ def _render_error(error: ContextLintError, output: OutputFormat) -> None:
 
 
 def _sync_capsule_docs(context: CLIContext) -> None:
-    snippet = context.root / ".sentinel/snippets/capsules.md"
-    readme = context.root / "README.md"
-    if not snippet.exists():
-        raise ContextLintError(
-            build_error_payload(
-                code="context.docs.missing_snippet",
-                message=f"Snippet '{snippet}' does not exist.",
-            )
-        )
-    if not readme.exists():
-        raise ContextLintError(
-            build_error_payload(
-                code="context.docs.missing_readme",
-                message=f"Documentation target '{readme}' does not exist.",
-            )
-        )
     try:
-        synchronize_snippet(
-            SurgeonOptions(
-                file=readme,
-                marker="SENTINEL:CAPSULES",
-                content_path=snippet,
-            )
-        )
-    except MarkdownSurgeonError as error:
+        sync_snippets(root=context.root, markers=["SENTINEL:CAPSULES"])
+    except SnippetSyncError as error:
         raise ContextLintError(error.payload) from error
     typer.echo("Synced README capsule snippet via md-surgeon.")

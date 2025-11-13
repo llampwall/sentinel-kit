@@ -405,7 +405,7 @@
               3
             ],
             "details": "Implement utilities for resolving workspace roots, safe snippet injection, README badge updates, and reuse path normalization so context lint and capsule generator trust `/speckit.*` gates.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Integration test that triggers sync against temp bundles and asserts files/paths match expected set.",
             "parentId": "undefined"
           },
@@ -419,7 +419,7 @@
               4
             ],
             "details": "Extend Typer app modules, ensure shared options (`--root`, `--format`), return codes, and logging semantics match legacy behavior; integrate snippet sync triggers with `specify init --sentinel` hooks if applicable.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CLI-level tests invoking commands via `uv run` with fixtures, asserting outputs and exit codes.",
             "parentId": "undefined"
           },
@@ -434,7 +434,7 @@
               5
             ],
             "details": "Add fixture directories, golden outputs, CLI runners, and md-surgeon log assertions so future refactors detect regressions; ensure cross-platform path handling is covered.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Pytest golden comparisons, CLI snapshots, and temp directory assertions verifying snippet sync + logging.",
             "parentId": "undefined"
           }
@@ -690,7 +690,7 @@
         "id": "9",
         "title": "Deliver MCP stdio server and smoke tests for sentinel tools",
         "description": "Expose `contract_validate`, `sentinel_run`, and `decision_log` over MCP via Python JSON-RPC with automated smoke coverage.",
-        "details": "- Build `sentinelkit/cli/mcp/server.py` implementing a stdio JSON-RPC server (e.g., `asyncio` + `jsonrpcserver`) that registers three tools: `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, `mcp.sentinel.decision_log`.\n- Each tool should reuse the underlying Python modules from Tasks 3, 6, and 7, returning the same JSON payloads expected by Codex/Claude.\n- Provide CLI entry `python -m sentinelkit.cli.mcp.server` plus `sentinel mcp smoke` command that runs initialize â†’ tools/list â†’ tools/call for each tool.\n- Update `.mcp.json` template (copied during `specify init --sentinel`) to reference the new Python command (`uvx sentinel mcp server`) instead of pnpm scripts.\n```\nasync def handle_call(request):\n    if request.method == \"contract_validate\":\n        return validate_contracts(**request.params)\n```\n- Add GitHub workflow step and `sentinel selfcheck` hook to run MCP smoke tests.\n- Generate `.mcp.json` entries that run `uv run sentinel mcp server` with deterministic env vars; smoke scripts must invoke the same command.\n- Add per-phase timeouts (initialize/list/call) and a single retry for initialize in the MCP smoke driver; ensure hung tools fail selfcheck with the gate/tool name.",
+        "details": "- Build `sentinelkit/cli/mcp/server.py` implementing a stdio JSON-RPC server (e.g., `asyncio` + `jsonrpcserver`) that registers three tools: `mcp.sentinel.contract_validate`, `mcp.sentinel.sentinel_run`, `mcp.sentinel.decision_log`.\n- Each tool should reuse the underlying Python modules from Tasks 3, 6, and 7, returning the same JSON payloads expected by Codex/Claude.\n- Provide CLI entry `python -m sentinelkit.cli.mcp.server` plus `sentinel mcp smoke` command that runs initialize \u00c3\u00a2\u00e2\u20ac\u00a0\u00e2\u20ac\u2122 tools/list \u00c3\u00a2\u00e2\u20ac\u00a0\u00e2\u20ac\u2122 tools/call for each tool.\n- Update `.mcp.json` template (copied during `specify init --sentinel`) to reference the new Python command (`uvx sentinel mcp server`) instead of pnpm scripts.\n```\nasync def handle_call(request):\n    if request.method == \"contract_validate\":\n        return validate_contracts(**request.params)\n```\n- Add GitHub workflow step and `sentinel selfcheck` hook to run MCP smoke tests.\n- Generate `.mcp.json` entries that run `uv run sentinel mcp server` with deterministic env vars; smoke scripts must invoke the same command.\n- Add per-phase timeouts (initialize/list/call) and a single retry for initialize in the MCP smoke driver; ensure hung tools fail selfcheck with the gate/tool name.",
         "testStrategy": "MCP test suites should spawn the Python server via `uv run sentinel mcp server`, exercise initialize/list/call flows with configured timeouts/retry, and compare JSON responses to the shared schema; CI smoke must run on all OSes and prove hung phases fail selfcheck with gate/tool labels.",
         "priority": "medium",
         "dependencies": [
@@ -714,7 +714,7 @@
           {
             "id": 2,
             "title": "Add CLI entry points and smoke command",
-            "description": "Expose the MCP server via `python -m sentinelkit.cli.mcp.server` and add a `sentinel mcp smoke` command that drives initialize â†’ tools/list â†’ tools/call for all tools.",
+            "description": "Expose the MCP server via `python -m sentinelkit.cli.mcp.server` and add a `sentinel mcp smoke` command that drives initialize \u00c3\u00a2\u00e2\u20ac\u00a0\u00e2\u20ac\u2122 tools/list \u00c3\u00a2\u00e2\u20ac\u00a0\u00e2\u20ac\u2122 tools/call for all tools.",
             "dependencies": [
               1
             ],

@@ -161,7 +161,49 @@ The Typer CLI exposes placeholders for the legacy workflows while we finish the 
 - The server watches .sentinel/contracts/** and .sentinel/DECISIONS.md, so you can keep it running while editing.
 <!-- SENTINEL:MCP-CONTRACT-VALIDATE:end -->
 
+<!-- SENTINEL:PROMPT-RENDER:start -->
+<!-- ProducedBy=BUILDER RulesHash=BUILDER@1.1 Decision=D-0011 -->
+### Prompt renderer workflow
 
+The Python renderer now lives under `sentinelkit.prompt.render` and is exposed via the Typer CLI (`uv run sentinel prompts render`). Use it to hand capsules to the router and lead agents with the correct context, logging, and Allowed Context validation.
+
+- Before rendering, the CLI automatically lints the capsule via `sentinel context lint`. Invalid include lists (missing files, forbidden paths, or empty sections) abort the render with actionable errors—fix the capsule before retrying.
+
+1. **Render prompts** from the repo root:
+   ```bash
+   uv run sentinel prompts render \
+     --mode router \
+     --capsule .specify/specs/<slug>/capsule.md \
+     [--output router.md]
+
+   uv run sentinel prompts render \
+     --mode capsule \
+     --capsule .specify/specs/<slug>/capsule.md \
+     --agent builder \
+     [--output builder.md]
+   ```
+   - `--output` writes the prompt to disk; omit it to stream to stdout.
+   - Capsule paths are relative to repo root; pass absolute paths if running elsewhere.
+2. **Validate router decisions** (optional but recommended) by supplying the router’s JSON file:
+   ```bash
+   uv run sentinel prompts render \
+     --mode router \
+     --capsule .specify/specs/<slug>/capsule.md \
+     --router-json ./router-output.json
+   ```
+   This enforces the router JSON schema (leadAgent, requiredOutputs[], contextToMount[], notes) and appends an entry to `.sentinel/router_log/<timestamp>-<slug>.jsonl` with a hashed capsule path.
+3. **Smoke-test** the end-to-end flow anytime the renderer changes by rendering both router and capsule prompts (with `--output`) and spot-checking the log file.
+4. **Tests**:
+   ```bash
+   uv run pytest -q tests/prompts/test_renderer.py
+   ```
+   These cover agent discovery, template rendering, router schema validation, log writes, and CLI flows.
+
+Tips:
+- Router logs are JSONL (one file per run). Each entry includes ISO timestamp, relative capsule path, a short hash, and the validated payload.
+- Capsule prompts inherit Allowed Context directly from the capsule; if you see missing paths, update the capsule before re-rendering.
+- Running with `--output` makes it easier to copy/paste prompts into external tools without losing formatting.
+<!-- SENTINEL:PROMPT-RENDER:end -->
 
 <!-- SENTINEL:CAPSULES:start -->
 <!-- ProducedBy=BUILDER RulesHash=BUILDER@1.0 Decision=D-0010 -->
@@ -171,20 +213,29 @@ Capsules turn a Spec-Kit feature (`.specify/specs/<slug>`) into a router-ready h
 
 1. Start from `.sentinel/templates/capsule.md`. The Typer capsule generator will copy this layout automatically; until it lands you can duplicate the template directly.
 2. Keep the Spec-Kit artifacts (`spec.md`, `plan.md`, `tasks.md`) aligned with the capsule content. Capsule Task 5 lives in `.specify/specs/005-capsule-gen`.
-3. Review the generated `.specify/specs/<slug>/capsule.md` and keep it under the 300-line budget. The Python Allowed Context helper auto-includes `.sentinel/context/**` so the router only mounts shared context.
-4. Run the context linter after every capsule edit:
+3. When you're ready to render/update a capsule, run:
+   ```bash
+   uv run sentinel capsule generate \
+     --spec .specify/specs/<slug> \
+     --decision D-XXXX \
+     --agent ROUTER \
+     [--dry-run]
+   ```
+   - The command hashes the capsule ID (`slug@<sha>`), enforces the 300-line budget, and writes `.specify/specs/<slug>/capsule.md` (unless `--dry-run`).
+4. Review the generated `.specify/specs/<slug>/capsule.md` and keep it under the 300-line budget. The Python Allowed Context helper auto-includes `.sentinel/context/**` so the router only mounts shared context.
+5. Run the context linter after every capsule edit:
    ```bash
    uv run sentinel context lint --strict --sync-docs
    ```
    - `--capsule path/to/capsule.md` limits the run to the edited capsule(s).
    - `--sync-docs` refreshes the `SENTINEL:CAPSULES` block in `README.md` via the md-surgeon helper so docs track the latest guidance.
-5. Enable the git hook (`git config core.hooksPath .husky`) if your workflow frequently touches `.specify/specs/*/capsule.md`, `.sentinel/context/**`, or prompt files. The hook re-runs the linter before commits proceed.
-6. Re-run sentinel tests whenever capsule or context code changes:
+6. Enable the git hook (`git config core.hooksPath .husky`) if your workflow frequently touches `.specify/specs/*/capsule.md`, `.sentinel/context/**`, or prompt files. The hook re-runs the linter before commits proceed.
+7. Re-run sentinel tests whenever capsule or context code changes:
    ```bash
    uv run pytest -q tests/context
    ```
    Add targeted sentinel fixtures alongside regression tests under `tests/context/` to capture past failures.
-7. When you update capsule docs, edit `.sentinel/snippets/capsules.md` and re-run `uv run python -m sentinelkit.scripts.md_surgeon --file README.md --marker=SENTINEL:CAPSULES --content .sentinel/snippets/capsules.md` (or pass `--sync-docs` to the linter) so README stays in sync.
+8. When you update capsule docs, edit `.sentinel/snippets/capsules.md` and re-run `uv run sentinel snippets sync --marker SENTINEL:CAPSULES` (or pass `--sync-docs` to the linter) so README stays in sync.
 <!-- SENTINEL:CAPSULES:end -->
 
 ### Implementation Runbook

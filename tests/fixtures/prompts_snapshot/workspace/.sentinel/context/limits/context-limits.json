@@ -1,0 +1,15 @@
+{
+  "defaultMaxLines": 400,
+  "warningThreshold": 0.9,
+  "forbiddenPaths": [".git"],
+  "artifacts": [
+    {
+      "name": "fixture-capsule",
+      "globs": [
+        "specs/sample/capsule.md"
+      ],
+      "enforceAllowedContext": true,
+      "maxLines": 400
+    }
+  ]
+}

@@ -14,7 +14,7 @@ from sentinelkit import prompt as _prompt_pkg  # noqa: F401
 from sentinelkit import scripts as _scripts_pkg  # noqa: F401
 from sentinelkit import utils as _utils_pkg  # noqa: F401
 
-from . import capsule, context, contracts, decisions, mcp, prompts, runbook, selfcheck, sentinels
+from . import capsule, context, contracts, decisions, mcp, prompts, runbook, selfcheck, sentinels, snippets
 from .state import OutputFormat, set_context
 
 app = typer.Typer(help="SentinelKit CLI (scaffold)")
@@ -55,6 +55,7 @@ app.add_typer(sentinels.app, name="sentinels")
 app.add_typer(decisions.app, name="decisions")
 app.add_typer(runbook.app, name="runbook")
 app.add_typer(mcp.app, name="mcp")
+app.add_typer(snippets.app, name="snippets")
 
 
 def main() -> None:  # pragma: no cover - Typer handles invocation

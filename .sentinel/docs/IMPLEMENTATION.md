@@ -138,6 +138,23 @@
 - Updated the Typer CLI (`sentinelkit/cli/prompts.py`) to support `uv run sentinel prompts render --mode {router|capsule}` with options for `--capsule`, `--agent`, `--output`, and `--router-json`, surfacing structured errors on lint/template failures.
 - Added pytest coverage (`tests/prompts/test_renderer.py`) that exercises router/agent prompt rendering and router log creation with temporary capsules, agents, and context-limit configs.
 
+## Task 5.4 Summary
+
+- Added a reusable snippet sync module + CLI (`sentinelkit/scripts/snippets.py`, `sentinelkit/cli/snippets.py`) that reuses the Python md-surgeon helper to refresh README/UPSTREAM markers (workflow badge, MCP validator, capsules, decision log, prompt renderer, upstream decision). Context lint’s `--sync-docs` flag now delegates to the same helper instead of duplicating logic.
+- Introduced shared path utilities (`sentinelkit/utils/paths.py`) and wired `sentinel context lint` to use them for glob normalization, keeping future modules consistent.
+- Updated `.sentinel/snippets/prompt-render.md` + README marker (`SENTINEL:PROMPT-RENDER`) to document the new `uv run sentinel prompts render` workflow, and added pytest coverage for snippet syncing (`tests/scripts/test_snippet_sync.py`).
+
+## Task 5.5 Summary
+
+- Hooked capsule/prompt/snippet workflows into the Typer CLI with end-to-end smoke tests (`tests/cli/test_capsule_prompts_snippets.py`), ensuring `sentinel capsule generate`, `sentinel prompts render`, and `sentinel snippets sync` match the legacy behavior.
+- Synced the capsule + prompt README snippets via the new CLI utilities so docs always reflect the Python commands.
+
+## Task 5.6 Summary
+
+- Added golden snapshot coverage for the capsule generator (`tests/capsule/test_generator_snapshot.py`) driven by fixtures under `tests/fixtures/capsule_snapshot/**`.
+- Captured router/agent prompt outputs in fixtures (`tests/fixtures/prompts_snapshot/**`) and enforce them via `tests/prompts/test_renderer.py`.
+- Expanded the CLI test suite to assert the new commands succeed in temp workspaces, providing regression protection for generator, renderer, and snippet flows.
+
 ## Known Gaps
 
 - Placeholder modules still raise `NotImplementedError`; future subtasks will fill in the actual enforcement logic.

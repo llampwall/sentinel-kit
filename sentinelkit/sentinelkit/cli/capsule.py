@@ -34,7 +34,7 @@ def generate(
     context = get_context(ctx)
     generator = CapsuleGenerator(root=context.root)
     try:
-        capsule_path = generator.generate(
+        result = generator.generate(
             spec_dir=spec,
             decision=decision,
             agent=agent,
@@ -50,6 +50,6 @@ def generate(
         raise typer.Exit(1)
 
     if dry_run:
-        typer.echo(capsule_path.read_text(encoding="utf-8"))
+        typer.echo(result.content)
     else:
-        typer.secho(f"capsule:generate -> {capsule_path}", fg="green")
+        typer.secho(f"capsule:generate -> {result.path}", fg="green")

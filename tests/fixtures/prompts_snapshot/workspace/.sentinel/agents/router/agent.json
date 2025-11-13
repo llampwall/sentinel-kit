@@ -1,0 +1,12 @@
+{
+  "id": "router",
+  "name": "Router",
+  "rulesHash": "ROUTER@1.0",
+  "summary": "Assigns lead agents and enforces capsule context.",
+  "routing_keywords": ["route"],
+  "mount_paths": [],
+  "prompt_files": [
+    ".sentinel/agents/router/ROLE.md",
+    ".sentinel/agents/router/PLAYBOOK.md"
+  ]
+}
