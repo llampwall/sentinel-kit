@@ -41,7 +41,7 @@ All of this runs on Python 3.12 via `uv`. Node tooling (pnpm, vitest, tsconfig) 
 uv tool install --from git+https://github.com/llampwall/sentinel-kit.git specify-cli
 
 # 2) Scaffold a project with Sentinel assets + bootstrap
-uvx specify init <project> --sentinel
+specify init <project> --sentinel
 
 # 3) From any Sentinel repo, validate all gates
 uv run sentinel --format pretty selfcheck
