@@ -30,7 +30,6 @@ def run(
     results = sorted(run_checks(context, checks, show_status=not verbose), key=lambda r: r.name)
     ok = all(result.success for result in results)
 
-    console = Console()
     if context.format == "json":
         payload = {
             "ok": ok,
@@ -42,8 +41,9 @@ def run(
             },
             "checks": [result.to_dict() for result in results],
         }
-        console.print(json.dumps(payload, indent=2))
+        typer.echo(json.dumps(payload, indent=2))
     else:
+        console = Console()
         console.print(_build_table(results))
         summary = "[bold green]Selfcheck OK[/bold green]" if ok else "[bold red]Selfcheck failed[/bold red]"
         console.print(summary)

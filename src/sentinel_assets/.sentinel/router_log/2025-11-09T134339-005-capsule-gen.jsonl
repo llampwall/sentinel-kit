@@ -1,0 +1,1 @@
+{"timestamp":"2025-11-09T13:43:39.242Z","capsule":".specify/specs/005-capsule-gen/capsule.md","capsuleHash":"9686170b","payload":{"leadAgent":"builder","requiredOutputs":["README.md"],"acceptanceCriteria":["README updated"],"contextToMount":[".specify/specs/005-capsule-gen/capsule.md"],"notes":"CLI test"}}

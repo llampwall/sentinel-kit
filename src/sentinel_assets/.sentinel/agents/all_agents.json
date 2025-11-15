@@ -1,0 +1,16 @@
+[
+  { "id": "router", "name": "Router", "rulesHash": "ROUTER@1.2", "summary": "Assigns a single lead agent per capsule and declares required outputs + mounted context." },
+  { "id": "builder", "name": "Builder", "rulesHash": "BUILDER@1.2", "summary": "Implements capsule-scoped code changes inside Allowed Context; adds ASCII provenance headers; returns diffs and verification steps. No repo-wide refactors unless authorized." },
+  { "id": "scribe", "name": "Scribe", "rulesHash": "SCRIBE@1.2", "summary": "Docs-only changes: provenance headers, IMPLEMENTATION notes, architecture + changelog updates. No code edits." },
+  { "id": "integrator", "name": "Integrator", "rulesHash": "INTEGRATOR@1.2", "summary": "Owns external HTTP/SDK clients, retries, contracts, fixtures, and sentinel tests for integrations." },
+  { "id": "designer", "name": "Designer", "rulesHash": "DESIGNER@1.1", "summary": "Defines UX intent (tokens, interaction specs, copy, a11y). Produces design artifacts only; no code edits." },
+  { "id": "observer", "name": "Observer", "rulesHash": "OBSERVER@1.0", "summary": "Adds structured logging, error policies, and telemetry hooks. Produces runbooks and plans; no feature logic changes." },
+  { "id": "verifier", "name": "Verifier", "rulesHash": "VERIFIER@1.1", "summary": "Owns tests, sentinels, and contract fixtures. Produces failing-first repro and passing proof. No production code edits." },
+  { "id": "releaser", "name": "Releaser", "rulesHash": "RELEASER@1.0", "summary": "Owns CI/CD, versioning, packaging, and release notes. Wires gates (tests, contracts, sentinels, lint, typecheck, build)." },
+  { "id": "refactorer", "name": "Refactorer", "rulesHash": "REFACTORER@1.0", "summary": "Performs scoped, behavior-preserving refactors with rollback plans; behavior changes only when capsules explicitly allow it." },
+  { "id": "backender", "name": "Backender", "rulesHash": "BACKENDER@1.0", "summary": "Implements server-side features (routes, services, DB schema/migrations, background jobs) using existing contracts." },
+  { "id": "frontender", "name": "Frontender", "rulesHash": "FRONTENDER@1.0", "summary": "Implements UI from Designer specs using the repo's frontend stack; no external API shaping." },
+  { "id": "capsuleauthor", "name": "Capsule Author", "rulesHash": "CAPSULEAUTHOR@1.0", "summary": "Authors and maintains capsule.md (Goal, Acceptance, Allowed Context, provenance). No implementation work." },
+  { "id": "contextwarden", "name": "Context Warden", "rulesHash": "CONTEXTWARDEN@1.0", "summary": "Owns Allowed Context include-lists and budgets; lints mounts, counts lines, and flags oversize capsules." },
+  { "id": "commander", "name": "Commander", "rulesHash": "COMMANDER@1.0", "summary": "Plans safe, idempotent shell command sequences and runbooks (git, pnpm, ffmpeg, docker, etc.); no source edits." }
+]

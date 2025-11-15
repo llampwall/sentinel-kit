@@ -37,6 +37,7 @@ env/
 .env
 .env.local
 *.lock
+!src/sentinel_assets/uv.lock
 
 # Spec Kit-specific files
 .genreleases/

@@ -1,0 +1,48 @@
+{
+  "$schema": "./context-limits.schema.json",
+  "defaultMaxLines": 300,
+  "warningThreshold": 0.9,
+  "forbiddenPaths": [
+    ".git",
+    ".github",
+    ".husky",
+    "node_modules",
+    ".sentinel/router_log",
+    ".venv",
+    ".specify/cache"
+  ],
+  "artifacts": [
+    {
+      "name": "capsules",
+      "globs": [
+        ".specify/specs/*/capsule.md"
+      ],
+      "enforceAllowedContext": true
+    },
+    {
+      "name": "router-prompts",
+      "globs": [
+        ".sentinel/prompts/router.prompt.eta.md"
+      ]
+    },
+    {
+      "name": "agent-prompts",
+      "globs": [
+        ".sentinel/prompts/agent.prompt.eta.md"
+      ]
+    },
+    {
+      "name": "capsule-template",
+      "globs": [
+        ".sentinel/templates/capsule.md"
+      ]
+    }
+  ],
+  "overrides": [
+    {
+      "pattern": ".specify/specs/005-capsule-gen/capsule.md",
+      "maxLines": 320,
+      "reason": "Sample capsule includes extra guidance for docs"
+    }
+  ]
+}

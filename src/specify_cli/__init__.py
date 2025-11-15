@@ -24,6 +24,8 @@ Or install globally:
     specify init --here
 """
 
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
@@ -33,10 +35,20 @@ import shutil
 import shlex
 import json
 from pathlib import Path
-from typing import Optional, Tuple, Iterable, List
+from typing import Any, Iterable, List, Optional, Tuple, TYPE_CHECKING
 
 import typer
-import httpx
+
+try:  # pragma: no cover - exercised indirectly via CLI usage
+    import httpx  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - handled in helper
+    httpx = None  # type: ignore[assignment]
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from httpx import Client as HTTPXClient
+else:  # pragma: no cover - typing fallback
+    HTTPXClient = Any
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -48,12 +60,42 @@ from rich.tree import Tree
 from typer.core import TyperGroup
 
 # For cross-platform keyboard input
-import readchar
 import ssl
-import truststore
 
-ssl_context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-client = httpx.Client(verify=ssl_context)
+try:  # pragma: no cover - runtime dependency for system certificate trust
+    import truststore  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - fallback to stdlib certificates
+    truststore = None  # type: ignore[assignment]
+
+try:  # pragma: no cover - interactive dependency
+    import readchar  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - handled when interactive prompts are requested
+    readchar = None  # type: ignore[assignment]
+
+if truststore is not None:
+    ssl_context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+else:  # pragma: no cover - fallback path used when truststore is unavailable
+    ssl_context = ssl.create_default_context()
+
+
+def _ensure_http_client(
+    client: HTTPXClient | None = None,
+    *,
+    verify: ssl.SSLContext | bool | None = None,
+) -> HTTPXClient:
+    """Return an HTTPX client, raising a helpful error if the dependency is missing."""
+
+    if client is not None:
+        return client
+
+    if httpx is None:  # pragma: no cover - exercises missing dependency edge case
+        raise ModuleNotFoundError(
+            "The 'httpx' package is required to download project templates. "
+            "Install sentinel-kit dev dependencies with 'uv sync --dev'."
+        )
+
+    verify_config = ssl_context if verify is None else verify
+    return httpx.Client(verify=verify_config)
 
 def _github_token(cli_token: str | None = None) -> str | None:
     """Return sanitized GitHub token (cli arg takes precedence) or None."""
@@ -156,7 +198,8 @@ SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
 CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+PACKAGE_ROOT = Path(__file__).resolve().parent
+ASSETS_ROOT = PACKAGE_ROOT.parent / "sentinel_assets"
 
 DEFAULT_COPY_IGNORE = ["__pycache__", "*.pyc", "*.pyo", ".DS_Store", "Thumbs.db"]
 
@@ -179,6 +222,7 @@ SENTINEL_DIR_ASSETS = [
     (".sentinel/snippets", ".sentinel/snippets"),
     (".sentinel/status", ".sentinel/status"),
     (".sentinel/templates", ".sentinel/templates"),
+    (".sentinel/tests", ".sentinel/tests"),
 ]
 
 SENTINEL_RUNBOOK_TEMPLATE = (
@@ -299,6 +343,12 @@ class StepTracker:
 
 def get_key():
     """Get a single keypress in a cross-platform way using readchar."""
+    if readchar is None:  # pragma: no cover - interactive dependency
+        raise ModuleNotFoundError(
+            "The 'readchar' package is required for interactive prompts. "
+            "Install sentinel-kit dev dependencies with 'uv sync --dev'."
+        )
+
     key = readchar.readkey()
 
     if key == readchar.key.UP or key == readchar.key.CTRL_P:
@@ -604,11 +654,20 @@ def merge_json_files(existing_path: Path, new_content: dict, verbose: bool = Fal
 
     return merged
 
-def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Tuple[Path, dict]:
+def download_template_from_github(
+    ai_assistant: str,
+    download_dir: Path,
+    *,
+    script_type: str = "sh",
+    verbose: bool = True,
+    show_progress: bool = True,
+    client: HTTPXClient | None = None,
+    debug: bool = False,
+    github_token: str | None = None,
+) -> Tuple[Path, dict]:
     repo_owner = "github"
     repo_name = "spec-kit"
-    if client is None:
-        client = httpx.Client(verify=ssl_context)
+    client = _ensure_http_client(client)
 
     if verbose:
         console.print("[cyan]Fetching latest release information...[/cyan]")
@@ -714,7 +773,18 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
     }
     return zip_path, metadata
 
-def download_and_extract_template(project_path: Path, ai_assistant: str, script_type: str, is_current_dir: bool = False, *, verbose: bool = True, tracker: StepTracker | None = None, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Path:
+def download_and_extract_template(
+    project_path: Path,
+    ai_assistant: str,
+    script_type: str,
+    is_current_dir: bool = False,
+    *,
+    verbose: bool = True,
+    tracker: StepTracker | None = None,
+    client: HTTPXClient | None = None,
+    debug: bool = False,
+    github_token: str | None = None,
+) -> Path:
     """Download the latest release and extract it to create a new project.
     Returns project_path. Uses tracker if provided (with keys: fetch, download, extract, cleanup)
     """
@@ -909,8 +979,18 @@ def ensure_executable_scripts(project_path: Path, tracker: StepTracker | None = 
                 console.print(f"  - {f}")
 
 
+def _resolve_asset(path: str) -> Path:
+    if not ASSETS_ROOT.exists():
+        raise FileNotFoundError(
+            "Sentinel assets are missing from the Specify CLI installation. "
+            "Reinstall the tool with `uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git`."
+        )
+    src = ASSETS_ROOT / path
+    return src
+
+
 def _copy_file_asset(src_rel: str, dest_rel: str, project_path: Path) -> None:
-    src = REPO_ROOT / src_rel
+    src = _resolve_asset(src_rel)
     if not src.exists():
         raise FileNotFoundError(f"Sentinel asset '{src_rel}' is missing from the toolchain.")
     dest = project_path / dest_rel
@@ -919,7 +999,7 @@ def _copy_file_asset(src_rel: str, dest_rel: str, project_path: Path) -> None:
 
 
 def _copy_dir_asset(src_rel: str, dest_rel: str, project_path: Path, ignore: Iterable[str] | None = None) -> None:
-    src = REPO_ROOT / src_rel
+    src = _resolve_asset(src_rel)
     if not src.exists():
         raise FileNotFoundError(f"Sentinel directory '{src_rel}' is missing from the toolchain.")
     dest = project_path / dest_rel
@@ -932,7 +1012,7 @@ def _copy_dir_asset(src_rel: str, dest_rel: str, project_path: Path, ignore: Ite
 
 def _copy_runbook_template(project_path: Path) -> None:
     src_rel, dest_rel = SENTINEL_RUNBOOK_TEMPLATE
-    src = REPO_ROOT / src_rel
+    src = _resolve_asset(src_rel)
     if not src.exists():
         raise FileNotFoundError("Sentinel runbook template is missing.")
     dest = project_path / dest_rel
@@ -942,7 +1022,7 @@ def _copy_runbook_template(project_path: Path) -> None:
 
 def sync_agent_prompt_bundles(project_path: Path) -> int:
     """Copy canonical Sentinel prompts into supported agent bundles."""
-    prompts_dir = REPO_ROOT / ".sentinel" / "prompts"
+    prompts_dir = _resolve_asset(".sentinel/prompts")
     if not prompts_dir.exists():
         return 0
     copied = 0
@@ -958,11 +1038,36 @@ def sync_agent_prompt_bundles(project_path: Path) -> int:
 
 def run_uv_sync_in_project(project_path: Path) -> None:
     """Run uv sync inside the scaffold, falling back to unlocked sync on failure."""
-    commands = [
-        ["uv", "sync", "--locked", "--all-groups"],
-        ["uv", "sync", "--locked"],
-        ["uv", "sync", "--dev"],
-    ]
+    lock_path = project_path / "uv.lock"
+
+    def _is_placeholder_lockfile() -> bool:
+        if not lock_path.exists():
+            return True
+        try:
+            for line in lock_path.read_text(encoding="utf-8").splitlines():
+                stripped = line.strip()
+                if stripped:
+                    return stripped.startswith("# SentinelKit placeholder")
+        except Exception:
+            return False
+        return True
+
+    if _is_placeholder_lockfile():
+        console.print(
+            Panel(
+                "Sentinel scaffold ships with a placeholder uv.lock. "
+                "Run `uv lock --locked --all-groups` after the initial sync to pin dependencies.",
+                title="[yellow]uv.lock placeholder[/yellow]",
+                border_style="yellow",
+            )
+        )
+        commands = [["uv", "sync"]]
+    else:
+        commands = [
+            ["uv", "sync", "--locked", "--all-groups"],
+            ["uv", "sync", "--locked"],
+            ["uv", "sync", "--dev"],
+        ]
     last_error: subprocess.CalledProcessError | None = None
     for idx, command in enumerate(commands):
         try:
@@ -1256,7 +1361,7 @@ def init(
         try:
             verify = not skip_tls
             local_ssl_context = ssl_context if verify else False
-            local_client = httpx.Client(verify=local_ssl_context)
+            local_client = _ensure_http_client(verify=local_ssl_context)
 
             download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, github_token=github_token)
 

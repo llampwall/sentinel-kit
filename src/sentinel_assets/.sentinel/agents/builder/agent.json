@@ -1,0 +1,12 @@
+{
+  "id": "builder",
+  "name": "Builder",
+  "rulesHash": "BUILDER@1.2",
+  "summary": "Implements capsule-scoped code changes inside Allowed Context; adds ASCII provenance headers; returns diffs and verification steps. No repo-wide refactors unless authorized.",
+  "routing_keywords": ["code", "implementation", "feature", "refactor", "cli", "fix", "patch"],
+  "mount_paths": [".sentinel/agents/builder/**"],
+  "prompt_files": [
+    ".sentinel/agents/builder/ROLE.md",
+    ".sentinel/agents/builder/PLAYBOOK.md"
+  ]
+}
