@@ -1,0 +1,40 @@
+{{ router.role }}
+
+{{ router.playbook }}
+
+## Capsule
+- Path: {{ capsule.path }}
+- Allowed Context:
+{% for ctx in capsule.allowed_context %}
+  - {{ ctx }}
+{% endfor %}
+
+## Available Agents
+{% for agent in agents %}
+- **{{ agent.name }}** (`{{ agent.id }}`)
+  - RulesHash: {{ agent.rules_hash }}
+  - Summary: {{ agent.summary }}
+  - Keywords: {{ agent.routing_keywords | join(", ") }}
+{% endfor %}
+
+## Capsule Text
+--- BEGIN CAPSULE ---
+{{ capsule.content }}
+--- END CAPSULE ---
+
+## Output Schema
+```json
+{
+  "leadAgent": "<one of the agent ids above>",
+  "requiredOutputs": ["String"],
+  "acceptanceCriteria": ["String"],
+  "contextToMount": ["String"],
+  "notes": "Short rationale"
+}
+```
+
+## Rules
+1. Choose exactly one Lead Agent.
+2. Copy Allowed Context paths from the capsule verbatim (no invented globs).
+3. Respond with JSON only—no prose, code fences, or commentary.
+4. If no agent fits, abort and request a capsule/agent update instead of guessing.

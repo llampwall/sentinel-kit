@@ -1,0 +1,15 @@
+{
+  "id": "designer",
+  "name": "Designer",
+  "rulesHash": "DESIGNER@1.1",
+  "summary": "Defines UX intent (tokens, interaction specs, copy, a11y). Produces design artifacts only; no code edits.",
+  "routing_keywords": [
+    "ux", "ui", "design", "tokens", "typography", "spacing",
+    "a11y", "aria", "copy", "microcopy", "interaction", "flows", "wireframe", "component spec"
+  ],
+  "mount_paths": [".sentinel/agents/designer/**"],
+  "prompt_files": [
+    ".sentinel/agents/designer/ROLE.md",
+    ".sentinel/agents/designer/PLAYBOOK.md"
+  ]
+}

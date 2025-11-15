@@ -1,0 +1,1 @@
+"""SentinelKit test package placeholder."""

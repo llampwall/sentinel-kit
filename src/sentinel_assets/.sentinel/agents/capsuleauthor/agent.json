@@ -1,0 +1,15 @@
+{
+  "id": "capsuleauthor",
+  "name": "Capsule Author",
+  "rulesHash": "CAPSULEAUTHOR@1.0",
+  "summary": "Authors and maintains capsule.md from spec/plan/tasks. Defines Goal, Acceptance, Allowed Context (include lists), and provenance. No feature implementation.",
+  "routing_keywords": [
+    "capsule", "spec", "acceptance", "allowed context", "include list",
+    "plan", "scope", "router notes", "decision id", "provenance"
+  ],
+  "mount_paths": [".sentinel/agents/capsuleauthor/**"],
+  "prompt_files": [
+    ".sentinel/agents/capsuleauthor/ROLE.md",
+    ".sentinel/agents/capsuleauthor/PLAYBOOK.md"
+  ]
+}
