@@ -38,7 +38,7 @@ All of this runs on Python 3.12 via `uv`. Node tooling (pnpm, vitest, tsconfig) 
 
 ```bash
 # 1) Install the Specify CLI (with Sentinel scaffolding built-in)
-uv tool install --from git+https://github.com/llampwall/sentinel-kit.git specify
+uv tool install --from git+https://github.com/llampwall/sentinel-kit.git specify-cli
 
 # 2) Scaffold a project with Sentinel assets + bootstrap
 uvx specify init <project> --sentinel
