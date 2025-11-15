@@ -10,34 +10,34 @@
 
 ## Installation
 
-### Initialize a New Project
-
-The easiest way to get started is to initialize a new project:
+### Install the Specify CLI (once per machine)
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
+uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git
 ```
 
-Or initialize in the current directory:
+This publishes a global `specify` command that includes SentinelKit's project scaffolding.
+
+### Initialize a new project
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init .
-# or use the --here flag
-uvx --from git+https://github.com/github/spec-kit.git specify init --here
+specify init <PROJECT_NAME> --sentinel
 ```
 
-### Specify AI Agent
+Already inside the folder you want to scaffold? Run `specify init . --sentinel` or `specify init --here --sentinel`.
 
-You can proactively specify your AI agent during initialization:
+### Specify AI assistant
+
+You can proactively select your AI assistant when calling `specify init` (otherwise you'll be prompted):
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai gemini
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai copilot
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai codebuddy
+specify init <project_name> --sentinel --ai claude
+specify init <project_name> --sentinel --ai gemini
+specify init <project_name> --sentinel --ai copilot
+specify init <project_name> --sentinel --ai codebuddy
 ```
 
-### Specify Script Type (Shell vs PowerShell)
+### Specify script type (Shell vs PowerShell)
 
 All automation scripts now have both Bash (`.sh`) and PowerShell (`.ps1`) variants.
 
@@ -50,8 +50,8 @@ Auto behavior:
 Force a specific script type:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --script sh
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --script ps
+specify init <project_name> --sentinel --script sh
+specify init <project_name> --sentinel --script ps
 ```
 
 ### Ignore Agent Tools Check
@@ -59,8 +59,18 @@ uvx --from git+https://github.com/github/spec-kit.git specify init <project_name
 If you prefer to get the templates without checking for the right tools:
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <project_name> --ai claude --ignore-agent-tools
+specify init <project_name> --sentinel --ai claude --ignore-agent-tools
 ```
+
+### Ephemeral one-off usage
+
+Prefer to avoid installing the CLI globally? Run:
+
+```bash
+uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <PROJECT_NAME> --sentinel
+```
+
+After the scaffold completes, continue inside the project directory with `uv sync`, `uv run sentinel ...`, and `specify check` as usual.
 
 ## Verification
 
