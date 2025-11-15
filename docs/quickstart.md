@@ -1,22 +1,41 @@
 # Quick Start Guide
 
-This guide will help you get started with Spec-Driven Development using Spec Kit.
+This guide walks through the SentinelKit-flavored Spec‑Kit workflow from a brand-new user's perspective.
 
-> **Python-first note:** SentinelKit and Specify now ship as a single uv-native workspace. No Node or Vitest is required anymore; everything runs through `uv`/`uvx`.
+> **Python-first note:** SentinelKit and Specify now ship as a single uv-native workspace. No Node or Vitest is required anymore; everything runs through `uv`.
 
-## The 4-Step Process
+## The four-step process
 
-### 1. Install Specify
-
-Initialize your project using the uv toolchain:
+### 1. Install Specify (once per machine)
 
 ```bash
-uvx --from git+https://github.com/github/spec-kit.git specify init <PROJECT_NAME>
+uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git
 ```
 
-`uvx` auto-selects the correct shell for your platform, so no separate `--script` flag is needed. The bootstrap runs `uv sync` followed by `uv run sentinel selfcheck`, so you get a ready-to-go workspace on Windows, macOS, or Linux.
+This provides a global `specify` CLI that always pulls the SentinelKit scaffold when you pass `--sentinel`.
 
-### 2. Create the Spec
+### 2. Initialize a project with SentinelKit enabled
+
+```bash
+specify init <PROJECT_NAME> --sentinel
+```
+
+Pick whichever AI assistant and shell the prompt offers. SentinelKit works with every Spec‑Kit option.
+
+### 3. Bootstrap the generated repository
+
+```bash
+cd <PROJECT_NAME>
+uv sync
+uv run sentinel selfcheck
+specify check
+```
+
+- `uv sync` creates (or updates) the local virtual environment using the repo's `uv.lock`.
+- `uv run sentinel selfcheck` executes SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel pytest suites, MCP smoke tests).
+- `specify check` runs the upstream Spec‑Kit verification to keep specs and plans in sync.
+
+### 4. Create the spec and iterate
 
 Use the `/speckit.specify` command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
 
@@ -103,16 +122,12 @@ Finally, implement the solution:
 implement specs/002-create-taskify/plan.md
 ```
 
-## Key Principles
+## Helpful reminders
 
 - **Be explicit** about what you're building and why.
 - **Let `uv run sentinel selfcheck` guard** your automation to ensure contracts, context, MCP, and sentinel pytest gates are green before you ship.
-- **Stay platform-agnostic**: the repo runs identically on Windows, Linux, and macOS once you use the shared uv toolchain.
+- **Use `uv run sentinel ...` for SentinelKit commands** so each project uses the version captured in its lockfile.
+- **Stick with `specify` for Spec‑Kit commands** (`specify check`, `/speckit.*` slash commands, etc.).
 - **Iterate and refine** your specs before giving them to the implementation agent.
-- **Explain the “why”** first so downstream agents can choose the right enforcement surfaces.
 
-## Next Steps
-
-- Read the complete methodology for in-depth guidance
-- Check out more examples in the repository
-- Explore the source code on GitHub
+Need an ephemeral, zero-install bootstrap? You can run `uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <PROJECT_NAME> --sentinel` as a one-liner. After that, continue inside the generated project with `uv sync`, `uv run sentinel ...`, and `specify ...` commands as shown above.

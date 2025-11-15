@@ -10,13 +10,15 @@ Everything in this repo is implemented in Python and distributed via `uv`, so bo
 ## Table of Contents
 
 1. [Why Sentinel?](#why-sentinel)
-2. [Quick Start](#quick-start)
-3. [CLI Overview](#cli-overview)
-4. [Slash Command Gates](#slash-command-gates)
-5. [MCP Workflow](#mcp-workflow)
-6. [Tests & CI](#tests--ci)
-7. [Repository Layout](#repository-layout)
-8. [Support & Resources](#support--resources)
+2. [Quickstart (for users)](#quickstart-for-users)
+3. [Using SentinelKit in your project](#using-sentinelkit-in-your-project)
+4. [CLI Overview](#cli-overview)
+5. [Maintainer / contributor guide](#maintainer--contributor-guide)
+6. [Slash Command Gates](#slash-command-gates)
+7. [MCP Workflow](#mcp-workflow)
+8. [Tests & CI](#tests--ci)
+9. [Repository Layout](#repository-layout)
+10. [Support & Resources](#support--resources)
 
 ---
 
@@ -34,23 +36,50 @@ All of this runs on Python 3.12 via `uv`. Node tooling (pnpm, vitest, tsconfig) 
 
 ---
 
-## Quick Start
+## Quickstart (for users)
+
+SentinelKit rides on top of GitHub's Spec‑Kit, but you do not need to clone or install the upstream project directly. Once you have [uv installed](https://docs.astral.sh/uv/getting-started/installation/), follow this flow whenever you want to start a new project:
 
 ```bash
-# 1) Install the Specify CLI (with Sentinel scaffolding built-in)
-uv tool install --from git+https://github.com/llampwall/sentinel-kit.git specify-cli
+# 1) Install the Specify CLI (with Sentinel scaffolding built in)
+uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git
 
-# 2) Scaffold a project with Sentinel assets + bootstrap
-specify init <project> --sentinel
+# 2) Scaffold a project with Sentinel enabled
+specify init <project-name> --sentinel
 
-# 3) From any Sentinel repo, validate all gates
-uv run sentinel --format pretty selfcheck
+# 3) Enter the project and set it up
+cd <project-name>
+uv sync
+uv run sentinel selfcheck
+specify check
 ```
 
-> **Tip:** `selfcheck` runs contracts, context lint, capsule dry-run, sentinel tests, MCP smoke, decision/runbook hooks, etc. Keep the JSON output around for CI:
-> ```bash
-> uv run sentinel --format json selfcheck > .artifacts/selfcheck.json
-> ```
+- Step 2 will prompt you to pick an AI assistant and shell. Choose whatever fits your environment—SentinelKit works with all of the options Spec‑Kit exposes.
+- Run `uv run sentinel selfcheck` anytime you want SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel tests, MCP smoke) to verify your repo.
+- Run `specify check` for Spec‑Kit's built-in validation.
+
+> **Need a one-off run without installing the CLI globally?** Use `uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <project-name> --sentinel` as an alternative. The rest of the workflow stays inside the generated project via `uv run ...` commands.
+
+Need machine-readable output for CI? Run `uv run sentinel --format json selfcheck > .artifacts/selfcheck.json` and upload the artifact alongside your test results.
+
+---
+
+## Using SentinelKit in your project
+
+Running `specify init --sentinel` adds SentinelKit assets alongside the standard Spec‑Kit scaffold:
+
+- `.sentinel/**` with contracts, context budgets, prompts, and runbook templates
+- `sentinelkit/` Python package pre-wired into the project environment
+- CI snippets, decision ledger templates, and sentinel pytest suites
+
+Inside a Sentinel-enabled repo:
+
+- `specify check` runs Spec‑Kit's validation for the current repo.
+- `uv sync` ensures the virtual environment matches the pinned dependencies in `uv.lock`.
+- `uv run sentinel ...` executes SentinelKit commands (selfcheck, contracts, context lint, capsule operations, sentinel tests, MCP helpers, etc.).
+- `uv run sentinel selfcheck` is the all-in-one guardrail we expect before commits land.
+
+Because `uv run` resolves against the project's lockfile, every repo uses the SentinelKit version it was scaffolded with, guaranteeing reproducible enforcement even if the global `specify` CLI updates later.
 
 ---
 
@@ -73,6 +102,26 @@ All commands are exposed via `uv run sentinel ...`. Use `--format json` for mach
 | `sentinel agents roster [--format json]` | Lists router/agent metadata sourced from `.sentinel/agents/**`. |
 
 All commands honor `--root <path>` to run against another repo.
+
+---
+
+## Maintainer / contributor guide
+
+Working on SentinelKit itself? Clone the repo and use the bundled development workflow:
+
+```bash
+git clone https://github.com/llampwall/sentinel-kit.git
+cd sentinel-kit
+uv sync --dev
+uv run sentinel selfcheck
+uv run pytest -q
+```
+
+- `uv run sentinel selfcheck` exercises the same gates we recommend to end users, ensuring local changes do not break the contract/context/capsule/test stack.
+- `uv run pytest -q` drives the Sentinel pytest suites directly.
+- Maintainers who prefer a globally installed development copy can run `uv tool install --editable .` from the repo root, but this is optional and separate from the user-facing `specify` CLI install.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for additional guidelines.
 
 ---
 
@@ -100,12 +149,12 @@ Environment overrides:
 
 1. **Server** – Start the stdio server in a repo:
    ```bash
-   uvx sentinel mcp server
+   uv run sentinel mcp server
    ```
 
 2. **Smoke** – Validate the handshake (initialize → list → call):
    ```bash
-   uvx sentinel mcp smoke --timeout-call 90
+   uv run sentinel mcp smoke --timeout-call 90
    ```
 
 3. **.mcp.json entry**
@@ -113,8 +162,8 @@ Environment overrides:
    {
      "mcpServers": {
        "sentinel": {
-         "command": "uvx",
-         "args": ["sentinel", "mcp", "server"],
+         "command": "uv",
+         "args": ["run", "sentinel", "mcp", "server"],
          "env": { "PYTHONUTF8": "1" }
        }
      }
