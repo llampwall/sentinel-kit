@@ -25,8 +25,7 @@ def test_apply_sentinel_scaffold_copies_assets(tmp_path: Path, monkeypatch: pyte
     specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None)
 
     assert (tmp_path / "pyproject.toml").exists()
-    assert (tmp_path / "uv.lock").exists()
-    assert "placeholder" in (tmp_path / "uv.lock").read_text(encoding="utf-8")
+    assert not (tmp_path / "uv.lock").exists()
     assert (tmp_path / ".tool-versions").exists()
     assert (tmp_path / "scripts" / "bootstrap.py").exists()
     assert (tmp_path / "sentinelkit" / "pyproject.toml").exists()

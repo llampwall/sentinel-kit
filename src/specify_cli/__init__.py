@@ -34,6 +34,7 @@ import tempfile
 import shutil
 import shlex
 import json
+import contextlib
 from pathlib import Path
 from typing import Any, Iterable, List, Optional, Tuple, TYPE_CHECKING
 
@@ -205,7 +206,6 @@ DEFAULT_COPY_IGNORE = ["__pycache__", "*.pyc", "*.pyo", ".DS_Store", "Thumbs.db"
 
 SENTINEL_FILE_ASSETS = [
     ("pyproject.toml", "pyproject.toml"),
-    ("uv.lock", "uv.lock"),
     (".tool-versions", ".tool-versions"),
     ("Makefile", "Makefile"),
     ("scripts/bootstrap.py", "scripts/bootstrap.py"),
@@ -1040,24 +1040,33 @@ def run_uv_sync_in_project(project_path: Path) -> None:
     """Run uv sync inside the scaffold, falling back to unlocked sync on failure."""
     lock_path = project_path / "uv.lock"
 
-    def _is_placeholder_lockfile() -> bool:
+    def _lockfile_state() -> str:
         if not lock_path.exists():
-            return True
+            return "missing"
         try:
             for line in lock_path.read_text(encoding="utf-8").splitlines():
                 stripped = line.strip()
-                if stripped:
-                    return stripped.startswith("# SentinelKit placeholder")
+                if not stripped:
+                    continue
+                if stripped.startswith("# SentinelKit placeholder") or stripped.startswith(
+                    "# Placeholder uv.lock"
+                ):
+                    return "placeholder"
+                break
         except Exception:
-            return False
-        return True
+            return "unknown"
+        return "present"
 
-    if _is_placeholder_lockfile():
+    lockfile_state = _lockfile_state()
+    if lockfile_state != "present":
+        if lockfile_state == "placeholder" and lock_path.exists():
+            with contextlib.suppress(OSError):
+                lock_path.unlink()
         console.print(
             Panel(
-                "Sentinel scaffold ships with a placeholder uv.lock. "
-                "Run `uv lock --locked --all-groups` after the initial sync to pin dependencies.",
-                title="[yellow]uv.lock placeholder[/yellow]",
+                "No uv.lock detected. Running `uv sync` to generate one now. "
+                "After customizing dependencies, run `uv lock --locked --all-groups` to pin them.",
+                title="[yellow]uv.lock bootstrap[/yellow]",
                 border_style="yellow",
             )
         )
