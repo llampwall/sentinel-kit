@@ -178,7 +178,7 @@ The smoke runner is wired into `sentinel selfcheck` and the CI workflow. Dry-run
 
 - **Bootstrap:** `uv sync --locked --dev` (with fallbacks), `uv run sentinel selfcheck`, `uv run pytest -q`.
 - **Sentinel suites:** `uv run sentinel sentinels run --json-report test-results/sentinels.json --junit test-results/sentinels.xml`.
-- **MCP smoke:** `uv run python -m Sentinel-Kit.cli.main mcp smoke --format json`.
+- **MCP smoke:** `uv run sentinel mcp smoke --format json`.
 - **Check for banned Node artifacts:** `uv run python scripts/check_node_artifacts.py`.
 - **CI (`.github/workflows/sentinel-ci.yml`)** runs all of the above on Ubuntu/macOS/Windows, uploads artifacts, and fails fast on any regression.
 

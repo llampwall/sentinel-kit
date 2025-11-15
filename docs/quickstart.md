@@ -43,7 +43,7 @@ Use the `/speckit.specify` command to describe what you want to build. Focus on 
 /speckit.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.
 ```
 
-### 3. Create a Technical Implementation Plan
+### Create a Technical Implementation Plan
 
 Use the `/speckit.plan` command to provide your tech stack and architecture choices.
 
@@ -51,7 +51,7 @@ Use the `/speckit.plan` command to provide your tech stack and architecture choi
 /speckit.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
 ```
 
-### 4. Break Down and Implement
+### Break Down and Implement
 
 Use `/speckit.tasks` to create an actionable task list, then ask your agent to implement the feature.
 
