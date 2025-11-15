@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import importlib
+import tomllib
 
 import pytest
 
@@ -29,6 +30,9 @@ def test_apply_sentinel_scaffold_copies_assets(tmp_path: Path, monkeypatch: pyte
     assert (tmp_path / ".tool-versions").exists()
     assert (tmp_path / "scripts" / "bootstrap.py").exists()
     assert (tmp_path / "sentinelkit" / "pyproject.toml").exists()
+    sentinel_pyproject = tomllib.loads((tmp_path / "sentinelkit" / "pyproject.toml").read_text(encoding="utf-8"))
+    include_globs = sentinel_pyproject.get("tool", {}).get("hatch", {}).get("build", {}).get("include", [])
+    assert "sentinelkit" in include_globs
     assert (tmp_path / ".sentinel" / "docs" / "IMPLEMENTATION.md").exists()
     assert (tmp_path / ".github" / "workflows" / "sentinel-ci.yml").exists()
     assert (tmp_path / ".codex" / "prompts" / "sentinel.router.md").exists()

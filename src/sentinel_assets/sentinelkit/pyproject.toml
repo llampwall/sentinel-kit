@@ -20,6 +20,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 include = [
+    "sentinelkit",
     "sentinelkit/prompt/templates/*.md.j2",
 ]
 
