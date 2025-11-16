@@ -36,7 +36,7 @@ import shlex
 import json
 import contextlib
 from pathlib import Path
-from typing import Any, Iterable, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
 
 import typer
 
@@ -1022,13 +1022,18 @@ def _copy_runbook_template(project_path: Path) -> None:
     shutil.copy2(src, dest)
 
 
-def sync_agent_prompt_bundles(project_path: Path) -> int:
-    """Copy canonical Sentinel prompts into supported agent bundles."""
+def sync_agent_prompt_bundles(project_path: Path, assistant: str | None = None) -> int:
+    """Copy canonical Sentinel prompts into the selected agent bundle."""
     prompts_dir = _resolve_asset(".sentinel/prompts")
     if not prompts_dir.exists():
         return 0
+    targets: list[Path] = []
+    if assistant and assistant in AGENT_PROMPT_DIRS:
+        targets.append(AGENT_PROMPT_DIRS[assistant])
+    elif assistant is None:
+        targets.extend(AGENT_PROMPT_DIRS.values())
     copied = 0
-    for target in AGENT_PROMPT_DIRS.values():
+    for target in targets:
         dest_dir = project_path / target
         dest_dir.mkdir(parents=True, exist_ok=True)
         for prompt_file in prompts_dir.iterdir():
@@ -1114,7 +1119,12 @@ def run_sentinel_selfcheck_in_project(project_path: Path) -> None:
     run_sentinel_selfcheck(root=project_path)
 
 
-def apply_sentinel_scaffold(project_path: Path, tracker: StepTracker | None = None) -> None:
+def apply_sentinel_scaffold(
+    project_path: Path,
+    *,
+    tracker: StepTracker | None = None,
+    assistant: str | None = None,
+) -> None:
     """Copy Sentinel assets into the scaffold and run the bootstrap commands."""
     copy_key = "sentinel-copy"
     if tracker:
@@ -1141,7 +1151,7 @@ def apply_sentinel_scaffold(project_path: Path, tracker: StepTracker | None = No
     if tracker:
         tracker.start(prompts_key, "sync agent prompts")
     try:
-        prompt_count = sync_agent_prompt_bundles(project_path)
+        prompt_count = sync_agent_prompt_bundles(project_path, assistant=assistant)
     except Exception as exc:
         if tracker:
             tracker.error(prompts_key, str(exc))
@@ -1379,7 +1389,7 @@ def init(
             ensure_executable_scripts(project_path, tracker=tracker)
 
             if sentinel:
-                apply_sentinel_scaffold(project_path, tracker=tracker)
+                apply_sentinel_scaffold(project_path, tracker=tracker, assistant=selected_ai)
 
             if not no_git:
                 tracker.start("git")
@@ -1540,10 +1550,54 @@ def check(
     sentinel_tracker.add("sentinel-run", "sentinel selfcheck")
     console.print(sentinel_tracker.render())
 
+    pending_checks: list[dict] = []
+
     try:
-        sentinel_tracker.start("sentinel-run", "uv run sentinel selfcheck --format json")
-        run_sentinel_selfcheck(root=root)
-        sentinel_tracker.complete("sentinel-run", "ok")
+        sentinel_tracker.start("sentinel-run", "uv run sentinel --format json selfcheck")
+        root_path = Path(root)
+        exit_code, payload, stderr_output = _invoke_sentinel_selfcheck_json(root_path)
+        checks = list(payload.get("checks", []))
+        pending_checks = [check for check in checks if check.get("status") == "pending"]
+        failing_checks = [check for check in checks if check.get("status") == "fail"]
+
+        console.print(_render_sentinel_check_table(checks))
+        if stderr_output:
+            console.print(
+                Panel(
+                    stderr_output,
+                    title="[yellow]sentinel selfcheck (stderr)[/yellow]",
+                    border_style="yellow",
+                )
+            )
+
+        if failing_checks:
+            sentinel_tracker.error("sentinel-run", "failed")
+            console.print(
+                Panel(
+                    "\n".join(
+                        f"{check.get('name', 'check')}: {_format_check_message(check) or 'failed'}"
+                        for check in failing_checks
+                    ),
+                    title="[red]Sentinel Gate Failed[/red]",
+                    border_style="red",
+                )
+            )
+            raise typer.Exit(exit_code or 1)
+
+        if exit_code != 0:
+            sentinel_tracker.error("sentinel-run", f"exit {exit_code}")
+            raise typer.Exit(exit_code)
+
+        sentinel_tracker.complete(
+            "sentinel-run",
+            "ok" if not pending_checks else "ok (pending)",
+        )
+    except FileNotFoundError:
+        sentinel_tracker.error("sentinel-run", "uv missing")
+        console.print(
+            "[bold red]uv command not found.[/bold red] Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
+        )
+        raise typer.Exit(1)
     except typer.Exit as exc:
         sentinel_tracker.error("sentinel-run", f"exit {exc.exit_code}")
         console.print(
@@ -1566,39 +1620,122 @@ def check(
         raise typer.Exit(1)
     else:
         console.print(sentinel_tracker.render())
-        console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
+        if pending_checks:
+            console.print(
+                Panel(
+                    "Sentinel selfcheck completed with pending checks. Configure MCP and sentinel tests when ready.",
+                    title="[yellow]Pending Sentinel Checks[/yellow]",
+                    border_style="yellow",
+                )
+            )
+        else:
+            console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
 
 
-def run_sentinel_selfcheck(root: Path | None = None) -> None:
-    """Invoke the Sentinel CLI selfcheck via uv."""
+def run_sentinel_selfcheck(root: Path | None = None) -> dict:
+    """Invoke the Sentinel CLI selfcheck via uv and return the parsed payload."""
     root_path = Path(root) if root else Path.cwd()
-    command = [
-        "uv",
-        "run",
-        "sentinel",
-        "selfcheck",
-        "--format",
-        "json",
-    ]
     try:
-        subprocess.run(command, check=True, cwd=root_path)
+        exit_code, payload, _stderr = _invoke_sentinel_selfcheck_json(root_path)
     except FileNotFoundError:
         console.print(
             "[bold red]uv command not found.[/bold red] "
             "Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
         )
         raise typer.Exit(1)
-    except subprocess.CalledProcessError as exc:
+
+    if exit_code != 0:
+        raise typer.Exit(exit_code)
+
+    failing_checks = [check for check in payload.get("checks", []) if check.get("status") == "fail"]
+    if failing_checks:
+        raise typer.Exit(1)
+
+    console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
+    return payload
+
+
+def _invoke_sentinel_selfcheck_json(root_path: Path) -> tuple[int, dict, str]:
+    command = [
+        "uv",
+        "run",
+        "sentinel",
+        "--format",
+        "json",
+        "selfcheck",
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=root_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    stdout = (completed.stdout or "").strip()
+    if not stdout:
+        message = completed.stderr.strip() or "Sentinel selfcheck produced no output."
         console.print(
             Panel(
-                f"Sentinel selfcheck failed (exit code {exc.returncode}). See logs above for details.",
+                message,
                 title="[red]Sentinel Selfcheck[/red]",
                 border_style="red",
             )
         )
-        raise typer.Exit(exc.returncode)
-    else:
-        console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
+        raise typer.Exit(completed.returncode or 1)
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+        console.print(
+            Panel(
+                f"Sentinel selfcheck returned invalid JSON: {exc}",
+                title="[red]Sentinel Selfcheck[/red]",
+                border_style="red",
+            )
+        )
+        raise typer.Exit(completed.returncode or 1) from exc
+    return completed.returncode, payload, (completed.stderr or "").strip()
+
+
+def _render_sentinel_check_table(checks: list[Mapping[str, Any]]) -> Table:
+    table = Table(title="Sentinel selfcheck")
+    table.add_column("Check")
+    table.add_column("Status")
+    table.add_column("Duration", justify="right")
+    table.add_column("Message")
+
+    icon_map = {"ok": "✅", "pending": "⏳", "fail": "❌"}
+    for check in checks:
+        status = str(check.get("status", "unknown"))
+        icon = icon_map.get(status, "❔")
+        duration = check.get("duration")
+        if isinstance(duration, (int, float)):
+            duration_text = f"{duration:.2f}s"
+        else:
+            duration_text = "-"
+        table.add_row(
+            str(check.get("name", "-")),
+            f"{icon} {status}",
+            duration_text,
+            _format_check_message(check) or "-",
+        )
+    return table
+
+
+def _format_check_message(check: Mapping[str, Any]) -> str:
+    data = check.get("data")
+    if isinstance(data, Mapping):
+        message = data.get("message")
+        if isinstance(message, str) and message:
+            return message
+    error = check.get("error")
+    if isinstance(error, Mapping):
+        message = error.get("message")
+        if isinstance(message, str) and message:
+            remediation = error.get("remediation")
+            if isinstance(remediation, str) and remediation:
+                return f"{message} ({remediation})"
+            return message
+    return ""
 
 def main():
     app()

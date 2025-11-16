@@ -58,7 +58,7 @@ def test_selfcheck_reports_mcp_success(monkeypatch, repo_root: Path) -> None:
     )
     result = selfcheck_module._build_checks()["mcp"](context)
 
-    assert result.success is True
+    assert result.status == "ok"
     assert result.data["command"] == summary.command
 
 
@@ -84,7 +84,7 @@ def test_selfcheck_reports_mcp_failure(monkeypatch, repo_root: Path) -> None:
     )
     result = selfcheck_module._build_checks()["mcp"](context)
 
-    assert result.success is False
+    assert result.status == "fail"
     assert result.error
     assert result.error.message == failure_step.detail
 
@@ -106,6 +106,6 @@ def test_selfcheck_marks_mcp_pending_when_unconfigured(monkeypatch, repo_root: P
     )
     result = selfcheck_module._build_checks()["mcp"](context)
 
-    assert result.success is True
+    assert result.status == "pending"
     assert result.data is not None
     assert result.data["status"] == "pending"

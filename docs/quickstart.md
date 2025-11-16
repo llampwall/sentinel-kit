@@ -33,7 +33,8 @@ specify check
 
 - `uv sync` creates (or updates) the local virtual environment using the repo's `uv.lock`.
 - `uv run sentinel selfcheck` executes SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel pytest suites, MCP smoke tests).
-- `specify check` runs the upstream Spec‑Kit verification to keep specs and plans in sync.
+- `specify check` runs the upstream Spec‑Kit verification to keep specs and plans in sync (it shells out to `uv run sentinel --format json selfcheck` and interprets the JSON result).
+- Initial runs mark `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you wire up MCP configs and sentinel pytest suites. Pending checks are informational only and do not block the gate.
 
 ### 4. Create the spec and iterate
 

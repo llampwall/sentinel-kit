@@ -60,3 +60,4 @@ logs
 # Task files
 # tasks.json
 # tasks/
+node_modules

@@ -57,10 +57,11 @@ specify check
 - Step 2 will prompt you to pick an AI assistant and shell. Choose whatever fits your environment—SentinelKit works with all of the options Spec‑Kit exposes.
 - Run `uv run sentinel selfcheck` anytime you want SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel tests, MCP smoke) to verify your repo.
 - Run `specify check` for Spec‑Kit's built-in validation.
+- Fresh scaffolds report `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you copy real prompts/tests/MCP configs into place. Pending checks still produce exit code 0 so you can stage infrastructure incrementally.
 
 > **Need a one-off run without installing the CLI globally?** Use `uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <project-name> --sentinel` as an alternative. The rest of the workflow stays inside the generated project via `uv run ...` commands.
 
-Need machine-readable output for CI? Run `uv run sentinel --format json selfcheck > .artifacts/selfcheck.json` and upload the artifact alongside your test results.
+Need machine-readable output for CI? Run `uv run sentinel --format json selfcheck > .artifacts/selfcheck.json` and upload the artifact alongside your test results. `specify check` uses the same JSON contract under the hood and fails only when a check reports `status="fail"`.
 
 ---
 

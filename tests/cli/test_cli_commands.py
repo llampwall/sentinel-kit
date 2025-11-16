@@ -117,7 +117,7 @@ def test_selfcheck_json_output() -> None:
     assert output.endswith("}"), output
     payload = json.loads(output)
     sentinel_check = next(check for check in payload["checks"] if check["name"] == "sentinels")
-    assert sentinel_check["success"] is True
+    assert sentinel_check["status"] in {"ok", "pending"}
 
 
 def test_agents_roster_cli(tmp_path: Path) -> None:

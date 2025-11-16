@@ -3,8 +3,6 @@
 from __future__ import annotations
 
 import json
-from typing import Dict
-
 from typer.testing import CliRunner
 
 from sentinelkit.cli import main as cli_main
@@ -17,17 +15,21 @@ runner = CliRunner()
 
 
 def _success_check(context: CLIContext) -> CheckResult:
-    return CheckResult(name="contracts", success=True, duration=0.01, data={"message": "ok"})
+    return CheckResult(name="contracts", status="ok", duration=0.01, data={"message": "ok"})
 
 
 def _failure_check(context: CLIContext) -> CheckResult:
     return CheckResult(
         name="contracts",
-        success=False,
+        status="fail",
         duration=0.02,
         data={"message": "missing"},
         error=build_error_payload(code="contracts.error", message="boom"),
     )
+
+
+def _pending_check(context: CLIContext) -> CheckResult:
+    return CheckResult(name="contracts", status="pending", duration=0.0, data={"message": "skipped"})
 
 
 def test_selfcheck_pretty_success(monkeypatch):
@@ -44,6 +46,7 @@ def test_selfcheck_json_success(monkeypatch):
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
     assert payload["checks"][0]["name"] == "contracts"
+    assert payload["checks"][0]["status"] == "ok"
 
 
 def test_selfcheck_failure(monkeypatch):
@@ -51,3 +54,10 @@ def test_selfcheck_failure(monkeypatch):
     result = runner.invoke(cli_main.app, ["--root", ".", "selfcheck"])
     assert result.exit_code == 1
     assert "Selfcheck failed" in result.stdout
+
+
+def test_selfcheck_pending(monkeypatch):
+    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _pending_check})
+    result = runner.invoke(cli_main.app, ["--root", ".", "selfcheck"])
+    assert result.exit_code == 0
+    assert "pending" in result.stdout.lower()

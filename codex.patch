@@ -1,0 +1,1956 @@
+diff --git a/README.md b/README.md
+index 397b32b95cc7ebd9b425ee325b45cfc7c8632dcb..1c5947370614675b4fa51247561c1d63c8902e87 100644
+--- a/README.md
++++ b/README.md
+@@ -35,54 +35,55 @@ Specs are executable contracts. Sentinel-Kit makes sure we live up to them by en
+ All of this runs on Python 3.12 via `uv`. Node tooling (pnpm, vitest, tsconfig) has been removed entirely.
+ 
+ ---
+ 
+ ## Quickstart (for users)
+ 
+ SentinelKit rides on top of GitHub's Spec‑Kit, but you do not need to clone or install the upstream project directly. Once you have [uv installed](https://docs.astral.sh/uv/getting-started/installation/), follow this flow whenever you want to start a new project:
+ 
+ ```bash
+ # 1) Install the Specify CLI (with Sentinel scaffolding built in)
+ uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git
+ 
+ # 2) Scaffold a project with Sentinel enabled
+ specify init <project-name> --sentinel
+ 
+ # 3) Enter the project and set it up
+ cd <project-name>
+ uv sync
+ uv run sentinel selfcheck
+ specify check
+ ```
+ 
+ - Step 2 will prompt you to pick an AI assistant and shell. Choose whatever fits your environment—SentinelKit works with all of the options Spec‑Kit exposes.
+ - Run `uv run sentinel selfcheck` anytime you want SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel tests, MCP smoke) to verify your repo.
+ - Run `specify check` for Spec‑Kit's built-in validation.
++- Fresh scaffolds report `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you copy real prompts/tests/MCP configs into place. Pending checks still produce exit code 0 so you can stage infrastructure incrementally.
+ 
+ > **Need a one-off run without installing the CLI globally?** Use `uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <project-name> --sentinel` as an alternative. The rest of the workflow stays inside the generated project via `uv run ...` commands.
+ 
+-Need machine-readable output for CI? Run `uv run sentinel --format json selfcheck > .artifacts/selfcheck.json` and upload the artifact alongside your test results.
++Need machine-readable output for CI? Run `uv run sentinel --format json selfcheck > .artifacts/selfcheck.json` and upload the artifact alongside your test results. `specify check` uses the same JSON contract under the hood and fails only when a check reports `status="fail"`.
+ 
+ ---
+ 
+ ## Using SentinelKit in your project
+ 
+ Running `specify init --sentinel` adds SentinelKit assets alongside the standard Spec‑Kit scaffold:
+ 
+ - `.sentinel/**` with contracts, context budgets, prompts, and runbook templates
+ - `sentinelkit/` Python package pre-wired into the project environment
+ - CI snippets, decision ledger templates, and sentinel pytest suites
+ 
+ Inside a Sentinel-enabled repo:
+ 
+ - `specify check` runs Spec‑Kit's validation for the current repo.
+ - `uv sync` ensures the virtual environment matches the pinned dependencies in `uv.lock`.
+ - `uv run sentinel ...` executes SentinelKit commands (selfcheck, contracts, context lint, capsule operations, sentinel tests, MCP helpers, etc.).
+ - `uv run sentinel selfcheck` is the all-in-one guardrail we expect before commits land.
+ 
+ Because `uv run` resolves against the project's lockfile, every repo uses the SentinelKit version it was scaffolded with, guaranteeing reproducible enforcement even if the global `specify` CLI updates later.
+ 
+ ---
+ 
+ ## CLI Overview
+ 
+ All commands are exposed via `uv run sentinel ...`. Use `--format json` for machine-readable output.
+diff --git a/docs/installation.md b/docs/installation.md
+index ef1167842c852be34ff0bae631271e5061548c32..880a793282aeca79467cde506eba8757e052cd11 100644
+--- a/docs/installation.md
++++ b/docs/installation.md
+@@ -50,50 +50,63 @@ Auto behavior:
+ Force a specific script type:
+ 
+ ```bash
+ specify init <project_name> --sentinel --script sh
+ specify init <project_name> --sentinel --script ps
+ ```
+ 
+ ### Ignore Agent Tools Check
+ 
+ If you prefer to get the templates without checking for the right tools:
+ 
+ ```bash
+ specify init <project_name> --sentinel --ai claude --ignore-agent-tools
+ ```
+ 
+ ### Ephemeral one-off usage
+ 
+ Prefer to avoid installing the CLI globally? Run:
+ 
+ ```bash
+ uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <PROJECT_NAME> --sentinel
+ ```
+ 
+ After the scaffold completes, continue inside the project directory with `uv sync`, `uv run sentinel ...`, and `specify check` as usual.
+ 
++### Verify the Sentinel gate
++
++Run the core workflow once inside the new repo:
++
++```bash
++uv sync
++uv run sentinel selfcheck
++specify check
++```
++
++- Use `uv run sentinel --format json selfcheck` when you need machine-readable output.
++- Expect early runs to flag `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you wire up MCP configs and sentinel pytest suites. Pending checks keep the exit code at 0 so you can land scaffolding before the enforcement assets are ready.
++
+ ## Verification
+ 
+ After initialization, you should see the following commands available in your AI agent:
+ 
+ - `/speckit.specify` - Create specifications
+ - `/speckit.plan` - Generate implementation plans  
+ - `/speckit.tasks` - Break down into actionable tasks
+ 
+ The `.specify/scripts` directory will contain both `.sh` and `.ps1` scripts.
+ 
+ ## Troubleshooting
+ 
+ ### Git Credential Manager on Linux
+ 
+ If you're having issues with Git authentication on Linux, you can install Git Credential Manager:
+ 
+ ```bash
+ #!/usr/bin/env bash
+ set -e
+ echo "Downloading Git Credential Manager v2.6.1..."
+ wget https://github.com/git-ecosystem/git-credential-manager/releases/download/v2.6.1/gcm-linux_amd64.2.6.1.deb
+ echo "Installing Git Credential Manager..."
+ sudo dpkg -i gcm-linux_amd64.2.6.1.deb
+ echo "Configuring Git to use GCM..."
+ git config --global credential.helper manager
+diff --git a/docs/quickstart.md b/docs/quickstart.md
+index 8a7a8d89ee7850880bbbdf259881f4a8cc2493a5..089c2460ad26600cdb35737584ef88b10e1e9c2b 100644
+--- a/docs/quickstart.md
++++ b/docs/quickstart.md
+@@ -11,51 +11,52 @@ This guide walks through the SentinelKit-flavored Spec‑Kit workflow from a bra
+ ```bash
+ uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git
+ ```
+ 
+ This provides a global `specify` CLI that always pulls the SentinelKit scaffold when you pass `--sentinel`.
+ 
+ ### 2. Initialize a project with SentinelKit enabled
+ 
+ ```bash
+ specify init <PROJECT_NAME> --sentinel
+ ```
+ 
+ Pick whichever AI assistant and shell the prompt offers. SentinelKit works with every Spec‑Kit option.
+ 
+ ### 3. Bootstrap the generated repository
+ 
+ ```bash
+ cd <PROJECT_NAME>
+ uv sync
+ uv run sentinel selfcheck
+ specify check
+ ```
+ 
+ - `uv sync` creates (or updates) the local virtual environment using the repo's `uv.lock`.
+ - `uv run sentinel selfcheck` executes SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel pytest suites, MCP smoke tests).
+-- `specify check` runs the upstream Spec‑Kit verification to keep specs and plans in sync.
++- `specify check` runs the upstream Spec‑Kit verification to keep specs and plans in sync (it shells out to `uv run sentinel --format json selfcheck` and interprets the JSON result).
++- Initial runs mark `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you wire up MCP configs and sentinel pytest suites. Pending checks are informational only and do not block the gate.
+ 
+ ### 4. Create the spec and iterate
+ 
+ Use the `/speckit.specify` command to describe what you want to build. Focus on the **what** and **why**, not the tech stack.
+ 
+ ```bash
+ /speckit.specify Build an application that can help me organize my photos in separate photo albums. Albums are grouped by date and can be re-organized by dragging and dropping on the main page. Albums are never in other nested albums. Within each album, photos are previewed in a tile-like interface.
+ ```
+ 
+ ### Create a Technical Implementation Plan
+ 
+ Use the `/speckit.plan` command to provide your tech stack and architecture choices.
+ 
+ ```bash
+ /speckit.plan The application uses Vite with minimal number of libraries. Use vanilla HTML, CSS, and JavaScript as much as possible. Images are not uploaded anywhere and metadata is stored in a local SQLite database.
+ ```
+ 
+ ### Break Down and Implement
+ 
+ Use `/speckit.tasks` to create an actionable task list, then ask your agent to implement the feature.
+ 
+ ## Detailed Example: Building Taskify
+ 
+ Here's a complete example of building a team productivity platform:
+ 
+diff --git a/sentinelkit/sentinelkit/cli/executor.py b/sentinelkit/sentinelkit/cli/executor.py
+index cbe67abc6c6c2221f8159334ce9acb9c5bb12b59..5ef8b64f7d364369d1a4ce9945210eec5d7f5afc 100644
+--- a/sentinelkit/sentinelkit/cli/executor.py
++++ b/sentinelkit/sentinelkit/cli/executor.py
+@@ -1,81 +1,89 @@
+ """Concurrency helpers for running sentinel checks."""
+ 
+ from __future__ import annotations
+ 
+ import time
+ from concurrent.futures import ThreadPoolExecutor, as_completed
+ from dataclasses import dataclass
+-from typing import Callable, Mapping, Sequence
++from typing import Callable, Literal, Mapping, Sequence
+ 
+ from rich.console import Console
+ from rich.status import Status
+ 
+ from .state import CLIContext
+ from sentinelkit.utils.errors import ErrorPayload, serialize_error
+ 
+ __all__ = ["CheckResult", "run_checks"]
+ 
+ 
++CheckStatus = Literal["ok", "pending", "fail"]
++
++
+ @dataclass(slots=True)
+ class CheckResult:
+     name: str
+-    success: bool
++    status: CheckStatus
+     duration: float
+     data: dict | None = None
+     error: ErrorPayload | None = None
+ 
+     def to_dict(self) -> dict:
+         payload = {
+             "name": self.name,
+-            "success": self.success,
++            "status": self.status,
+             "duration": self.duration,
+         }
+         if self.data is not None:
+             payload["data"] = self.data
+         if self.error is not None:
+             payload["error"] = serialize_error(self.error)
+         return payload
+ 
+ 
+ CheckCallable = Callable[[CLIContext], CheckResult]
+ 
+ 
+ def run_checks(
+     context: CLIContext,
+     checks: Mapping[str, CheckCallable],
+     *,
+     show_status: bool = True,
+ ) -> Sequence[CheckResult]:
+     """Execute each check concurrently and return structured results."""
+     console = Console()
+     results: list[CheckResult] = []
+ 
+     status: Status | None = None
+     if show_status and context.format == "pretty":
+         status = console.status("Running sentinel checks...")
+         status.start()
+ 
+     try:
+         with ThreadPoolExecutor(max_workers=len(checks)) as executor:
+             future_map = {
+                 executor.submit(_run_single_check, name, fn, context): name for name, fn in checks.items()
+             }
+             for future in as_completed(future_map):
+                 result = future.result()
+                 results.append(result)
+                 if status:
+-                    status.update(f"[bold]{result.name}[/] {'✅' if result.success else '❌'}")
++                    status_icon = {
++                        "ok": "✅",
++                        "pending": "⏳",
++                        "fail": "❌",
++                    }.get(result.status, "❔")
++                    status.update(f"[bold]{result.name}[/] {status_icon}")
+     finally:
+         if status:
+             status.stop()
+ 
+     return results
+ 
+ 
+ def _run_single_check(name: str, fn: CheckCallable, context: CLIContext) -> CheckResult:
+     start = time.perf_counter()
+     try:
+         return fn(context)
+     except Exception as exc:  # pragma: no cover - placeholder until real checks land
+         payload = ErrorPayload(code=f"{name}.error", message=str(exc))
+-        return CheckResult(name=name, success=False, duration=time.perf_counter() - start, error=payload)
++        return CheckResult(name=name, status="fail", duration=time.perf_counter() - start, error=payload)
+diff --git a/sentinelkit/sentinelkit/cli/selfcheck.py b/sentinelkit/sentinelkit/cli/selfcheck.py
+index f356f32a5564776737ffc3b18b4e1b3a391e3621..4f962858bbec22c40dffa3c1e98a031f45756d2d 100644
+--- a/sentinelkit/sentinelkit/cli/selfcheck.py
++++ b/sentinelkit/sentinelkit/cli/selfcheck.py
+@@ -6,159 +6,182 @@ import json
+ import time
+ from typing import Dict, Mapping
+ 
+ import typer
+ from rich.console import Console
+ from rich.table import Table
+ 
+ from sentinelkit.cli.mcp.smoke import SmokeSummary, run_smoke
+ from sentinelkit.utils.errors import build_error_payload
+ 
+ from .executor import CheckResult, run_checks
+ from .state import CLIContext, get_context
+ from .sentinels import run_sentinel_pytest
+ 
+ __all__ = ["run"]
+ 
+ 
+ def run(
+     ctx: typer.Context,
+     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show additional diagnostics."),
+ ) -> None:
+     """Run SentinelKit self diagnostics."""
+     context = get_context(ctx)
+     checks = _build_checks()
+     results = sorted(run_checks(context, checks, show_status=not verbose), key=lambda r: r.name)
+-    ok = all(result.success for result in results)
++    ok = all(result.status != "fail" for result in results)
++    has_pending = any(result.status == "pending" for result in results)
+ 
+     if context.format == "json":
+         payload = {
+             "ok": ok,
+             "environment": {
+                 "root": str(context.root),
+                 "ci": context.env.is_ci,
+                 "platform": context.env.platform,
+                 "python": context.env.python_version,
+             },
+             "checks": [result.to_dict() for result in results],
+         }
+         typer.echo(json.dumps(payload, indent=2))
+     else:
+         console = Console()
+         console.print(_build_table(results))
+-        summary = "[bold green]Selfcheck OK[/bold green]" if ok else "[bold red]Selfcheck failed[/bold red]"
++        if not ok:
++            summary = "[bold red]Selfcheck failed[/bold red]"
++        elif has_pending:
++            summary = "[bold yellow]Selfcheck OK (pending checks)[/bold yellow]"
++        else:
++            summary = "[bold green]Selfcheck OK[/bold green]"
+         console.print(summary)
+ 
+     if not ok:
+         raise typer.Exit(1)
+ 
+ 
+ def _build_table(results: list[CheckResult]) -> Table:
+     table = Table(title="Sentinel selfcheck")
+     table.add_column("Check")
+     table.add_column("Status")
+     table.add_column("Duration", justify="right")
+     table.add_column("Details")
+ 
++    icon_map = {"ok": "✅", "pending": "⏳", "fail": "❌"}
+     for result in results:
+-        status = "✅" if result.success else "❌"
++        status_icon = icon_map.get(result.status, result.status)
++        status = f"{status_icon} {result.status}"
+         details = result.data.get("message") if result.data else ""
+         if result.error:
+             err = result.error.message
+             if result.error.remediation:
+                 err += f" ({result.error.remediation})"
+             details = err
+         table.add_row(result.name, status, f"{result.duration:.2f}s", details or "-")
+     return table
+ 
+ 
+ def _build_checks() -> Dict[str, callable]:
+     return {
+-        "contracts": _placeholder_check("contracts", "Contract validation pending implementation."),
+-        "context": _placeholder_check("context", "Context lint pending implementation."),
+-        "capsule": _placeholder_check("capsule", "Capsule generator dry-run pending implementation."),
++        "contracts": _placeholder_check(
++            "contracts", "Contract validation not configured yet. Add schemas to enable this gate."
++        ),
++        "context": _placeholder_check(
++            "context", "Context lint not configured yet. Copy context budgets to enable this gate."
++        ),
++        "capsule": _placeholder_check(
++            "capsule", "Capsule generator dry-run not configured yet. Add capsule metadata to enable this gate."
++        ),
+         "sentinels": _sentinel_check,
+         "mcp": _mcp_check,
+     }
+ 
+ 
+ def _placeholder_check(name: str, message: str):
+     def runner(context: CLIContext) -> CheckResult:
+         data = {"message": message, "root": str(context.root)}
+-        error = None
+-        success = False
+-        if context.env.is_ci:
+-            error = build_error_payload(code=f"{name}.not_implemented", message=message)
+-        else:
+-            success = True
+-        return CheckResult(name=name, success=success, duration=0.0, data=data, error=error)
++        return CheckResult(name=name, status="pending", duration=0.0, data=data)
+ 
+     return runner
+ 
+ 
+ def _sentinel_check(context: CLIContext) -> CheckResult:
+     """Run sentinel pytest suite and surface status."""
+ 
++    tests_dir = context.root / "tests" / "sentinels"
++    if not tests_dir.exists() or not any(tests_dir.rglob("test_*.py")):
++        return CheckResult(
++            name="sentinels",
++            status="pending",
++            duration=0.0,
++            data={
++                "message": "No sentinel pytest suite configured yet.",
++                "tests_path": str(tests_dir),
++            },
++        )
++
+     start = time.perf_counter()
+     try:
+         exit_code, summary = run_sentinel_pytest(root=context.root, quiet=True)
+-        success = exit_code == 0
++        status = "ok" if exit_code == 0 else "fail"
++        error = None
++        if status == "fail":
++            error = build_error_payload(code="sentinels.failed", message="Sentinel tests failed.")
+         return CheckResult(
+             name="sentinels",
+-            success=success,
++            status=status,
+             duration=time.perf_counter() - start,
+             data=summary,
+-            error=None if success else build_error_payload(code="sentinels.failed", message="Sentinel tests failed."),
++            error=error,
+         )
+     except Exception as exc:  # pragma: no cover - defensive
+         return CheckResult(
+             name="sentinels",
+-            success=False,
++            status="fail",
+             duration=time.perf_counter() - start,
+             error=build_error_payload(code="sentinels.error", message=str(exc)),
+         )
+ 
+ 
+ def _mcp_check(context: CLIContext) -> CheckResult:
+     """Run MCP smoke tests and surface status."""
+ 
+     start = time.perf_counter()
+     summary = run_smoke(context.root)
+     duration = time.perf_counter() - start
+     data = summary.to_dict()
+     if summary.ok:
+-        return CheckResult(name="mcp", success=True, duration=duration, data=data)
++        return CheckResult(name="mcp", status="ok", duration=duration, data=data)
+ 
+     pending_reason = _diagnose_mcp_pending(summary, context)
+     if pending_reason:
+         pending_data = dict(data)
+         pending_data.setdefault("status", "pending")
+         pending_data.setdefault("message", pending_reason)
+-        return CheckResult(name="mcp", success=True, duration=duration, data=pending_data)
++        return CheckResult(name="mcp", status="pending", duration=duration, data=pending_data)
+ 
+     failed_step = next((step for step in summary.steps if not step.success), None)
+     detail = failed_step.detail if failed_step else "MCP smoke failed."
+     error = build_error_payload(
+         code="mcp.failed",
+         message=detail or "MCP smoke failed.",
+         remediation="Run `uvx sentinel mcp smoke --timeout-call 60` for more detail.",
+         details={"failed_step": failed_step.name if failed_step else None},
+     )
+-    return CheckResult(name="mcp", success=False, duration=duration, data=data, error=error)
++    return CheckResult(name="mcp", status="fail", duration=duration, data=data, error=error)
+ 
+ 
+ def _diagnose_mcp_pending(summary: SmokeSummary, context: CLIContext) -> str | None:
+     """Return a skip reason when MCP is not configured for this workspace."""
+ 
+     config_file = context.root / ".mcp.json"
+     if not config_file.exists():
+         return "MCP client configuration (.mcp.json) not found; configure your IDE before enabling the smoke test."
+ 
+     decision_log_payload = summary.tool_results.get("mcp.sentinel.decision_log")
+     if isinstance(decision_log_payload, Mapping):
+         error = decision_log_payload.get("error")
+         if isinstance(error, Mapping):
+             code = error.get("code")
+             if code == "decision.ledger_missing":
+                 ledger_path = context.root / ".sentinel" / "DECISIONS.md"
+                 return f"Sentinel decision ledger missing ({ledger_path}). Copy DECISIONS.md before running MCP smoke."
+     return None
+diff --git a/sentinelkit/tests/test_cli_mcp.py b/sentinelkit/tests/test_cli_mcp.py
+index 746e724bf453890997c750bd321ceb0c5ef18223..15f353fd1672ddc126ac229b560a7bb4c8059422 100644
+--- a/sentinelkit/tests/test_cli_mcp.py
++++ b/sentinelkit/tests/test_cli_mcp.py
+@@ -36,76 +36,76 @@ def test_mcp_smoke_command(repo_root: Path) -> None:
+     assert set(payload["tool_results"]) == {
+         "mcp.sentinel.contract_validate",
+         "mcp.sentinel.decision_log",
+         "mcp.sentinel.sentinel_run",
+     }
+     preview_file = repo_root / ".sentinel" / "status" / "mcp-smoke-preview.md"
+     assert not preview_file.exists()
+ 
+ 
+ def test_selfcheck_reports_mcp_success(monkeypatch, repo_root: Path) -> None:
+     summary = SmokeSummary(
+         ok=True,
+         command=["python", "-m", "sentinelkit.cli.mcp.server"],
+         steps=[SmokeStep(name="initialize", success=True, duration=0.01)],
+         tool_results={},
+     )
+     monkeypatch.setattr(selfcheck_module, "run_smoke", lambda root, *_, **__: summary)
+ 
+     context = CLIContext(
+         root=repo_root,
+         format="pretty",
+         env=EnvironmentInfo(is_ci=False, platform="test", python_version="3.12"),
+     )
+     result = selfcheck_module._build_checks()["mcp"](context)
+ 
+-    assert result.success is True
++    assert result.status == "ok"
+     assert result.data["command"] == summary.command
+ 
+ 
+ def test_selfcheck_reports_mcp_failure(monkeypatch, repo_root: Path) -> None:
+     failure_step = SmokeStep(name="tools.call[mcp.sentinel.decision_log]", success=False, duration=0.5, detail="preview lock")
+     summary = SmokeSummary(
+         ok=False,
+         command=["python", "-m", "sentinelkit.cli.mcp.server"],
+         steps=[
+             SmokeStep(name="initialize", success=True, duration=0.01),
+             failure_step,
+         ],
+         tool_results={},
+     )
+     monkeypatch.setattr(selfcheck_module, "run_smoke", lambda root, *_, **__: summary)
+ 
+     (repo_root / ".mcp.json").write_text("{}", encoding="utf-8")
+ 
+     context = CLIContext(
+         root=repo_root,
+         format="pretty",
+         env=EnvironmentInfo(is_ci=True, platform="test", python_version="3.12"),
+     )
+     result = selfcheck_module._build_checks()["mcp"](context)
+ 
+-    assert result.success is False
++    assert result.status == "fail"
+     assert result.error
+     assert result.error.message == failure_step.detail
+ 
+ 
+ def test_selfcheck_marks_mcp_pending_when_unconfigured(monkeypatch, repo_root: Path) -> None:
+     failure_step = SmokeStep(name="tools.call[mcp.sentinel.decision_log]", success=False, duration=0.5, detail=None)
+     summary = SmokeSummary(
+         ok=False,
+         command=["python", "-m", "sentinelkit.cli.mcp.server"],
+         steps=[failure_step],
+         tool_results={},
+     )
+     monkeypatch.setattr(selfcheck_module, "run_smoke", lambda root, *_, **__: summary)
+ 
+     context = CLIContext(
+         root=repo_root,
+         format="pretty",
+         env=EnvironmentInfo(is_ci=False, platform="test", python_version="3.12"),
+     )
+     result = selfcheck_module._build_checks()["mcp"](context)
+ 
+-    assert result.success is True
++    assert result.status == "pending"
+     assert result.data is not None
+     assert result.data["status"] == "pending"
+diff --git a/sentinelkit/tests/test_cli_selfcheck.py b/sentinelkit/tests/test_cli_selfcheck.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..9b7620dc83487d32ceaa600dc047792027ff7565
+--- /dev/null
++++ b/sentinelkit/tests/test_cli_selfcheck.py
+@@ -0,0 +1,52 @@
++"""Regression tests for sentinel CLI selfcheck behavior."""
++
++from __future__ import annotations
++
++import json
++
++from typer.testing import CliRunner
++
++from sentinelkit.cli import main as cli_main
++from sentinelkit.cli import selfcheck as selfcheck_module
++from sentinelkit.cli.executor import CheckResult
++from sentinelkit.cli.state import CLIContext
++from sentinelkit.utils.errors import build_error_payload
++
++runner = CliRunner()
++
++
++def _ok_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(name="contracts", status="ok", duration=0.01, data={"message": "ok"})
++
++
++def _pending_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(name="contracts", status="pending", duration=0.0, data={"message": "todo"})
++
++
++def _failing_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(
++        name="contracts",
++        status="fail",
++        duration=0.01,
++        error=build_error_payload(code="contracts.error", message="boom"),
++    )
++
++
++def test_json_payload_includes_status(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _ok_check})
++    result = runner.invoke(cli_main.app, ["--format", "json", "selfcheck"])
++    assert result.exit_code == 0, result.output
++    payload = json.loads(result.stdout)
++    assert payload["checks"][0]["status"] == "ok"
++
++
++def test_exit_code_zero_with_pending(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _pending_check})
++    result = runner.invoke(cli_main.app, ["selfcheck"])
++    assert result.exit_code == 0, result.output
++
++
++def test_exit_code_nonzero_on_failure(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _failing_check})
++    result = runner.invoke(cli_main.app, ["selfcheck"])
++    assert result.exit_code == 1
+diff --git a/src/sentinel_assets/sentinelkit/sentinelkit/cli/executor.py b/src/sentinel_assets/sentinelkit/sentinelkit/cli/executor.py
+index cbe67abc6c6c2221f8159334ce9acb9c5bb12b59..5ef8b64f7d364369d1a4ce9945210eec5d7f5afc 100644
+--- a/src/sentinel_assets/sentinelkit/sentinelkit/cli/executor.py
++++ b/src/sentinel_assets/sentinelkit/sentinelkit/cli/executor.py
+@@ -1,81 +1,89 @@
+ """Concurrency helpers for running sentinel checks."""
+ 
+ from __future__ import annotations
+ 
+ import time
+ from concurrent.futures import ThreadPoolExecutor, as_completed
+ from dataclasses import dataclass
+-from typing import Callable, Mapping, Sequence
++from typing import Callable, Literal, Mapping, Sequence
+ 
+ from rich.console import Console
+ from rich.status import Status
+ 
+ from .state import CLIContext
+ from sentinelkit.utils.errors import ErrorPayload, serialize_error
+ 
+ __all__ = ["CheckResult", "run_checks"]
+ 
+ 
++CheckStatus = Literal["ok", "pending", "fail"]
++
++
+ @dataclass(slots=True)
+ class CheckResult:
+     name: str
+-    success: bool
++    status: CheckStatus
+     duration: float
+     data: dict | None = None
+     error: ErrorPayload | None = None
+ 
+     def to_dict(self) -> dict:
+         payload = {
+             "name": self.name,
+-            "success": self.success,
++            "status": self.status,
+             "duration": self.duration,
+         }
+         if self.data is not None:
+             payload["data"] = self.data
+         if self.error is not None:
+             payload["error"] = serialize_error(self.error)
+         return payload
+ 
+ 
+ CheckCallable = Callable[[CLIContext], CheckResult]
+ 
+ 
+ def run_checks(
+     context: CLIContext,
+     checks: Mapping[str, CheckCallable],
+     *,
+     show_status: bool = True,
+ ) -> Sequence[CheckResult]:
+     """Execute each check concurrently and return structured results."""
+     console = Console()
+     results: list[CheckResult] = []
+ 
+     status: Status | None = None
+     if show_status and context.format == "pretty":
+         status = console.status("Running sentinel checks...")
+         status.start()
+ 
+     try:
+         with ThreadPoolExecutor(max_workers=len(checks)) as executor:
+             future_map = {
+                 executor.submit(_run_single_check, name, fn, context): name for name, fn in checks.items()
+             }
+             for future in as_completed(future_map):
+                 result = future.result()
+                 results.append(result)
+                 if status:
+-                    status.update(f"[bold]{result.name}[/] {'✅' if result.success else '❌'}")
++                    status_icon = {
++                        "ok": "✅",
++                        "pending": "⏳",
++                        "fail": "❌",
++                    }.get(result.status, "❔")
++                    status.update(f"[bold]{result.name}[/] {status_icon}")
+     finally:
+         if status:
+             status.stop()
+ 
+     return results
+ 
+ 
+ def _run_single_check(name: str, fn: CheckCallable, context: CLIContext) -> CheckResult:
+     start = time.perf_counter()
+     try:
+         return fn(context)
+     except Exception as exc:  # pragma: no cover - placeholder until real checks land
+         payload = ErrorPayload(code=f"{name}.error", message=str(exc))
+-        return CheckResult(name=name, success=False, duration=time.perf_counter() - start, error=payload)
++        return CheckResult(name=name, status="fail", duration=time.perf_counter() - start, error=payload)
+diff --git a/src/sentinel_assets/sentinelkit/sentinelkit/cli/selfcheck.py b/src/sentinel_assets/sentinelkit/sentinelkit/cli/selfcheck.py
+index a0bc4d960c89bfdaaf15f2938dfc1f57d29b29a3..d98370f70b39181a01e0764e442a92d43f83ab4f 100644
+--- a/src/sentinel_assets/sentinelkit/sentinelkit/cli/selfcheck.py
++++ b/src/sentinel_assets/sentinelkit/sentinelkit/cli/selfcheck.py
+@@ -1,139 +1,187 @@
+ """Sentinel selfcheck command."""
+ 
+ from __future__ import annotations
+ 
+ import json
+ import time
+-from typing import Dict
++from typing import Dict, Mapping
+ 
+ import typer
+ from rich.console import Console
+ from rich.table import Table
+ 
+-from sentinelkit.cli.mcp.smoke import run_smoke
++from sentinelkit.cli.mcp.smoke import SmokeSummary, run_smoke
+ from sentinelkit.utils.errors import build_error_payload
+ 
+ from .executor import CheckResult, run_checks
+ from .state import CLIContext, get_context
+ from .sentinels import run_sentinel_pytest
+ 
+ __all__ = ["run"]
+ 
+ 
+ def run(
+     ctx: typer.Context,
+     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show additional diagnostics."),
+ ) -> None:
+     """Run SentinelKit self diagnostics."""
+     context = get_context(ctx)
+     checks = _build_checks()
+     results = sorted(run_checks(context, checks, show_status=not verbose), key=lambda r: r.name)
+-    ok = all(result.success for result in results)
++    ok = all(result.status != "fail" for result in results)
++    has_pending = any(result.status == "pending" for result in results)
+ 
+     console = Console()
+     if context.format == "json":
+         payload = {
+             "ok": ok,
+             "environment": {
+                 "root": str(context.root),
+                 "ci": context.env.is_ci,
+                 "platform": context.env.platform,
+                 "python": context.env.python_version,
+             },
+             "checks": [result.to_dict() for result in results],
+         }
+-        console.print(json.dumps(payload, indent=2))
++        typer.echo(json.dumps(payload, indent=2))
+     else:
+         console.print(_build_table(results))
+-        summary = "[bold green]Selfcheck OK[/bold green]" if ok else "[bold red]Selfcheck failed[/bold red]"
++        if not ok:
++            summary = "[bold red]Selfcheck failed[/bold red]"
++        elif has_pending:
++            summary = "[bold yellow]Selfcheck OK (pending checks)[/bold yellow]"
++        else:
++            summary = "[bold green]Selfcheck OK[/bold green]"
+         console.print(summary)
+ 
+     if not ok:
+         raise typer.Exit(1)
+ 
+ 
+ def _build_table(results: list[CheckResult]) -> Table:
+     table = Table(title="Sentinel selfcheck")
+     table.add_column("Check")
+     table.add_column("Status")
+     table.add_column("Duration", justify="right")
+     table.add_column("Details")
+ 
++    icon_map = {"ok": "✅", "pending": "⏳", "fail": "❌"}
+     for result in results:
+-        status = "✅" if result.success else "❌"
++        status_icon = icon_map.get(result.status, result.status)
++        status = f"{status_icon} {result.status}"
+         details = result.data.get("message") if result.data else ""
+         if result.error:
+             err = result.error.message
+             if result.error.remediation:
+                 err += f" ({result.error.remediation})"
+             details = err
+         table.add_row(result.name, status, f"{result.duration:.2f}s", details or "-")
+     return table
+ 
+ 
+ def _build_checks() -> Dict[str, callable]:
+     return {
+-        "contracts": _placeholder_check("contracts", "Contract validation pending implementation."),
+-        "context": _placeholder_check("context", "Context lint pending implementation."),
+-        "capsule": _placeholder_check("capsule", "Capsule generator dry-run pending implementation."),
++        "contracts": _placeholder_check(
++            "contracts", "Contract validation not configured yet. Add schemas to enable this gate."
++        ),
++        "context": _placeholder_check(
++            "context", "Context lint not configured yet. Copy context budgets to enable this gate."
++        ),
++        "capsule": _placeholder_check(
++            "capsule", "Capsule generator dry-run not configured yet. Add capsule metadata to enable this gate."
++        ),
+         "sentinels": _sentinel_check,
+         "mcp": _mcp_check,
+     }
+ 
+ 
+ def _placeholder_check(name: str, message: str):
+     def runner(context: CLIContext) -> CheckResult:
+         data = {"message": message, "root": str(context.root)}
+-        error = None
+-        success = False
+-        if context.env.is_ci:
+-            error = build_error_payload(code=f"{name}.not_implemented", message=message)
+-        else:
+-            success = True
+-        return CheckResult(name=name, success=success, duration=0.0, data=data, error=error)
++        return CheckResult(name=name, status="pending", duration=0.0, data=data)
+ 
+     return runner
+ 
+ 
+ def _sentinel_check(context: CLIContext) -> CheckResult:
+     """Run sentinel pytest suite and surface status."""
+ 
++    tests_dir = context.root / "tests" / "sentinels"
++    if not tests_dir.exists() or not any(tests_dir.rglob("test_*.py")):
++        return CheckResult(
++            name="sentinels",
++            status="pending",
++            duration=0.0,
++            data={
++                "message": "No sentinel pytest suite configured yet.",
++                "tests_path": str(tests_dir),
++            },
++        )
++
+     start = time.perf_counter()
+     try:
+         exit_code, summary = run_sentinel_pytest(root=context.root, quiet=True)
+-        success = exit_code == 0
++        status = "ok" if exit_code == 0 else "fail"
++        error = None
++        if status == "fail":
++            error = build_error_payload(code="sentinels.failed", message="Sentinel tests failed.")
+         return CheckResult(
+             name="sentinels",
+-            success=success,
++            status=status,
+             duration=time.perf_counter() - start,
+             data=summary,
+-            error=None if success else build_error_payload(code="sentinels.failed", message="Sentinel tests failed."),
++            error=error,
+         )
+     except Exception as exc:  # pragma: no cover - defensive
+         return CheckResult(
+             name="sentinels",
+-            success=False,
++            status="fail",
+             duration=time.perf_counter() - start,
+             error=build_error_payload(code="sentinels.error", message=str(exc)),
+         )
+ 
+ 
+ def _mcp_check(context: CLIContext) -> CheckResult:
+     """Run MCP smoke tests and surface status."""
+ 
+     start = time.perf_counter()
+     summary = run_smoke(context.root)
+     duration = time.perf_counter() - start
+     data = summary.to_dict()
+     if summary.ok:
+-        return CheckResult(name="mcp", success=True, duration=duration, data=data)
++        return CheckResult(name="mcp", status="ok", duration=duration, data=data)
++
++    pending_reason = _diagnose_mcp_pending(summary, context)
++    if pending_reason:
++        pending_data = dict(data)
++        pending_data.setdefault("status", "pending")
++        pending_data.setdefault("message", pending_reason)
++        return CheckResult(name="mcp", status="pending", duration=duration, data=pending_data)
+ 
+     failed_step = next((step for step in summary.steps if not step.success), None)
+     detail = failed_step.detail if failed_step else "MCP smoke failed."
+     error = build_error_payload(
+         code="mcp.failed",
+         message=detail or "MCP smoke failed.",
+         remediation="Run `uvx sentinel mcp smoke --timeout-call 60` for more detail.",
+         details={"failed_step": failed_step.name if failed_step else None},
+     )
+-    return CheckResult(name="mcp", success=False, duration=duration, data=data, error=error)
++    return CheckResult(name="mcp", status="fail", duration=duration, data=data, error=error)
++
++
++def _diagnose_mcp_pending(summary: SmokeSummary, context: CLIContext) -> str | None:
++    """Return a skip reason when MCP is not configured for this workspace."""
++
++    config_file = context.root / ".mcp.json"
++    if not config_file.exists():
++        return "MCP client configuration (.mcp.json) not found; configure your IDE before enabling the smoke test."
++
++    decision_log_payload = summary.tool_results.get("mcp.sentinel.decision_log")
++    if isinstance(decision_log_payload, Mapping):
++        error = decision_log_payload.get("error")
++        if isinstance(error, Mapping):
++            code = error.get("code")
++            if code == "decision.ledger_missing":
++                ledger_path = context.root / ".sentinel" / "DECISIONS.md"
++                return f"Sentinel decision ledger missing ({ledger_path}). Copy DECISIONS.md before running MCP smoke."
++    return None
+diff --git a/src/sentinel_assets/sentinelkit/tests/test_cli_mcp.py b/src/sentinel_assets/sentinelkit/tests/test_cli_mcp.py
+index 062dc58766d090e6361083daf152a9ad586db1e9..7eed3a1b3a11d7b94e2fb44525e295cb9b518f49 100644
+--- a/src/sentinel_assets/sentinelkit/tests/test_cli_mcp.py
++++ b/src/sentinel_assets/sentinelkit/tests/test_cli_mcp.py
+@@ -36,52 +36,52 @@ def test_mcp_smoke_command(repo_root: Path) -> None:
+     assert set(payload["tool_results"]) == {
+         "mcp.sentinel.contract_validate",
+         "mcp.sentinel.decision_log",
+         "mcp.sentinel.sentinel_run",
+     }
+     preview_file = repo_root / ".sentinel" / "status" / "mcp-smoke-preview.md"
+     assert not preview_file.exists()
+ 
+ 
+ def test_selfcheck_reports_mcp_success(monkeypatch, repo_root: Path) -> None:
+     summary = SmokeSummary(
+         ok=True,
+         command=["python", "-m", "sentinelkit.cli.mcp.server"],
+         steps=[SmokeStep(name="initialize", success=True, duration=0.01)],
+         tool_results={},
+     )
+     monkeypatch.setattr(selfcheck_module, "run_smoke", lambda root, *_, **__: summary)
+ 
+     context = CLIContext(
+         root=repo_root,
+         format="pretty",
+         env=EnvironmentInfo(is_ci=False, platform="test", python_version="3.12"),
+     )
+     result = selfcheck_module._build_checks()["mcp"](context)
+ 
+-    assert result.success is True
++    assert result.status == "ok"
+     assert result.data["command"] == summary.command
+ 
+ 
+ def test_selfcheck_reports_mcp_failure(monkeypatch, repo_root: Path) -> None:
+     failure_step = SmokeStep(name="tools.call[mcp.sentinel.decision_log]", success=False, duration=0.5, detail="preview lock")
+     summary = SmokeSummary(
+         ok=False,
+         command=["python", "-m", "sentinelkit.cli.mcp.server"],
+         steps=[
+             SmokeStep(name="initialize", success=True, duration=0.01),
+             failure_step,
+         ],
+         tool_results={},
+     )
+     monkeypatch.setattr(selfcheck_module, "run_smoke", lambda root, *_, **__: summary)
+ 
+     context = CLIContext(
+         root=repo_root,
+         format="pretty",
+         env=EnvironmentInfo(is_ci=True, platform="test", python_version="3.12"),
+     )
+     result = selfcheck_module._build_checks()["mcp"](context)
+ 
+-    assert result.success is False
++    assert result.status == "fail"
+     assert result.error
+     assert result.error.message == failure_step.detail
+diff --git a/src/sentinel_assets/sentinelkit/tests/test_cli_selfcheck.py b/src/sentinel_assets/sentinelkit/tests/test_cli_selfcheck.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..9b7620dc83487d32ceaa600dc047792027ff7565
+--- /dev/null
++++ b/src/sentinel_assets/sentinelkit/tests/test_cli_selfcheck.py
+@@ -0,0 +1,52 @@
++"""Regression tests for sentinel CLI selfcheck behavior."""
++
++from __future__ import annotations
++
++import json
++
++from typer.testing import CliRunner
++
++from sentinelkit.cli import main as cli_main
++from sentinelkit.cli import selfcheck as selfcheck_module
++from sentinelkit.cli.executor import CheckResult
++from sentinelkit.cli.state import CLIContext
++from sentinelkit.utils.errors import build_error_payload
++
++runner = CliRunner()
++
++
++def _ok_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(name="contracts", status="ok", duration=0.01, data={"message": "ok"})
++
++
++def _pending_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(name="contracts", status="pending", duration=0.0, data={"message": "todo"})
++
++
++def _failing_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(
++        name="contracts",
++        status="fail",
++        duration=0.01,
++        error=build_error_payload(code="contracts.error", message="boom"),
++    )
++
++
++def test_json_payload_includes_status(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _ok_check})
++    result = runner.invoke(cli_main.app, ["--format", "json", "selfcheck"])
++    assert result.exit_code == 0, result.output
++    payload = json.loads(result.stdout)
++    assert payload["checks"][0]["status"] == "ok"
++
++
++def test_exit_code_zero_with_pending(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _pending_check})
++    result = runner.invoke(cli_main.app, ["selfcheck"])
++    assert result.exit_code == 0, result.output
++
++
++def test_exit_code_nonzero_on_failure(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _failing_check})
++    result = runner.invoke(cli_main.app, ["selfcheck"])
++    assert result.exit_code == 1
+diff --git a/src/specify_cli/__init__.py b/src/specify_cli/__init__.py
+index c69b450b62340eeb1b54d1dec6436c4638fbc4a8..920097fbe64af7ba18aa9d430bbbc16729334698 100644
+--- a/src/specify_cli/__init__.py
++++ b/src/specify_cli/__init__.py
+@@ -14,51 +14,51 @@ Specify CLI - Setup tool for Specify projects
+ 
+ Usage:
+     uvx specify-cli.py init <project-name>
+     uvx specify-cli.py init .
+     uvx specify-cli.py init --here
+ 
+ Or install globally:
+     uv tool install --from specify-cli.py specify-cli
+     specify init <project-name>
+     specify init .
+     specify init --here
+ """
+ 
+ from __future__ import annotations
+ 
+ import os
+ import subprocess
+ import sys
+ import zipfile
+ import tempfile
+ import shutil
+ import shlex
+ import json
+ import contextlib
+ from pathlib import Path
+-from typing import Any, Iterable, List, Optional, Tuple, TYPE_CHECKING
++from typing import Any, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
+ 
+ import typer
+ 
+ try:  # pragma: no cover - exercised indirectly via CLI usage
+     import httpx  # type: ignore[import]
+ except ModuleNotFoundError:  # pragma: no cover - handled in helper
+     httpx = None  # type: ignore[assignment]
+ 
+ if TYPE_CHECKING:  # pragma: no cover - typing only
+     from httpx import Client as HTTPXClient
+ else:  # pragma: no cover - typing fallback
+     HTTPXClient = Any
+ 
+ from rich.console import Console
+ from rich.panel import Panel
+ from rich.progress import Progress, SpinnerColumn, TextColumn
+ from rich.text import Text
+ from rich.live import Live
+ from rich.align import Align
+ from rich.table import Table
+ from rich.tree import Tree
+ from typer.core import TyperGroup
+ 
+ # For cross-platform keyboard input
+ import ssl
+@@ -1000,57 +1000,64 @@ def _copy_file_asset(src_rel: str, dest_rel: str, project_path: Path) -> None:
+     shutil.copy2(src, dest)
+ 
+ 
+ def _copy_dir_asset(src_rel: str, dest_rel: str, project_path: Path, ignore: Iterable[str] | None = None) -> None:
+     src = _resolve_asset(src_rel)
+     if not src.exists():
+         raise FileNotFoundError(f"Sentinel directory '{src_rel}' is missing from the toolchain.")
+     dest = project_path / dest_rel
+     if ignore:
+         ignore_fn = shutil.ignore_patterns(*ignore)
+     else:
+         ignore_fn = None
+     shutil.copytree(src, dest, dirs_exist_ok=True, ignore=ignore_fn)
+ 
+ 
+ def _copy_runbook_template(project_path: Path) -> None:
+     src_rel, dest_rel = SENTINEL_RUNBOOK_TEMPLATE
+     src = _resolve_asset(src_rel)
+     if not src.exists():
+         raise FileNotFoundError("Sentinel runbook template is missing.")
+     dest = project_path / dest_rel
+     dest.parent.mkdir(parents=True, exist_ok=True)
+     shutil.copy2(src, dest)
+ 
+ 
+-def sync_agent_prompt_bundles(project_path: Path) -> int:
+-    """Copy canonical Sentinel prompts into supported agent bundles."""
++def sync_agent_prompt_bundles(project_path: Path, assistant: str | None = None) -> int:
++    """Copy canonical Sentinel prompts into the selected agent bundle."""
+     prompts_dir = _resolve_asset(".sentinel/prompts")
+     if not prompts_dir.exists():
+         return 0
++
++    targets: list[Path] = []
++    if assistant and assistant in AGENT_PROMPT_DIRS:
++        targets.append(AGENT_PROMPT_DIRS[assistant])
++    elif assistant is None:
++        targets.extend(AGENT_PROMPT_DIRS.values())
++
+     copied = 0
+-    for target in AGENT_PROMPT_DIRS.values():
++    for target in targets:
+         dest_dir = project_path / target
+         dest_dir.mkdir(parents=True, exist_ok=True)
+         for prompt_file in prompts_dir.iterdir():
+             if prompt_file.is_file():
+                 shutil.copy2(prompt_file, dest_dir / prompt_file.name)
+                 copied += 1
+     return copied
+ 
+ 
+ def run_uv_sync_in_project(project_path: Path) -> None:
+     """Run uv sync inside the scaffold, falling back to unlocked sync on failure."""
+     lock_path = project_path / "uv.lock"
+ 
+     def _lockfile_state() -> str:
+         if not lock_path.exists():
+             return "missing"
+         try:
+             for line in lock_path.read_text(encoding="utf-8").splitlines():
+                 stripped = line.strip()
+                 if not stripped:
+                     continue
+                 if stripped.startswith("# SentinelKit placeholder") or stripped.startswith(
+                     "# Placeholder uv.lock"
+                 ):
+                     return "placeholder"
+@@ -1092,78 +1099,83 @@ def run_uv_sync_in_project(project_path: Path) -> None:
+             raise typer.Exit(1) from exc
+         except subprocess.CalledProcessError as exc:
+             last_error = exc
+             if idx < len(commands) - 1:
+                 console.print(
+                     Panel(
+                         f"uv sync command {' '.join(command[1:])} failed with exit code {exc.returncode}. "
+                         "Retrying with a more permissive command...",
+                         title="[yellow]uv sync retry[/yellow]",
+                         border_style="yellow",
+                     )
+                 )
+             else:
+                 break
+     if last_error:
+         console.print(
+             "[bold red]uv sync failed after multiple attempts. See logs above for details.[/bold red]"
+         )
+         raise typer.Exit(last_error.returncode)
+ 
+ 
+ def run_sentinel_selfcheck_in_project(project_path: Path) -> None:
+     run_sentinel_selfcheck(root=project_path)
+ 
+ 
+-def apply_sentinel_scaffold(project_path: Path, tracker: StepTracker | None = None) -> None:
++def apply_sentinel_scaffold(
++    project_path: Path,
++    tracker: StepTracker | None = None,
++    *,
++    assistant: str | None = None,
++) -> None:
+     """Copy Sentinel assets into the scaffold and run the bootstrap commands."""
+     copy_key = "sentinel-copy"
+     if tracker:
+         tracker.start(copy_key, "copying assets")
+     try:
+         total = 0
+         for src_rel, dest_rel in SENTINEL_FILE_ASSETS:
+             _copy_file_asset(src_rel, dest_rel, project_path)
+             total += 1
+         for src_rel, dest_rel in SENTINEL_DIR_ASSETS:
+             _copy_dir_asset(src_rel, dest_rel, project_path, DEFAULT_COPY_IGNORE)
+             total += 1
+         _copy_runbook_template(project_path)
+         total += 1
+     except Exception as exc:
+         if tracker:
+             tracker.error(copy_key, str(exc))
+         raise
+     else:
+         if tracker:
+             tracker.complete(copy_key, f"{total} assets")
+ 
+     prompts_key = "sentinel-prompts"
+     if tracker:
+         tracker.start(prompts_key, "sync agent prompts")
+     try:
+-        prompt_count = sync_agent_prompt_bundles(project_path)
++        prompt_count = sync_agent_prompt_bundles(project_path, assistant=assistant)
+     except Exception as exc:
+         if tracker:
+             tracker.error(prompts_key, str(exc))
+         raise
+     else:
+         if tracker:
+             tracker.complete(prompts_key, f"{prompt_count} files")
+ 
+     sync_key = "sentinel-uv"
+     if tracker:
+         tracker.start(sync_key, "uv sync")
+     try:
+         run_uv_sync_in_project(project_path)
+     except Exception as exc:
+         if tracker:
+             tracker.error(sync_key, str(exc))
+         raise
+     else:
+         if tracker:
+             tracker.complete(sync_key, "uv sync ok")
+ 
+     selfcheck_key = "sentinel-selfcheck"
+     if tracker:
+         tracker.start(selfcheck_key, "sentinel selfcheck")
+     try:
+@@ -1357,51 +1369,51 @@ def init(
+     tracker_steps.extend(
+         [
+             ("cleanup", "Cleanup"),
+             ("git", "Initialize git repository"),
+             ("final", "Finalize"),
+         ]
+     )
+     for key, label in tracker_steps:
+         tracker.add(key, label)
+ 
+     # Track git error message outside Live context so it persists
+     git_error_message = None
+ 
+     with Live(tracker.render(), console=console, refresh_per_second=8, transient=True) as live:
+         tracker.attach_refresh(lambda: live.update(tracker.render()))
+         try:
+             verify = not skip_tls
+             local_ssl_context = ssl_context if verify else False
+             local_client = _ensure_http_client(verify=local_ssl_context)
+ 
+             download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, github_token=github_token)
+ 
+             ensure_executable_scripts(project_path, tracker=tracker)
+ 
+             if sentinel:
+-                apply_sentinel_scaffold(project_path, tracker=tracker)
++                apply_sentinel_scaffold(project_path, tracker=tracker, assistant=selected_ai)
+ 
+             if not no_git:
+                 tracker.start("git")
+                 if is_git_repo(project_path):
+                     tracker.complete("git", "existing repo detected")
+                 elif should_init_git:
+                     success, error_msg = init_git_repo(project_path, quiet=True)
+                     if success:
+                         tracker.complete("git", "initialized")
+                     else:
+                         tracker.error("git", "init failed")
+                         git_error_message = error_msg
+                 else:
+                     tracker.skip("git", "git not available")
+             else:
+                 tracker.skip("git", "--no-git flag")
+ 
+             tracker.complete("final", "project ready")
+         except Exception as e:
+             tracker.error("final", str(e))
+             console.print(Panel(f"Initialization failed: {e}", title="Failure", border_style="red"))
+             if debug:
+                 _env_pairs = [
+                     ("Python", sys.version.split()[0]),
+                     ("Platform", sys.platform),
+@@ -1518,90 +1530,216 @@ def check(
+         requires_cli = agent_config["requires_cli"]
+ 
+         tracker.add(agent_key, agent_name)
+ 
+         if requires_cli:
+             agent_results[agent_key] = check_tool(agent_key, tracker=tracker)
+         else:
+             tracker.skip(agent_key, "IDE-based, no CLI check")
+             agent_results[agent_key] = False
+ 
+     tracker.add("code", "Visual Studio Code")
+     check_tool("code", tracker=tracker)
+ 
+     tracker.add("code-insiders", "Visual Studio Code Insiders")
+     check_tool("code-insiders", tracker=tracker)
+ 
+     console.print(tracker.render())
+     console.print("\n[bold]Running Sentinel selfcheck...[/bold]\n")
+ 
+     sentinel_tracker = StepTracker("Sentinel Gate")
+     sentinel_tracker.add("sentinel-pre", "Summarize tool coverage")
+     sentinel_tracker.complete("sentinel-pre", "tools enumerated")
+     sentinel_tracker.add("sentinel-run", "sentinel selfcheck")
+     console.print(sentinel_tracker.render())
+ 
++    pending_checks: list[dict] = []
++
+     try:
+-        sentinel_tracker.start("sentinel-run", "uv run sentinel selfcheck --format json")
+-        run_sentinel_selfcheck(root=root)
+-        sentinel_tracker.complete("sentinel-run", "ok")
++        sentinel_tracker.start("sentinel-run", "uv run sentinel --format json selfcheck")
++        root_path = Path(root)
++        exit_code, payload, stderr_output = _invoke_sentinel_selfcheck_json(root_path)
++        checks = list(payload.get("checks", []))
++        pending_checks = [check for check in checks if check.get("status") == "pending"]
++        failing_checks = [check for check in checks if check.get("status") == "fail"]
++
++        console.print(_render_sentinel_check_table(checks))
++        if stderr_output:
++            console.print(
++                Panel(
++                    stderr_output,
++                    title="[yellow]sentinel selfcheck (stderr)[/yellow]",
++                    border_style="yellow",
++                )
++            )
++
++        if failing_checks:
++            sentinel_tracker.error("sentinel-run", "failed")
++            console.print(
++                Panel(
++                    "\n".join(
++                        f"{check.get('name', 'check')}: {_format_check_message(check) or 'failed'}"
++                        for check in failing_checks
++                    ),
++                    title="[red]Sentinel Gate Failed[/red]",
++                    border_style="red",
++                )
++            )
++            raise typer.Exit(exit_code or 1)
++
++        if exit_code != 0:
++            sentinel_tracker.error("sentinel-run", f"exit {exit_code}")
++            raise typer.Exit(exit_code)
++
++        sentinel_tracker.complete(
++            "sentinel-run",
++            "ok" if not pending_checks else "ok (pending)",
++        )
++    except FileNotFoundError:
++        sentinel_tracker.error("sentinel-run", "uv missing")
++        console.print(
++            "[bold red]uv command not found.[/bold red] Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
++        )
++        raise typer.Exit(1)
+     except typer.Exit as exc:
+         sentinel_tracker.error("sentinel-run", f"exit {exc.exit_code}")
+         console.print(
+             Panel(
+                 "Sentinel selfcheck failed. Resolve the diagnostics above before running slash commands.",
+                 title="[red]Sentinel Gate Failed[/red]",
+                 border_style="red",
+             )
+         )
+         raise
+     except Exception as exc:
+         sentinel_tracker.error("sentinel-run", str(exc))
+         console.print(
+             Panel(
+                 f"Sentinel selfcheck encountered an unexpected error: {exc}",
+                 title="[red]Sentinel Gate Error[/red]",
+                 border_style="red",
+             )
+         )
+         raise typer.Exit(1)
+     else:
+         console.print(sentinel_tracker.render())
+-        console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
++        if pending_checks:
++            console.print(
++                Panel(
++                    "Sentinel selfcheck completed with pending checks. Configure MCP and sentinel tests when ready.",
++                    title="[yellow]Pending Sentinel Checks[/yellow]",
++                    border_style="yellow",
++                )
++            )
++        else:
++            console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
+ 
+ 
+-def run_sentinel_selfcheck(root: Path | None = None) -> None:
+-    """Invoke the Sentinel CLI selfcheck via uv."""
++def run_sentinel_selfcheck(root: Path | None = None) -> dict:
++    """Invoke the Sentinel CLI selfcheck via uv and return the parsed payload."""
+     root_path = Path(root) if root else Path.cwd()
++    try:
++        exit_code, payload, _stderr = _invoke_sentinel_selfcheck_json(root_path)
++    except FileNotFoundError:
++        console.print(
++            "[bold red]uv command not found.[/bold red] "
++            "Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
++        )
++        raise typer.Exit(1)
++
++    if exit_code != 0:
++        raise typer.Exit(exit_code)
++
++    failing_checks = [check for check in payload.get("checks", []) if check.get("status") == "fail"]
++    if failing_checks:
++        raise typer.Exit(1)
++
++    console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
++    return payload
++
++
++def _invoke_sentinel_selfcheck_json(root_path: Path) -> tuple[int, dict, str]:
+     command = [
+         "uv",
+         "run",
+         "sentinel",
+-        "selfcheck",
+         "--format",
+         "json",
++        "selfcheck",
+     ]
+-    try:
+-        subprocess.run(command, check=True, cwd=root_path)
+-    except FileNotFoundError:
++    completed = subprocess.run(
++        command,
++        cwd=root_path,
++        capture_output=True,
++        text=True,
++        check=False,
++    )
++    stdout = (completed.stdout or "").strip()
++    if not stdout:
++        message = completed.stderr.strip() or "Sentinel selfcheck produced no output."
+         console.print(
+-            "[bold red]uv command not found.[/bold red] "
+-            "Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
++            Panel(
++                message,
++                title="[red]Sentinel Selfcheck[/red]",
++                border_style="red",
++            )
+         )
+-        raise typer.Exit(1)
+-    except subprocess.CalledProcessError as exc:
++        raise typer.Exit(completed.returncode or 1)
++    try:
++        payload = json.loads(stdout)
++    except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+         console.print(
+             Panel(
+-                f"Sentinel selfcheck failed (exit code {exc.returncode}). See logs above for details.",
++                f"Sentinel selfcheck returned invalid JSON: {exc}",
+                 title="[red]Sentinel Selfcheck[/red]",
+                 border_style="red",
+             )
+         )
+-        raise typer.Exit(exc.returncode)
+-    else:
+-        console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
++        raise typer.Exit(completed.returncode or 1) from exc
++    return completed.returncode, payload, (completed.stderr or "").strip()
++
++
++def _render_sentinel_check_table(checks: list[Mapping[str, Any]]) -> Table:
++    table = Table(title="Sentinel selfcheck")
++    table.add_column("Check")
++    table.add_column("Status")
++    table.add_column("Duration", justify="right")
++    table.add_column("Message")
++    icon_map = {"ok": "✅", "pending": "⏳", "fail": "❌"}
++    for check in checks:
++        status = str(check.get("status", "unknown"))
++        icon = icon_map.get(status, "❔")
++        duration = check.get("duration")
++        if isinstance(duration, (int, float)):
++            duration_text = f"{duration:.2f}s"
++        else:
++            duration_text = "-"
++        table.add_row(
++            str(check.get("name", "-")),
++            f"{icon} {status}",
++            duration_text,
++            _format_check_message(check) or "-",
++        )
++    return table
++
++
++def _format_check_message(check: Mapping[str, Any]) -> str:
++    data = check.get("data")
++    if isinstance(data, Mapping):
++        message = data.get("message")
++        if isinstance(message, str) and message:
++            return message
++    error = check.get("error")
++    if isinstance(error, Mapping):
++        message = error.get("message")
++        if isinstance(message, str) and message:
++            remediation = error.get("remediation")
++            if isinstance(remediation, str) and remediation:
++                return f"{message} ({remediation})"
++            return message
++    return ""
+ 
+ def main():
+     app()
+ 
+ if __name__ == "__main__":
+     main()
+diff --git a/tests/cli/test_cli_commands.py b/tests/cli/test_cli_commands.py
+index 4b17513d0338d65ced38c240e0c4f2710de84a92..81cb52aacfc07b21ed913fa8bac1d2f664aebc2e 100644
+--- a/tests/cli/test_cli_commands.py
++++ b/tests/cli/test_cli_commands.py
+@@ -95,51 +95,51 @@ def test_sentinels_run_cli(tmp_path: Path) -> None:
+             str(junit_report),
+         ],
+     )
+     assert result.exit_code == 0, result.output
+     summary = json.loads(json_report.read_text(encoding="utf-8"))
+     assert summary["ok"] is True
+     junit_content = junit_report.read_text(encoding="utf-8")
+     assert "<testsuite" in junit_content
+ 
+ 
+ def test_selfcheck_json_output() -> None:
+     result = runner.invoke(
+         app,
+         [
+             "--format",
+             "json",
+             "selfcheck",
+         ],
+     )
+     assert result.exit_code == 0, result.output
+     output = result.stdout.strip()
+     assert output.startswith("{"), output
+     assert output.endswith("}"), output
+     payload = json.loads(output)
+     sentinel_check = next(check for check in payload["checks"] if check["name"] == "sentinels")
+-    assert sentinel_check["success"] is True
++    assert sentinel_check["status"] in {"ok", "pending"}
+ 
+ 
+ def test_agents_roster_cli(tmp_path: Path) -> None:
+     _prepare_prompt_workspace(tmp_path)
+     result = runner.invoke(
+         app,
+         [
+             "--root",
+             str(tmp_path),
+             "--format",
+             "json",
+             "agents",
+             "roster",
+         ],
+     )
+     assert result.exit_code == 0, result.output
+     payload = json.loads(result.stdout)
+     assert payload["ok"] is True
+     ids = {agent["id"] for agent in payload["agents"]}
+     assert "builder" in ids
+     assert "router" in ids
+ 
+ 
+ # helpers --------------------------------------------------------------------
+ 
+diff --git a/tests/cli/test_selfcheck.py b/tests/cli/test_selfcheck.py
+index b8674deede18b1a29e744ec4505fecb8865e79f5..1119c965fe730febeadbe30d2643edcde88e22e0 100644
+--- a/tests/cli/test_selfcheck.py
++++ b/tests/cli/test_selfcheck.py
+@@ -1,53 +1,65 @@
+ """Tests for sentinel CLI selfcheck."""
+ 
+ from __future__ import annotations
+ 
+ import json
+ from typing import Dict
+ 
+ from typer.testing import CliRunner
+ 
+ from sentinelkit.cli import main as cli_main
+ from sentinelkit.cli.executor import CheckResult
+ from sentinelkit.cli import selfcheck as selfcheck_module
+ from sentinelkit.cli.state import CLIContext
+ from sentinelkit.utils.errors import build_error_payload
+ 
+ runner = CliRunner()
+ 
+ 
+ def _success_check(context: CLIContext) -> CheckResult:
+-    return CheckResult(name="contracts", success=True, duration=0.01, data={"message": "ok"})
++    return CheckResult(name="contracts", status="ok", duration=0.01, data={"message": "ok"})
+ 
+ 
+ def _failure_check(context: CLIContext) -> CheckResult:
+     return CheckResult(
+         name="contracts",
+-        success=False,
++        status="fail",
+         duration=0.02,
+         data={"message": "missing"},
+         error=build_error_payload(code="contracts.error", message="boom"),
+     )
+ 
+ 
++def _pending_check(context: CLIContext) -> CheckResult:
++    return CheckResult(name="contracts", status="pending", duration=0.0, data={"message": "skipped"})
++
++
+ def test_selfcheck_pretty_success(monkeypatch):
+     monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _success_check})
+     result = runner.invoke(cli_main.app, ["--root", ".", "selfcheck"])
+     assert result.exit_code == 0
+     assert "Selfcheck OK" in result.stdout
+ 
+ 
+ def test_selfcheck_json_success(monkeypatch):
+     monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _success_check})
+     result = runner.invoke(cli_main.app, ["--root", ".", "--format", "json", "selfcheck"])
+     assert result.exit_code == 0
+     payload = json.loads(result.stdout)
+     assert payload["ok"] is True
+     assert payload["checks"][0]["name"] == "contracts"
++    assert payload["checks"][0]["status"] == "ok"
+ 
+ 
+ def test_selfcheck_failure(monkeypatch):
+     monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _failure_check})
+     result = runner.invoke(cli_main.app, ["--root", ".", "selfcheck"])
+     assert result.exit_code == 1
+     assert "Selfcheck failed" in result.stdout
++
++
++def test_selfcheck_pending_is_success(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _pending_check})
++    result = runner.invoke(cli_main.app, ["--root", ".", "selfcheck"])
++    assert result.exit_code == 0
++    assert "pending" in result.stdout.lower()
+diff --git a/tests/sentinelkit/tests/test_cli_selfcheck.py b/tests/sentinelkit/tests/test_cli_selfcheck.py
+new file mode 100644
+index 0000000000000000000000000000000000000000..c5fa18a90b5a8fa54d64160999437143872392a5
+--- /dev/null
++++ b/tests/sentinelkit/tests/test_cli_selfcheck.py
+@@ -0,0 +1,50 @@
++from __future__ import annotations
++
++import json
++
++from typer.testing import CliRunner
++
++from sentinelkit.cli import main as cli_main
++from sentinelkit.cli import selfcheck as selfcheck_module
++from sentinelkit.cli.executor import CheckResult
++from sentinelkit.cli.state import CLIContext
++from sentinelkit.utils.errors import build_error_payload
++
++runner = CliRunner()
++
++
++def _ok_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(name="contracts", status="ok", duration=0.01, data={"message": "ok"})
++
++
++def _pending_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(name="contracts", status="pending", duration=0.0, data={"message": "todo"})
++
++
++def _failing_check(_context: CLIContext) -> CheckResult:
++    return CheckResult(
++        name="contracts",
++        status="fail",
++        duration=0.01,
++        error=build_error_payload(code="contracts.error", message="boom"),
++    )
++
++
++def test_json_payload_includes_status(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _ok_check})
++    result = runner.invoke(cli_main.app, ["--format", "json", "selfcheck"])
++    assert result.exit_code == 0, result.output
++    payload = json.loads(result.stdout)
++    assert payload["checks"][0]["status"] == "ok"
++
++
++def test_exit_code_zero_with_pending(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _pending_check})
++    result = runner.invoke(cli_main.app, ["selfcheck"])
++    assert result.exit_code == 0, result.output
++
++
++def test_exit_code_nonzero_on_failure(monkeypatch):
++    monkeypatch.setattr(selfcheck_module, "_build_checks", lambda: {"contracts": _failing_check})
++    result = runner.invoke(cli_main.app, ["selfcheck"])
++    assert result.exit_code == 1
+diff --git a/tests/specify_cli/test_sentinel_scaffold.py b/tests/specify_cli/test_sentinel_scaffold.py
+index a2345128789e2b05d73a0399929d6c4ca42d1ac6..7352d21f75485e1812ea5fe6158aea915d4b2f4d 100644
+--- a/tests/specify_cli/test_sentinel_scaffold.py
++++ b/tests/specify_cli/test_sentinel_scaffold.py
+@@ -5,131 +5,191 @@ from __future__ import annotations
+ from pathlib import Path
+ import importlib
+ import subprocess
+ import sys
+ import tomllib
+ 
+ import pytest
+ from typer.testing import CliRunner
+ 
+ specify_cli = importlib.import_module("specify_cli.__init__")
+ runner = CliRunner()
+ 
+ 
+ def test_apply_sentinel_scaffold_copies_assets(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+     calls: list[tuple[str, Path]] = []
+ 
+     def _record_uv(path: Path) -> None:
+         calls.append(("uv", path))
+ 
+     def _record_selfcheck(path: Path) -> None:
+         calls.append(("selfcheck", path))
+ 
+     monkeypatch.setattr(specify_cli, "run_uv_sync_in_project", _record_uv)
+     monkeypatch.setattr(specify_cli, "run_sentinel_selfcheck_in_project", _record_selfcheck)
+ 
+-    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None)
++    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None, assistant="codex")
+ 
+     assert (tmp_path / "pyproject.toml").exists()
+     assert not (tmp_path / "uv.lock").exists()
+     assert (tmp_path / ".tool-versions").exists()
+     assert (tmp_path / "scripts" / "bootstrap.py").exists()
+     assert (tmp_path / "sentinel_project" / "__init__.py").exists()
+     assert (tmp_path / "sentinelkit" / "pyproject.toml").exists()
+     sentinel_pyproject = tomllib.loads((tmp_path / "sentinelkit" / "pyproject.toml").read_text(encoding="utf-8"))
+     include_globs = sentinel_pyproject.get("tool", {}).get("hatch", {}).get("build", {}).get("include", [])
+     assert "sentinelkit" in include_globs
+     root_pyproject = tomllib.loads((tmp_path / "pyproject.toml").read_text(encoding="utf-8"))
+     wheel_cfg = (
+         root_pyproject.get("tool", {})
+         .get("hatch", {})
+         .get("build", {})
+         .get("targets", {})
+         .get("wheel", {})
+     )
+     assert "packages" in wheel_cfg and "sentinel_project" in wheel_cfg["packages"]
+     assert (tmp_path / ".sentinel" / "DECISIONS.md").exists()
+     assert (tmp_path / ".sentinel" / "docs" / "IMPLEMENTATION.md").exists()
+     assert (tmp_path / ".github" / "workflows" / "sentinel-ci.yml").exists()
+     assert (tmp_path / ".codex" / "prompts" / "sentinel.router.md").exists()
++    assert not (tmp_path / ".claude").exists()
++    assert not (tmp_path / ".gemini").exists()
++    assert not (tmp_path / ".qwen").exists()
+     assert ("uv", tmp_path) in calls
+     assert ("selfcheck", tmp_path) in calls
+ 
+ 
+ def test_specify_init_and_check_flow(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+     project_dir = tmp_path / "mobile-comfy"
+ 
+     def _fake_download(project_path: Path, *_args, **_kwargs) -> None:
+         project_path.mkdir(parents=True, exist_ok=True)
+ 
+     class _DummyClient:
+         def __init__(self, *_, **__):
+             pass
+ 
+         def close(self) -> None:  # pragma: no cover - noop stub
+             pass
+ 
+     class _DummyHTTPX:
+         Client = _DummyClient
+ 
+     monkeypatch.setattr(specify_cli, "httpx", _DummyHTTPX())
+     monkeypatch.setattr(specify_cli, "download_and_extract_template", _fake_download)
+     monkeypatch.setattr(specify_cli, "ensure_executable_scripts", lambda *_, **__: None)
+-    monkeypatch.setattr(specify_cli, "sync_agent_prompt_bundles", lambda *_: 0)
++    prompt_calls: list[str | None] = []
++
++    def _record_prompts(_project_path: Path, assistant: str | None = None) -> int:
++        prompt_calls.append(assistant)
++        return 0
++
++    monkeypatch.setattr(specify_cli, "sync_agent_prompt_bundles", _record_prompts)
+ 
+     uv_calls: list[Path] = []
+     monkeypatch.setattr(specify_cli, "run_uv_sync_in_project", lambda path: uv_calls.append(path))
+ 
+     sentinel_calls: list[Path] = []
+     monkeypatch.setattr(
+         specify_cli,
+         "run_sentinel_selfcheck_in_project",
+         lambda path: sentinel_calls.append(path),
+     )
+ 
+     # ensure CLI skips git operations to keep the test hermetic
+     result = runner.invoke(
+         specify_cli.app,
+         [
+             "init",
+             str(project_dir),
+             "--ai",
+             "codex",
+             "--script",
+             "sh",
+             "--sentinel",
+             "--ignore-agent-tools",
+             "--no-git",
+         ],
+     )
+     assert result.exit_code == 0, result.output
+     assert uv_calls == [project_dir]
+     assert sentinel_calls == [project_dir]
+     assert (project_dir / ".sentinel" / "DECISIONS.md").exists()
++    assert prompt_calls == ["codex"]
+ 
+-    check_calls: list[Path | None] = []
+-    monkeypatch.setattr(
+-        specify_cli,
+-        "run_sentinel_selfcheck",
+-        lambda root=None: check_calls.append(root),
+-    )
++    payload = {
++        "ok": True,
++        "checks": [
++            {"name": "capsule", "status": "pending", "duration": 0.0, "data": {"message": "todo"}},
++            {"name": "mcp", "status": "pending", "duration": 0.0, "data": {"message": "missing"}},
++        ],
++    }
++
++    invoked_roots: list[Path] = []
++
++    def _fake_invoke(root_path: Path) -> tuple[int, dict, str]:
++        invoked_roots.append(root_path)
++        return 0, payload, ""
++
++    monkeypatch.setattr(specify_cli, "_invoke_sentinel_selfcheck_json", _fake_invoke)
+ 
+     check_result = runner.invoke(specify_cli.app, ["check", "--root", str(project_dir)])
+     assert check_result.exit_code == 0, check_result.output
+-    assert check_calls == [project_dir]
++    assert invoked_roots == [project_dir]
+ 
+ 
+ def test_sentinel_project_package_can_build(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+     pytest.importorskip("hatchling")
+     monkeypatch.setattr(specify_cli, "run_uv_sync_in_project", lambda *_: None)
+     monkeypatch.setattr(specify_cli, "run_sentinel_selfcheck_in_project", lambda *_: None)
+ 
+     (tmp_path / "README.md").write_text("sentinel-kit scaffold", encoding="utf-8")
+-    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None)
++    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None, assistant="codex")
+ 
+     result = subprocess.run(
+-        [sys.executable, "-m", "hatchling", "build", "--wheel"],
++        [sys.executable, "-m", "hatchling", "build"],
+         cwd=tmp_path,
+         capture_output=True,
+         text=True,
+     )
+     assert result.returncode == 0, result.stderr + result.stdout
++    wheel_files = list((tmp_path / "dist").glob("*.whl"))
++    assert wheel_files, "expected hatchling build to produce a wheel"
++
++
++def test_specify_check_succeeds_with_pending(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
++    payload = {
++        "ok": True,
++        "checks": [
++            {"name": "capsule", "status": "pending", "duration": 0.0, "data": {"message": "todo"}},
++            {"name": "sentinels", "status": "ok", "duration": 0.1, "data": {"message": "ok"}},
++        ],
++    }
++
++    monkeypatch.setattr(
++        specify_cli,
++        "_invoke_sentinel_selfcheck_json",
++        lambda root: (0, payload, ""),
++    )
++
++    result = runner.invoke(specify_cli.app, ["check", "--root", str(tmp_path)])
++    assert result.exit_code == 0, result.output
++    assert "pending" in result.output.lower()
++
++
++def test_specify_check_fails_on_failed_check(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
++    payload = {
++        "ok": False,
++        "checks": [
++            {"name": "sentinels", "status": "fail", "duration": 0.2, "error": {"message": "tests failed"}},
++        ],
++    }
++
++    monkeypatch.setattr(
++        specify_cli,
++        "_invoke_sentinel_selfcheck_json",
++        lambda root: (1, payload, "boom"),
++    )
++
++    result = runner.invoke(specify_cli.app, ["check", "--root", str(tmp_path)])
++    assert result.exit_code == 1
++    assert "failed" in result.output.lower()

@@ -5,7 +5,7 @@ from __future__ import annotations
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
-from typing import Callable, Mapping, Sequence
+from typing import Callable, Literal, Mapping, Sequence
 
 from rich.console import Console
 from rich.status import Status
@@ -15,11 +15,13 @@ from sentinelkit.utils.errors import ErrorPayload, serialize_error
 
 __all__ = ["CheckResult", "run_checks"]
 
+CheckStatus = Literal["ok", "pending", "fail"]
+
 
 @dataclass(slots=True)
 class CheckResult:
     name: str
-    success: bool
+    status: CheckStatus
     duration: float
     data: dict | None = None
     error: ErrorPayload | None = None
@@ -27,7 +29,7 @@ class CheckResult:
     def to_dict(self) -> dict:
         payload = {
             "name": self.name,
-            "success": self.success,
+            "status": self.status,
             "duration": self.duration,
         }
         if self.data is not None:
@@ -64,7 +66,12 @@ def run_checks(
                 result = future.result()
                 results.append(result)
                 if status:
-                    status.update(f"[bold]{result.name}[/] {'✅' if result.success else '❌'}")
+                    status_icon = {
+                        "ok": "✅",
+                        "pending": "⏳",
+                        "fail": "❌",
+                    }.get(result.status, "❔")
+                    status.update(f"[bold]{result.name}[/] {status_icon}")
     finally:
         if status:
             status.stop()
@@ -78,4 +85,4 @@ def _run_single_check(name: str, fn: CheckCallable, context: CLIContext) -> Chec
         return fn(context)
     except Exception as exc:  # pragma: no cover - placeholder until real checks land
         payload = ErrorPayload(code=f"{name}.error", message=str(exc))
-        return CheckResult(name=name, success=False, duration=time.perf_counter() - start, error=payload)
+        return CheckResult(name=name, status="fail", duration=time.perf_counter() - start, error=payload)

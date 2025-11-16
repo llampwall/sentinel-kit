@@ -72,6 +72,19 @@ uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <PROJE
 
 After the scaffold completes, continue inside the project directory with `uv sync`, `uv run sentinel ...`, and `specify check` as usual.
 
+### Verify the Sentinel gate
+
+Run the core workflow once inside the new repo:
+
+```bash
+uv sync
+uv run sentinel selfcheck
+specify check
+```
+
+- Use `uv run sentinel --format json selfcheck` when you need machine-readable output.
+- Expect early runs to flag `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you wire up MCP configs and sentinel pytest suites. Pending checks keep the exit code at 0 so you can land scaffolding before the enforcement assets are ready.
+
 ## Verification
 
 After initialization, you should see the following commands available in your AI agent:

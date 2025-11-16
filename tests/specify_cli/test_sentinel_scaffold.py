@@ -27,7 +27,7 @@ def test_apply_sentinel_scaffold_copies_assets(tmp_path: Path, monkeypatch: pyte
     monkeypatch.setattr(specify_cli, "run_uv_sync_in_project", _record_uv)
     monkeypatch.setattr(specify_cli, "run_sentinel_selfcheck_in_project", _record_selfcheck)
 
-    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None)
+    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None, assistant="codex")
 
     assert (tmp_path / "pyproject.toml").exists()
     assert not (tmp_path / "uv.lock").exists()
@@ -74,7 +74,13 @@ def test_specify_init_and_check_flow(monkeypatch: pytest.MonkeyPatch, tmp_path: 
     monkeypatch.setattr(specify_cli, "httpx", _DummyHTTPX())
     monkeypatch.setattr(specify_cli, "download_and_extract_template", _fake_download)
     monkeypatch.setattr(specify_cli, "ensure_executable_scripts", lambda *_, **__: None)
-    monkeypatch.setattr(specify_cli, "sync_agent_prompt_bundles", lambda *_: 0)
+    prompt_calls: list[str | None] = []
+
+    def _record_prompts(_project_path: Path, assistant: str | None = None) -> int:
+        prompt_calls.append(assistant)
+        return 0
+
+    monkeypatch.setattr(specify_cli, "sync_agent_prompt_bundles", _record_prompts)
 
     uv_calls: list[Path] = []
     monkeypatch.setattr(specify_cli, "run_uv_sync_in_project", lambda path: uv_calls.append(path))
@@ -105,17 +111,27 @@ def test_specify_init_and_check_flow(monkeypatch: pytest.MonkeyPatch, tmp_path: 
     assert uv_calls == [project_dir]
     assert sentinel_calls == [project_dir]
     assert (project_dir / ".sentinel" / "DECISIONS.md").exists()
+    assert prompt_calls == ["codex"]
 
-    check_calls: list[Path | None] = []
-    monkeypatch.setattr(
-        specify_cli,
-        "run_sentinel_selfcheck",
-        lambda root=None: check_calls.append(root),
-    )
+    payload = {
+        "ok": True,
+        "checks": [
+            {"name": "capsule", "status": "pending", "duration": 0.0, "data": {"message": "todo"}},
+            {"name": "mcp", "status": "pending", "duration": 0.0, "data": {"message": "missing"}},
+        ],
+    }
+
+    invoked_roots: list[Path] = []
+
+    def _fake_invoke(root_path: Path) -> tuple[int, dict, str]:
+        invoked_roots.append(root_path)
+        return 0, payload, ""
+
+    monkeypatch.setattr(specify_cli, "_invoke_sentinel_selfcheck_json", _fake_invoke)
 
     check_result = runner.invoke(specify_cli.app, ["check", "--root", str(project_dir)])
     assert check_result.exit_code == 0, check_result.output
-    assert check_calls == [project_dir]
+    assert invoked_roots == [project_dir]
 
 
 def test_sentinel_project_package_can_build(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -124,12 +140,53 @@ def test_sentinel_project_package_can_build(monkeypatch: pytest.MonkeyPatch, tmp
     monkeypatch.setattr(specify_cli, "run_sentinel_selfcheck_in_project", lambda *_: None)
 
     (tmp_path / "README.md").write_text("sentinel-kit scaffold", encoding="utf-8")
-    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None)
+    specify_cli.apply_sentinel_scaffold(tmp_path, tracker=None, assistant="codex")
 
     result = subprocess.run(
-        [sys.executable, "-m", "hatchling", "build", "--wheel"],
+        [sys.executable, "-m", "hatchling", "build"],
         cwd=tmp_path,
         capture_output=True,
         text=True,
     )
     assert result.returncode == 0, result.stderr + result.stdout
+    wheel_files = list((tmp_path / "dist").glob("*.whl"))
+    assert wheel_files, "expected hatchling build to produce a wheel"
+
+
+def test_specify_check_succeeds_with_pending(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    payload = {
+        "ok": True,
+        "checks": [
+            {"name": "capsule", "status": "pending", "duration": 0.0, "data": {"message": "todo"}},
+            {"name": "sentinels", "status": "ok", "duration": 0.1, "data": {"message": "ok"}},
+        ],
+    }
+
+    monkeypatch.setattr(
+        specify_cli,
+        "_invoke_sentinel_selfcheck_json",
+        lambda root: (0, payload, ""),
+    )
+
+    result = runner.invoke(specify_cli.app, ["check", "--root", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    assert "pending" in result.output.lower()
+
+
+def test_specify_check_fails_on_failed_check(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    payload = {
+        "ok": False,
+        "checks": [
+            {"name": "sentinels", "status": "fail", "duration": 0.2, "error": {"message": "tests failed"}},
+        ],
+    }
+
+    monkeypatch.setattr(
+        specify_cli,
+        "_invoke_sentinel_selfcheck_json",
+        lambda root: (1, payload, "boom"),
+    )
+
+    result = runner.invoke(specify_cli.app, ["check", "--root", str(tmp_path)])
+    assert result.exit_code == 1
+    assert "failed" in result.output.lower()
