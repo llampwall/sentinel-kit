@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import json
 import time
-from typing import Dict
+from typing import Dict, Mapping
 
 import typer
 from rich.console import Console
 from rich.table import Table
 
-from sentinelkit.cli.mcp.smoke import run_smoke
+from sentinelkit.cli.mcp.smoke import SmokeSummary, run_smoke
 from sentinelkit.utils.errors import build_error_payload
 
 from .executor import CheckResult, run_checks
@@ -128,6 +128,13 @@ def _mcp_check(context: CLIContext) -> CheckResult:
     if summary.ok:
         return CheckResult(name="mcp", success=True, duration=duration, data=data)
 
+    pending_reason = _diagnose_mcp_pending(summary, context)
+    if pending_reason:
+        pending_data = dict(data)
+        pending_data.setdefault("status", "pending")
+        pending_data.setdefault("message", pending_reason)
+        return CheckResult(name="mcp", success=True, duration=duration, data=pending_data)
+
     failed_step = next((step for step in summary.steps if not step.success), None)
     detail = failed_step.detail if failed_step else "MCP smoke failed."
     error = build_error_payload(
@@ -137,3 +144,21 @@ def _mcp_check(context: CLIContext) -> CheckResult:
         details={"failed_step": failed_step.name if failed_step else None},
     )
     return CheckResult(name="mcp", success=False, duration=duration, data=data, error=error)
+
+
+def _diagnose_mcp_pending(summary: SmokeSummary, context: CLIContext) -> str | None:
+    """Return a skip reason when MCP is not configured for this workspace."""
+
+    config_file = context.root / ".mcp.json"
+    if not config_file.exists():
+        return "MCP client configuration (.mcp.json) not found; configure your IDE before enabling the smoke test."
+
+    decision_log_payload = summary.tool_results.get("mcp.sentinel.decision_log")
+    if isinstance(decision_log_payload, Mapping):
+        error = decision_log_payload.get("error")
+        if isinstance(error, Mapping):
+            code = error.get("code")
+            if code == "decision.ledger_missing":
+                ledger_path = context.root / ".sentinel" / "DECISIONS.md"
+                return f"Sentinel decision ledger missing ({ledger_path}). Copy DECISIONS.md before running MCP smoke."
+    return None

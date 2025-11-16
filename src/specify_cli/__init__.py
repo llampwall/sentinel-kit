@@ -210,6 +210,7 @@ SENTINEL_FILE_ASSETS = [
     ("Makefile", "Makefile"),
     ("scripts/bootstrap.py", "scripts/bootstrap.py"),
     (".github/workflows/sentinel-ci.yml", ".github/workflows/sentinel-ci.yml"),
+    (".sentinel/DECISIONS.md", ".sentinel/DECISIONS.md"),
 ]
 
 SENTINEL_DIR_ASSETS = [
@@ -1539,7 +1540,7 @@ def check(
     console.print(sentinel_tracker.render())
 
     try:
-        sentinel_tracker.start("sentinel-run", f"uv run sentinel selfcheck --root {root}")
+        sentinel_tracker.start("sentinel-run", "uv run sentinel selfcheck --format json")
         run_sentinel_selfcheck(root=root)
         sentinel_tracker.complete("sentinel-run", "ok")
     except typer.Exit as exc:
@@ -1570,7 +1571,14 @@ def check(
 def run_sentinel_selfcheck(root: Path | None = None) -> None:
     """Invoke the Sentinel CLI selfcheck via uv."""
     root_path = Path(root) if root else Path.cwd()
-    command = ["uv", "run", "sentinel", "selfcheck", "--root", str(root_path)]
+    command = [
+        "uv",
+        "run",
+        "sentinel",
+        "selfcheck",
+        "--format",
+        "json",
+    ]
     try:
         subprocess.run(command, check=True, cwd=root_path)
     except FileNotFoundError:

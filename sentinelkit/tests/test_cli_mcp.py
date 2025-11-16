@@ -75,6 +75,8 @@ def test_selfcheck_reports_mcp_failure(monkeypatch, repo_root: Path) -> None:
     )
     monkeypatch.setattr(selfcheck_module, "run_smoke", lambda root, *_, **__: summary)
 
+    (repo_root / ".mcp.json").write_text("{}", encoding="utf-8")
+
     context = CLIContext(
         root=repo_root,
         format="pretty",
@@ -85,3 +87,25 @@ def test_selfcheck_reports_mcp_failure(monkeypatch, repo_root: Path) -> None:
     assert result.success is False
     assert result.error
     assert result.error.message == failure_step.detail
+
+
+def test_selfcheck_marks_mcp_pending_when_unconfigured(monkeypatch, repo_root: Path) -> None:
+    failure_step = SmokeStep(name="tools.call[mcp.sentinel.decision_log]", success=False, duration=0.5, detail=None)
+    summary = SmokeSummary(
+        ok=False,
+        command=["python", "-m", "sentinelkit.cli.mcp.server"],
+        steps=[failure_step],
+        tool_results={},
+    )
+    monkeypatch.setattr(selfcheck_module, "run_smoke", lambda root, *_, **__: summary)
+
+    context = CLIContext(
+        root=repo_root,
+        format="pretty",
+        env=EnvironmentInfo(is_ci=False, platform="test", python_version="3.12"),
+    )
+    result = selfcheck_module._build_checks()["mcp"](context)
+
+    assert result.success is True
+    assert result.data is not None
+    assert result.data["status"] == "pending"
