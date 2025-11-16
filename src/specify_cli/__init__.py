@@ -214,6 +214,7 @@ SENTINEL_FILE_ASSETS = [
 ]
 
 SENTINEL_DIR_ASSETS = [
+    ("sentinel_project", "sentinel_project"),
     ("sentinelkit", "sentinelkit"),
     (".sentinel/agents", ".sentinel/agents"),
     (".sentinel/context", ".sentinel/context"),
