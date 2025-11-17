@@ -9,6 +9,7 @@ import sys
 import tomllib
 
 import pytest
+import typer
 from typer.testing import CliRunner
 
 specify_cli = importlib.import_module("specify_cli.__init__")
@@ -170,7 +171,9 @@ def test_specify_check_succeeds_with_pending(monkeypatch: pytest.MonkeyPatch, tm
 
     result = runner.invoke(specify_cli.app, ["check", "--root", str(tmp_path)])
     assert result.exit_code == 0, result.output
-    assert "pending" in result.output.lower()
+    assert "pending checks" in result.stdout.lower()
+    assert "capsule" in result.stdout
+    assert "sentinels" in result.stdout
 
 
 def test_specify_check_fails_on_failed_check(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -190,3 +193,41 @@ def test_specify_check_fails_on_failed_check(monkeypatch: pytest.MonkeyPatch, tm
     result = runner.invoke(specify_cli.app, ["check", "--root", str(tmp_path)])
     assert result.exit_code == 1
     assert "failed" in result.output.lower()
+    assert "tests failed" in result.stdout
+
+
+def test_run_sentinel_selfcheck_returns_payload(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    payload = {
+        "ok": True,
+        "checks": [
+            {"name": "capsule", "status": "pending", "duration": 0.0},
+        ],
+    }
+
+    monkeypatch.setattr(
+        specify_cli,
+        "_invoke_sentinel_selfcheck_json",
+        lambda root: (0, payload, ""),
+    )
+
+    result = specify_cli.run_sentinel_selfcheck(tmp_path)
+    assert result is payload
+
+
+def test_run_sentinel_selfcheck_raises_on_failed_checks(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    payload = {
+        "ok": False,
+        "checks": [
+            {"name": "mcp", "status": "fail", "duration": 0.1, "error": {"message": "smoke failed"}},
+        ],
+    }
+
+    monkeypatch.setattr(
+        specify_cli,
+        "_invoke_sentinel_selfcheck_json",
+        lambda root: (0, payload, ""),
+    )
+
+    with pytest.raises(typer.Exit) as excinfo:
+        specify_cli.run_sentinel_selfcheck(tmp_path)
+    assert excinfo.value.exit_code == 1

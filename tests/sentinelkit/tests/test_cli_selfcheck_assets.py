@@ -1,4 +1,4 @@
-"""Regression tests for sentinel CLI selfcheck behavior."""
+"""Regression tests for sentinel CLI selfcheck behavior (asset mirror)."""
 
 from __future__ import annotations
 
@@ -10,24 +10,23 @@ from sentinelkit.cli import main as cli_main
 from sentinelkit.cli import selfcheck as selfcheck_module
 from sentinelkit.cli.executor import CheckResult
 from sentinelkit.cli.state import CLIContext
+from sentinelkit.tests._selfcheck_helpers import make_check
 from sentinelkit.utils.errors import build_error_payload
 
 runner = CliRunner()
 
 
 def _ok_check(_context: CLIContext) -> CheckResult:
-    return CheckResult(name="contracts", status="ok", duration=0.01, data={"message": "ok"})
+    return make_check(status="ok")
 
 
 def _pending_check(_context: CLIContext) -> CheckResult:
-    return CheckResult(name="contracts", status="pending", duration=0.0, data={"message": "todo"})
+    return make_check(status="pending", message="todo")
 
 
 def _failing_check(_context: CLIContext) -> CheckResult:
-    return CheckResult(
-        name="contracts",
+    return make_check(
         status="fail",
-        duration=0.01,
         error=build_error_payload(code="contracts.error", message="boom"),
     )
 

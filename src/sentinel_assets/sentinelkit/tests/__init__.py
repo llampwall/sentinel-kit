@@ -1,1 +1,1 @@
-"""SentinelKit test package placeholder."""
+"""Test helpers for the sentinel kit asset package."""

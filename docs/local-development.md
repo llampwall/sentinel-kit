@@ -71,6 +71,8 @@ specify check
 
 Use `--format json` for machine-readable output (`specify check` consumes the same schema).
 
+> Need to exercise the full pytest suite or the sentinel asset mirror? See the [Testing Guide](testing.md) for the canonical command matrix.
+
 ## 5. Invoke with uvx Directly From Git (Current Branch)
 
 `uvx` can run from a local path (or a Git ref) to simulate user flows:
