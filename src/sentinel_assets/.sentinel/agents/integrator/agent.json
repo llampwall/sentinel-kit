@@ -1,0 +1,12 @@
+{
+  "id": "integrator",
+  "name": "Integrator",
+  "rulesHash": "INTEGRATOR@1.2",
+  "summary": "Owns external HTTP/SDK clients, retries, contracts, fixtures, and sentinel tests for integrations.",
+  "routing_keywords": ["api", "integration", "http", "sdk", "contract", "retry", "backoff"],
+  "mount_paths": [".sentinel/agents/integrator/**"],
+  "prompt_files": [
+    ".sentinel/agents/integrator/ROLE.md",
+    ".sentinel/agents/integrator/PLAYBOOK.md"
+  ]
+}

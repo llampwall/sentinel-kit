@@ -24,6 +24,8 @@ Or install globally:
     specify init --here
 """
 
+from __future__ import annotations
+
 import os
 import subprocess
 import sys
@@ -32,11 +34,22 @@ import tempfile
 import shutil
 import shlex
 import json
+import contextlib
 from pathlib import Path
-from typing import Optional, Tuple, Iterable, List
+from typing import Any, Iterable, List, Mapping, Optional, Tuple, TYPE_CHECKING
 
 import typer
-import httpx
+
+try:  # pragma: no cover - exercised indirectly via CLI usage
+    import httpx  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - handled in helper
+    httpx = None  # type: ignore[assignment]
+
+if TYPE_CHECKING:  # pragma: no cover - typing only
+    from httpx import Client as HTTPXClient
+else:  # pragma: no cover - typing fallback
+    HTTPXClient = Any
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -48,12 +61,42 @@ from rich.tree import Tree
 from typer.core import TyperGroup
 
 # For cross-platform keyboard input
-import readchar
 import ssl
-import truststore
 
-ssl_context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
-client = httpx.Client(verify=ssl_context)
+try:  # pragma: no cover - runtime dependency for system certificate trust
+    import truststore  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - fallback to stdlib certificates
+    truststore = None  # type: ignore[assignment]
+
+try:  # pragma: no cover - interactive dependency
+    import readchar  # type: ignore[import]
+except ModuleNotFoundError:  # pragma: no cover - handled when interactive prompts are requested
+    readchar = None  # type: ignore[assignment]
+
+if truststore is not None:
+    ssl_context = truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+else:  # pragma: no cover - fallback path used when truststore is unavailable
+    ssl_context = ssl.create_default_context()
+
+
+def _ensure_http_client(
+    client: HTTPXClient | None = None,
+    *,
+    verify: ssl.SSLContext | bool | None = None,
+) -> HTTPXClient:
+    """Return an HTTPX client, raising a helpful error if the dependency is missing."""
+
+    if client is not None:
+        return client
+
+    if httpx is None:  # pragma: no cover - exercises missing dependency edge case
+        raise ModuleNotFoundError(
+            "The 'httpx' package is required to download project templates. "
+            "Install sentinel-kit dev dependencies with 'uv sync --dev'."
+        )
+
+    verify_config = ssl_context if verify is None else verify
+    return httpx.Client(verify=verify_config)
 
 def _github_token(cli_token: str | None = None) -> str | None:
     """Return sanitized GitHub token (cli arg takes precedence) or None."""
@@ -156,20 +199,22 @@ SCRIPT_TYPE_CHOICES = {"sh": "POSIX Shell (bash/zsh)", "ps": "PowerShell"}
 
 CLAUDE_LOCAL_PATH = Path.home() / ".claude" / "local" / "claude"
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+PACKAGE_ROOT = Path(__file__).resolve().parent
+ASSETS_ROOT = PACKAGE_ROOT.parent / "sentinel_assets"
 
 DEFAULT_COPY_IGNORE = ["__pycache__", "*.pyc", "*.pyo", ".DS_Store", "Thumbs.db"]
 
 SENTINEL_FILE_ASSETS = [
     ("pyproject.toml", "pyproject.toml"),
-    ("uv.lock", "uv.lock"),
     (".tool-versions", ".tool-versions"),
     ("Makefile", "Makefile"),
     ("scripts/bootstrap.py", "scripts/bootstrap.py"),
     (".github/workflows/sentinel-ci.yml", ".github/workflows/sentinel-ci.yml"),
+    (".sentinel/DECISIONS.md", ".sentinel/DECISIONS.md"),
 ]
 
 SENTINEL_DIR_ASSETS = [
+    ("sentinel_project", "sentinel_project"),
     ("sentinelkit", "sentinelkit"),
     (".sentinel/agents", ".sentinel/agents"),
     (".sentinel/context", ".sentinel/context"),
@@ -179,6 +224,7 @@ SENTINEL_DIR_ASSETS = [
     (".sentinel/snippets", ".sentinel/snippets"),
     (".sentinel/status", ".sentinel/status"),
     (".sentinel/templates", ".sentinel/templates"),
+    (".sentinel/tests", ".sentinel/tests"),
 ]
 
 SENTINEL_RUNBOOK_TEMPLATE = (
@@ -299,6 +345,12 @@ class StepTracker:
 
 def get_key():
     """Get a single keypress in a cross-platform way using readchar."""
+    if readchar is None:  # pragma: no cover - interactive dependency
+        raise ModuleNotFoundError(
+            "The 'readchar' package is required for interactive prompts. "
+            "Install sentinel-kit dev dependencies with 'uv sync --dev'."
+        )
+
     key = readchar.readkey()
 
     if key == readchar.key.UP or key == readchar.key.CTRL_P:
@@ -604,11 +656,20 @@ def merge_json_files(existing_path: Path, new_content: dict, verbose: bool = Fal
 
     return merged
 
-def download_template_from_github(ai_assistant: str, download_dir: Path, *, script_type: str = "sh", verbose: bool = True, show_progress: bool = True, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Tuple[Path, dict]:
+def download_template_from_github(
+    ai_assistant: str,
+    download_dir: Path,
+    *,
+    script_type: str = "sh",
+    verbose: bool = True,
+    show_progress: bool = True,
+    client: HTTPXClient | None = None,
+    debug: bool = False,
+    github_token: str | None = None,
+) -> Tuple[Path, dict]:
     repo_owner = "github"
     repo_name = "spec-kit"
-    if client is None:
-        client = httpx.Client(verify=ssl_context)
+    client = _ensure_http_client(client)
 
     if verbose:
         console.print("[cyan]Fetching latest release information...[/cyan]")
@@ -714,7 +775,18 @@ def download_template_from_github(ai_assistant: str, download_dir: Path, *, scri
     }
     return zip_path, metadata
 
-def download_and_extract_template(project_path: Path, ai_assistant: str, script_type: str, is_current_dir: bool = False, *, verbose: bool = True, tracker: StepTracker | None = None, client: httpx.Client = None, debug: bool = False, github_token: str = None) -> Path:
+def download_and_extract_template(
+    project_path: Path,
+    ai_assistant: str,
+    script_type: str,
+    is_current_dir: bool = False,
+    *,
+    verbose: bool = True,
+    tracker: StepTracker | None = None,
+    client: HTTPXClient | None = None,
+    debug: bool = False,
+    github_token: str | None = None,
+) -> Path:
     """Download the latest release and extract it to create a new project.
     Returns project_path. Uses tracker if provided (with keys: fetch, download, extract, cleanup)
     """
@@ -909,8 +981,18 @@ def ensure_executable_scripts(project_path: Path, tracker: StepTracker | None = 
                 console.print(f"  - {f}")
 
 
+def _resolve_asset(path: str) -> Path:
+    if not ASSETS_ROOT.exists():
+        raise FileNotFoundError(
+            "Sentinel assets are missing from the Specify CLI installation. "
+            "Reinstall the tool with `uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git`."
+        )
+    src = ASSETS_ROOT / path
+    return src
+
+
 def _copy_file_asset(src_rel: str, dest_rel: str, project_path: Path) -> None:
-    src = REPO_ROOT / src_rel
+    src = _resolve_asset(src_rel)
     if not src.exists():
         raise FileNotFoundError(f"Sentinel asset '{src_rel}' is missing from the toolchain.")
     dest = project_path / dest_rel
@@ -919,7 +1001,7 @@ def _copy_file_asset(src_rel: str, dest_rel: str, project_path: Path) -> None:
 
 
 def _copy_dir_asset(src_rel: str, dest_rel: str, project_path: Path, ignore: Iterable[str] | None = None) -> None:
-    src = REPO_ROOT / src_rel
+    src = _resolve_asset(src_rel)
     if not src.exists():
         raise FileNotFoundError(f"Sentinel directory '{src_rel}' is missing from the toolchain.")
     dest = project_path / dest_rel
@@ -932,7 +1014,7 @@ def _copy_dir_asset(src_rel: str, dest_rel: str, project_path: Path, ignore: Ite
 
 def _copy_runbook_template(project_path: Path) -> None:
     src_rel, dest_rel = SENTINEL_RUNBOOK_TEMPLATE
-    src = REPO_ROOT / src_rel
+    src = _resolve_asset(src_rel)
     if not src.exists():
         raise FileNotFoundError("Sentinel runbook template is missing.")
     dest = project_path / dest_rel
@@ -940,13 +1022,18 @@ def _copy_runbook_template(project_path: Path) -> None:
     shutil.copy2(src, dest)
 
 
-def sync_agent_prompt_bundles(project_path: Path) -> int:
-    """Copy canonical Sentinel prompts into supported agent bundles."""
-    prompts_dir = REPO_ROOT / ".sentinel" / "prompts"
+def sync_agent_prompt_bundles(project_path: Path, assistant: str | None = None) -> int:
+    """Copy canonical Sentinel prompts into the selected agent bundle."""
+    prompts_dir = _resolve_asset(".sentinel/prompts")
     if not prompts_dir.exists():
         return 0
+    targets: list[Path] = []
+    if assistant and assistant in AGENT_PROMPT_DIRS:
+        targets.append(AGENT_PROMPT_DIRS[assistant])
+    elif assistant is None:
+        targets.extend(AGENT_PROMPT_DIRS.values())
     copied = 0
-    for target in AGENT_PROMPT_DIRS.values():
+    for target in targets:
         dest_dir = project_path / target
         dest_dir.mkdir(parents=True, exist_ok=True)
         for prompt_file in prompts_dir.iterdir():
@@ -958,11 +1045,45 @@ def sync_agent_prompt_bundles(project_path: Path) -> int:
 
 def run_uv_sync_in_project(project_path: Path) -> None:
     """Run uv sync inside the scaffold, falling back to unlocked sync on failure."""
-    commands = [
-        ["uv", "sync", "--locked", "--all-groups"],
-        ["uv", "sync", "--locked"],
-        ["uv", "sync", "--dev"],
-    ]
+    lock_path = project_path / "uv.lock"
+
+    def _lockfile_state() -> str:
+        if not lock_path.exists():
+            return "missing"
+        try:
+            for line in lock_path.read_text(encoding="utf-8").splitlines():
+                stripped = line.strip()
+                if not stripped:
+                    continue
+                if stripped.startswith("# SentinelKit placeholder") or stripped.startswith(
+                    "# Placeholder uv.lock"
+                ):
+                    return "placeholder"
+                break
+        except Exception:
+            return "unknown"
+        return "present"
+
+    lockfile_state = _lockfile_state()
+    if lockfile_state != "present":
+        if lockfile_state == "placeholder" and lock_path.exists():
+            with contextlib.suppress(OSError):
+                lock_path.unlink()
+        console.print(
+            Panel(
+                "No uv.lock detected. Running `uv sync` to generate one now. "
+                "After customizing dependencies, run `uv lock --locked --all-groups` to pin them.",
+                title="[yellow]uv.lock bootstrap[/yellow]",
+                border_style="yellow",
+            )
+        )
+        commands = [["uv", "sync"]]
+    else:
+        commands = [
+            ["uv", "sync", "--locked", "--all-groups"],
+            ["uv", "sync", "--locked"],
+            ["uv", "sync", "--dev"],
+        ]
     last_error: subprocess.CalledProcessError | None = None
     for idx, command in enumerate(commands):
         try:
@@ -998,7 +1119,12 @@ def run_sentinel_selfcheck_in_project(project_path: Path) -> None:
     run_sentinel_selfcheck(root=project_path)
 
 
-def apply_sentinel_scaffold(project_path: Path, tracker: StepTracker | None = None) -> None:
+def apply_sentinel_scaffold(
+    project_path: Path,
+    *,
+    tracker: StepTracker | None = None,
+    assistant: str | None = None,
+) -> None:
     """Copy Sentinel assets into the scaffold and run the bootstrap commands."""
     copy_key = "sentinel-copy"
     if tracker:
@@ -1025,7 +1151,7 @@ def apply_sentinel_scaffold(project_path: Path, tracker: StepTracker | None = No
     if tracker:
         tracker.start(prompts_key, "sync agent prompts")
     try:
-        prompt_count = sync_agent_prompt_bundles(project_path)
+        prompt_count = sync_agent_prompt_bundles(project_path, assistant=assistant)
     except Exception as exc:
         if tracker:
             tracker.error(prompts_key, str(exc))
@@ -1256,14 +1382,14 @@ def init(
         try:
             verify = not skip_tls
             local_ssl_context = ssl_context if verify else False
-            local_client = httpx.Client(verify=local_ssl_context)
+            local_client = _ensure_http_client(verify=local_ssl_context)
 
             download_and_extract_template(project_path, selected_ai, selected_script, here, verbose=False, tracker=tracker, client=local_client, debug=debug, github_token=github_token)
 
             ensure_executable_scripts(project_path, tracker=tracker)
 
             if sentinel:
-                apply_sentinel_scaffold(project_path, tracker=tracker)
+                apply_sentinel_scaffold(project_path, tracker=tracker, assistant=selected_ai)
 
             if not no_git:
                 tracker.start("git")
@@ -1424,10 +1550,54 @@ def check(
     sentinel_tracker.add("sentinel-run", "sentinel selfcheck")
     console.print(sentinel_tracker.render())
 
+    pending_checks: list[dict] = []
+
     try:
-        sentinel_tracker.start("sentinel-run", f"uv run sentinel selfcheck --root {root}")
-        run_sentinel_selfcheck(root=root)
-        sentinel_tracker.complete("sentinel-run", "ok")
+        sentinel_tracker.start("sentinel-run", "uv run sentinel --format json selfcheck")
+        root_path = Path(root)
+        exit_code, payload, stderr_output = _invoke_sentinel_selfcheck_json(root_path)
+        checks = list(payload.get("checks", []))
+        pending_checks = [check for check in checks if check.get("status") == "pending"]
+        failing_checks = [check for check in checks if check.get("status") == "fail"]
+
+        console.print(_render_sentinel_check_table(checks))
+        if stderr_output:
+            console.print(
+                Panel(
+                    stderr_output,
+                    title="[yellow]sentinel selfcheck (stderr)[/yellow]",
+                    border_style="yellow",
+                )
+            )
+
+        if failing_checks:
+            sentinel_tracker.error("sentinel-run", "failed")
+            console.print(
+                Panel(
+                    "\n".join(
+                        f"{check.get('name', 'check')}: {_format_check_message(check) or 'failed'}"
+                        for check in failing_checks
+                    ),
+                    title="[red]Sentinel Gate Failed[/red]",
+                    border_style="red",
+                )
+            )
+            raise typer.Exit(exit_code or 1)
+
+        if exit_code != 0:
+            sentinel_tracker.error("sentinel-run", f"exit {exit_code}")
+            raise typer.Exit(exit_code)
+
+        sentinel_tracker.complete(
+            "sentinel-run",
+            "ok" if not pending_checks else "ok (pending)",
+        )
+    except FileNotFoundError:
+        sentinel_tracker.error("sentinel-run", "uv missing")
+        console.print(
+            "[bold red]uv command not found.[/bold red] Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
+        )
+        raise typer.Exit(1)
     except typer.Exit as exc:
         sentinel_tracker.error("sentinel-run", f"exit {exc.exit_code}")
         console.print(
@@ -1450,32 +1620,122 @@ def check(
         raise typer.Exit(1)
     else:
         console.print(sentinel_tracker.render())
-        console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
+        if pending_checks:
+            console.print(
+                Panel(
+                    "Sentinel selfcheck completed with pending checks. Configure MCP and sentinel tests when ready.",
+                    title="[yellow]Pending Sentinel Checks[/yellow]",
+                    border_style="yellow",
+                )
+            )
+        else:
+            console.print("[bold green]All checks passed. Sentinel gates are ready.[/bold green]")
 
 
-def run_sentinel_selfcheck(root: Path | None = None) -> None:
-    """Invoke the Sentinel CLI selfcheck via uv."""
+def run_sentinel_selfcheck(root: Path | None = None) -> dict:
+    """Invoke the Sentinel CLI selfcheck via uv and return the parsed payload."""
     root_path = Path(root) if root else Path.cwd()
-    command = ["uv", "run", "sentinel", "selfcheck", "--root", str(root_path)]
     try:
-        subprocess.run(command, check=True, cwd=root_path)
+        exit_code, payload, _stderr = _invoke_sentinel_selfcheck_json(root_path)
     except FileNotFoundError:
         console.print(
             "[bold red]uv command not found.[/bold red] "
             "Install uv (https://docs.astral.sh/uv/) and rerun the selfcheck."
         )
         raise typer.Exit(1)
-    except subprocess.CalledProcessError as exc:
+
+    if exit_code != 0:
+        raise typer.Exit(exit_code)
+
+    failing_checks = [check for check in payload.get("checks", []) if check.get("status") == "fail"]
+    if failing_checks:
+        raise typer.Exit(1)
+
+    console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
+    return payload
+
+
+def _invoke_sentinel_selfcheck_json(root_path: Path) -> tuple[int, dict, str]:
+    command = [
+        "uv",
+        "run",
+        "sentinel",
+        "--format",
+        "json",
+        "selfcheck",
+    ]
+    completed = subprocess.run(
+        command,
+        cwd=root_path,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    stdout = (completed.stdout or "").strip()
+    if not stdout:
+        message = completed.stderr.strip() or "Sentinel selfcheck produced no output."
         console.print(
             Panel(
-                f"Sentinel selfcheck failed (exit code {exc.returncode}). See logs above for details.",
+                message,
                 title="[red]Sentinel Selfcheck[/red]",
                 border_style="red",
             )
         )
-        raise typer.Exit(exc.returncode)
-    else:
-        console.print("[bold green]Sentinel selfcheck completed successfully.[/bold green]")
+        raise typer.Exit(completed.returncode or 1)
+    try:
+        payload = json.loads(stdout)
+    except json.JSONDecodeError as exc:  # pragma: no cover - defensive
+        console.print(
+            Panel(
+                f"Sentinel selfcheck returned invalid JSON: {exc}",
+                title="[red]Sentinel Selfcheck[/red]",
+                border_style="red",
+            )
+        )
+        raise typer.Exit(completed.returncode or 1) from exc
+    return completed.returncode, payload, (completed.stderr or "").strip()
+
+
+def _render_sentinel_check_table(checks: list[Mapping[str, Any]]) -> Table:
+    table = Table(title="Sentinel selfcheck")
+    table.add_column("Check")
+    table.add_column("Status")
+    table.add_column("Duration", justify="right")
+    table.add_column("Message")
+
+    icon_map = {"ok": "✅", "pending": "⏳", "fail": "❌"}
+    for check in checks:
+        status = str(check.get("status", "unknown"))
+        icon = icon_map.get(status, "❔")
+        duration = check.get("duration")
+        if isinstance(duration, (int, float)):
+            duration_text = f"{duration:.2f}s"
+        else:
+            duration_text = "-"
+        table.add_row(
+            str(check.get("name", "-")),
+            f"{icon} {status}",
+            duration_text,
+            _format_check_message(check) or "-",
+        )
+    return table
+
+
+def _format_check_message(check: Mapping[str, Any]) -> str:
+    data = check.get("data")
+    if isinstance(data, Mapping):
+        message = data.get("message")
+        if isinstance(message, str) and message:
+            return message
+    error = check.get("error")
+    if isinstance(error, Mapping):
+        message = error.get("message")
+        if isinstance(message, str) and message:
+            remediation = error.get("remediation")
+            if isinstance(remediation, str) and remediation:
+                return f"{message} ({remediation})"
+            return message
+    return ""
 
 def main():
     app()

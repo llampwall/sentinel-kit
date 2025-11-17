@@ -1,0 +1,51 @@
+[project]
+name = "sentinel-project"
+version = "0.1.0"
+description = "SentinelKit-enabled workspace scaffolded by Specify CLI."
+requires-python = ">=3.12"
+dependencies = [
+    "pytest>=8.3",
+    "ruff>=0.6",
+    "sentinelkit",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.3"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+pythonpath = ["."]
+testpaths = ["tests", "sentinelkit/tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "B", "I"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.6",
+]
+
+[tool.uv.workspace]
+members = ["sentinelkit"]
+
+[tool.uv.sources]
+sentinelkit = { workspace = true }
+
+[tool.hatch.build.targets.wheel]
+packages = ["sentinel_project"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "sentinel_project",
+    "pyproject.toml",
+    "README.md",
+]

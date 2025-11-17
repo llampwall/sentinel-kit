@@ -1,0 +1,69 @@
+name: Sentinel CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: sentinel-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: sentinel (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v2
+        with:
+          python-version: "3.12"
+
+      - name: Cache uv
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/uv
+            ~\AppData\Local\uv\cache
+          key: ${{ runner.os }}-uv-${{ hashFiles('.tool-versions', 'uv.lock') }}
+
+      - name: Sync project
+        run: uv sync --locked --dev
+
+      - name: Sentinel selfcheck
+        run: uv run sentinel selfcheck --verbose
+
+      - name: MCP smoke
+        run: uv run python -m sentinelkit.cli.main --root . --format json mcp smoke --timeout-call 90
+
+      - name: Node artifact guard
+        run: uv run python scripts/check_node_artifacts.py
+
+      - name: Prepare test-results
+        run: uv run python -c "from pathlib import Path; Path('test-results').mkdir(exist_ok=True)"
+
+      - name: Run sentinel regressions
+        run: uv run sentinel sentinels run --json-report test-results/sentinels.json --junit test-results/sentinels.xml
+
+      - name: Run tests
+        run: uv run pytest -q --junitxml=test-results/junit.xml
+
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinelkit-${{ matrix.os }}-tests
+          path: test-results
+          if-no-files-found: warn

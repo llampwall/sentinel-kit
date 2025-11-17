@@ -28,6 +28,8 @@ To build the documentation locally:
 - `toc.yml` - Table of contents configuration
 - `installation.md` - Installation guide
 - `quickstart.md` - Quick start guide
+- `local-development.md` - Working on the CLI locally
+- `testing.md` - Testing workflows and coverage expectations
 - `_site/` - Generated documentation output (ignored by git)
 
 ## Deployment

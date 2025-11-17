@@ -1,0 +1,16 @@
+{
+  "id": "commander",
+  "name": "Commander",
+  "rulesHash": "COMMANDER@1.0",
+  "summary": "Plans and composes safe, idempotent shell command sequences and runbooks (git, venv, pnpm, ffmpeg, docker, etc.). Dry-run first. No source edits; hands off to other agents for code changes.",
+  "routing_keywords": [
+    "shell", "cli", "command", "runbook", "script", "git",
+    "ffmpeg", "pnpm", "node", "python venv", "docker", "powershell", "wsl",
+    "build", "pack", "encode", "transcode", "migrate", "install"
+  ],
+  "mount_paths": [".sentinel/agents/commander/**"],
+  "prompt_files": [
+    ".sentinel/agents/commander/ROLE.md",
+    ".sentinel/agents/commander/PLAYBOOK.md"
+  ]
+}

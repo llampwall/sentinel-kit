@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 import sys
+import os
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -82,12 +83,22 @@ def run_smoke(root: Path, *, timeouts: SmokeTimeouts | None = None) -> SmokeSumm
 
 async def _run_smoke(root: Path, timeouts: SmokeTimeouts) -> SmokeSummary:
     command = _server_command()
+    env = os.environ.copy()
+    env.setdefault("PYTHONWARNINGS", "ignore::RuntimeWarning:runpy")
+    sentinelkit_repo_root = Path(__file__).resolve().parents[3]
+    python_path_entries = [str(root), str(sentinelkit_repo_root)]
+    existing_pythonpath = env.get("PYTHONPATH")
+    if existing_pythonpath:
+        python_path_entries.append(existing_pythonpath)
+    env["PYTHONPATH"] = os.pathsep.join(python_path_entries)
+
     process = await asyncio.create_subprocess_exec(
         *command,
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
         cwd=str(root),
+        env=env,
     )
     stderr_task = asyncio.create_task(_capture_stream(process.stderr))
     client = _JsonRpcClient(process)

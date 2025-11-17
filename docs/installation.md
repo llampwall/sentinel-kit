@@ -5,7 +5,7 @@
 - **Linux/macOS** (or Windows; PowerShell scripts now supported without WSL)
 - AI coding agent: [Claude Code](https://www.anthropic.com/claude-code), [GitHub Copilot](https://code.visualstudio.com/), [Codebuddy CLI](https://www.codebuddy.ai/cli) or [Gemini CLI](https://github.com/google-gemini/gemini-cli)
 - [uv](https://docs.astral.sh/uv/) for package management
-- [Python 3.11+](https://www.python.org/downloads/)
+- [Python 3.12+](https://www.python.org/downloads/)
 - [Git](https://git-scm.com/downloads)
 
 ## Installation
@@ -71,6 +71,19 @@ uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <PROJE
 ```
 
 After the scaffold completes, continue inside the project directory with `uv sync`, `uv run sentinel ...`, and `specify check` as usual.
+
+### Verify the Sentinel gate
+
+Run the core workflow once inside the new repo:
+
+```bash
+uv sync
+uv run sentinel selfcheck
+specify check
+```
+
+- Use `uv run sentinel --format json selfcheck` when you need machine-readable output.
+- Expect early runs to flag `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you wire up MCP configs and sentinel pytest suites. Pending checks keep the exit code at 0 so you can land scaffolding before the enforcement assets are ready.
 
 ## Verification
 

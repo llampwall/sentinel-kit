@@ -1,0 +1,15 @@
+{
+  "id": "verifier",
+  "name": "Verifier",
+  "rulesHash": "VERIFIER@1.1",
+  "summary": "Owns tests, sentinels, and contract fixtures. Produces failing-first repro and passing proof. No production code edits.",
+  "routing_keywords": [
+    "test", "tests", "unit", "integration", "vitest", "jest",
+    "coverage", "sentinel", "contract", "fixture", "reproduce", "MRE", "mock"
+  ],
+  "mount_paths": [".sentinel/agents/verifier/**"],
+  "prompt_files": [
+    ".sentinel/agents/verifier/ROLE.md",
+    ".sentinel/agents/verifier/PLAYBOOK.md"
+  ]
+}

@@ -17,6 +17,8 @@ dependencies = [
 dev = [
     "pytest>=8.3",
     "ruff>=0.6",
+    "httpx",
+    "hatchling",
 ]
 
 [project.scripts]
@@ -29,8 +31,19 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/specify_cli"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"src/sentinel_assets" = "sentinel_assets"
+
+[tool.hatch.build.targets.sdist.force-include]
+"src/sentinel_assets" = "sentinel_assets"
+
 [tool.uv.sources]
 sentinelkit = { workspace = true }
 
 [tool.uv.workspace]
 members = ["sentinelkit"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests", "sentinelkit/tests"]
+norecursedirs = ["src/sentinel_assets", ".venv", "dist", "build"]

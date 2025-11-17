@@ -1,0 +1,15 @@
+{
+  "id": "frontender",
+  "name": "Frontender",
+  "rulesHash": "FRONTENDER@1.0",
+  "summary": "Implements UI from Designer specs using the repo's existing frontend stack. Adds components, views, and wiring; no external API shaping and no CI work.",
+  "routing_keywords": [
+    "frontend", "react", "tsx", "component", "ui", "view", "page",
+    "storybook", "a11y", "aria", "css", "tailwind", "vite", "next", "router"
+  ],
+  "mount_paths": [".sentinel/agents/frontender/**"],
+  "prompt_files": [
+    ".sentinel/agents/frontender/ROLE.md",
+    ".sentinel/agents/frontender/PLAYBOOK.md"
+  ]
+}

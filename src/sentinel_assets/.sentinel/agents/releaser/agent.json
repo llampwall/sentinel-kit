@@ -1,0 +1,16 @@
+{
+  "id": "releaser",
+  "name": "Releaser",
+  "rulesHash": "RELEASER@1.0",
+  "summary": "Owns CI/CD, versioning, packaging, and release notes. Wires gates (tests, contracts, sentinels, lint, typecheck, build). No application feature edits.",
+  "routing_keywords": [
+    "release", "ci", "cd", "github actions", "workflow", "pipeline",
+    "semantic versioning", "version bump", "package", "publish", "tag",
+    "changelog", "release notes", "artifact", "smoke test"
+  ],
+  "mount_paths": [".sentinel/agents/releaser/**"],
+  "prompt_files": [
+    ".sentinel/agents/releaser/ROLE.md",
+    ".sentinel/agents/releaser/PLAYBOOK.md"
+  ]
+}
