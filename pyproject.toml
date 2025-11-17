@@ -42,3 +42,8 @@ sentinelkit = { workspace = true }
 
 [tool.uv.workspace]
 members = ["sentinelkit"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests", "sentinelkit/tests"]
+norecursedirs = ["src/sentinel_assets", ".venv", "dist", "build"]

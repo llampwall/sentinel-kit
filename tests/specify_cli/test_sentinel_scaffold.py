@@ -56,7 +56,7 @@ def test_apply_sentinel_scaffold_copies_assets(tmp_path: Path, monkeypatch: pyte
 
 
 def test_specify_init_and_check_flow(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    project_dir = tmp_path / "mobile-comfy"
+    project_dir = tmp_path / "sentinel-project"
 
     def _fake_download(project_path: Path, *_args, **_kwargs) -> None:
         project_path.mkdir(parents=True, exist_ok=True)

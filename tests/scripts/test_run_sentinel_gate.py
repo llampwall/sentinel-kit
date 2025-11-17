@@ -13,6 +13,16 @@ from typing import List
 
 import pytest
 
+# These tests exercise the bash-based sentinel gate wrapper.
+# On Windows, they end up going through WSL + pyenv-win shims and explode.
+# The gate is only expected to run in a POSIX CI environment, so we skip here.
+if os.name == "nt":
+    pytest.skip(
+        "Sentinel gate bash wrapper tests are POSIX-only; "
+        "skip on Windows.",
+        allow_module_level=True,
+    )
+
 
 @lru_cache()
 def _bash_mode() -> str:
