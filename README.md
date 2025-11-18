@@ -112,6 +112,25 @@ All commands honor `--root <path>` to run against another repo.
 
 ---
 
+## MCP Tools Overview
+
+- `mcp.sentinel.contract_validate` 
+  * Validates a proposed change against the project’s contracts (schemas + fixtures) and returns structured pass/pending/fail details. 
+  * CLI equivalent (roughly): `uv run sentinel contracts validate …` 
+  * When an agent should call it: Before/after edits that touch contract-governed areas (API shapes, file formats, invariants) to decide “is this change allowed?”
+- `mcp.sentinel.sentinel_run` 
+  * Runs sentinel-marked pytest suites and returns a JSON summary (success flag, per-test stats, stdout/stderr). 
+  * CLI equivalent (roughly): `uv run sentinel sentinels run …` 
+  * When an agent should call it: When the agent needs to check “did I break anything important?” without running every test—ideal for per-task/pre-commit gates.
+- `mcp.sentinel.decision_log` 
+  * Appends a structured entry to `.sentinel/DECISIONS.md` (honors dry-run env vars) and returns the new entry. 
+  * CLI equivalent (roughly): `uv run sentinel decisions append …` 
+  * When an agent should call it: Whenever the agent makes a non-trivial trade-off/assumption and needs to record why, not just what, it changed. |
+
+These tools are exposed automatically once the MCP server is configured.
+
+---
+
 ## Maintainer / contributor guide
 
 Working on SentinelKit itself? Clone the repo and use the bundled development workflow:
