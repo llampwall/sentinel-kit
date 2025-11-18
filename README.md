@@ -40,28 +40,27 @@ All of this runs on Python 3.12 via `uv`. Node tooling (pnpm, vitest, tsconfig) 
 
 SentinelKit rides on top of GitHub's Spec‑Kit, but you do not need to clone or install the upstream project directly. Once you have [uv installed](https://docs.astral.sh/uv/getting-started/installation/), follow this flow whenever you want to start a new project:
 
-```bash
-# 1) Install the Specify CLI (with Sentinel scaffolding built in)
-uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git
+
+# 1) Install the Specify CLI with Sentinel built-in
+`uv tool install specify-cli --from git+https://github.com/llampwall/sentinel-kit.git`
 
 # 2) Scaffold a project with Sentinel enabled
-specify init <project-name> --sentinel
-
-# 3) Enter the project and set it up
+- choose your preferred assistant and shell - SentinelKit supports the options Spec-Kit exposes.
+```bash
+specify init <project-name> --sentinel`     
 cd <project-name>
-uv sync
-uv run sentinel selfcheck
-specify check
 ```
 
-- Step 2 will prompt you to pick an AI assistant and shell. Choose whatever fits your environment—SentinelKit works with all of the options Spec‑Kit exposes.
-- Run `uv run sentinel selfcheck` anytime you want SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel tests, MCP smoke) to verify your repo.
-- Run `specify check` for Spec‑Kit's built-in validation.
-- Fresh scaffolds report `capsule`, `context`, `contracts`, `mcp`, and `sentinels` as **pending** until you copy real prompts/tests/MCP configs into place. Pending checks still produce exit code 0 so you can stage infrastructure incrementally.
+# 3) (Optional) Run Spec-Kit’s environment check
+`specify check`
+
+# 4) Open your AI assistant in this directory and follow normal Spec-Kit development flow:
+- `/speckit.constitution` to create your project's governing principles and development guidelines that will guide all subsequent development.
+
+- `/speckit.specify` to describe what you want to build. Focus on the what and why, not the tech stack.
+
 
 > **Need a one-off run without installing the CLI globally?** Use `uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <project-name> --sentinel` as an alternative. The rest of the workflow stays inside the generated project via `uv run ...` commands.
-
-Need machine-readable output for CI? Run `uv run sentinel --format json selfcheck > .artifacts/selfcheck.json` and upload the artifact alongside your test results. `specify check` uses the same JSON contract under the hood and fails only when a check reports `status="fail"`.
 
 ---
 
@@ -78,7 +77,7 @@ Inside a Sentinel-enabled repo:
 - `specify check` runs Spec‑Kit's validation for the current repo.
 - `uv sync` ensures the virtual environment matches the pinned dependencies in `uv.lock`.
 - `uv run sentinel ...` executes SentinelKit commands (selfcheck, contracts, context lint, capsule operations, sentinel tests, MCP helpers, etc.).
-- `uv run sentinel selfcheck` is the all-in-one guardrail we expect before commits land.
+- `uv run sentinel selfcheck` is the all-in-one guardrail we expect before commits land. Run it anytime you want SentinelKit's enforcement suite (contracts, context lint, capsule validation, sentinel tests, MCP smoke) to verify your repo.
 
 Because `uv run` resolves against the project's lockfile, every repo uses the SentinelKit version it was scaffolded with, guaranteeing reproducible enforcement even if the global `specify` CLI updates later.
 
@@ -103,6 +102,8 @@ All commands are exposed via `uv run sentinel ...`. Use `--format json` for mach
 | `sentinel agents roster [--format json]` | Lists router/agent metadata sourced from `.sentinel/agents/**`. |
 
 All commands honor `--root <path>` to run against another repo.
+
+> **Need machine-readable output for CI?** Run `uv run sentinel --format json selfcheck > .artifacts/selfcheck.json` and upload the artifact alongside your test results. `specify check` uses the same JSON contract under the hood and fails only when a check reports `status="fail"`.
 
 ---
 
