@@ -36,7 +36,7 @@ All of this runs on Python 3.12 via `uv`. Node tooling (pnpm, vitest, tsconfig) 
 
 ---
 
-## Quickstart (for users)
+## Quickstart
 
 SentinelKit rides on top of GitHub's Spec‑Kit, but you do not need to clone or install the upstream project directly. Once you have [uv installed](https://docs.astral.sh/uv/getting-started/installation/), follow this flow whenever you want to start a new project:
 
