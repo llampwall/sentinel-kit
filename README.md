@@ -24,13 +24,16 @@ Everything in this repo is implemented in Python and distributed via `uv`, so bo
 
 ## Why Sentinel?
 
-Specs are executable contracts. Sentinel-Kit makes sure we live up to them by enforcing:
+Spec-Kit’s worldview is: **“the LLM does the work; specs help it behave.”**  
+Sentinel-Kit’s worldview is stricter: **“the LLM does the work, but Sentinel decides what’s acceptable.”**
 
-- **Contracts** – deterministic validation of every fixture against its schema.
-- **Context** – Allowed Context linting, capsule line budgets, and prompt scaffolding.
-- **Sentinel Tests** – pytest suites encoding historical regressions.
-- **Provenance** – decision ledger + runbook CLIs with ProducedBy snippets.
-- **MCP Surfaces** – a JSON‑RPC stdio server exposing the same gates to editors and agents.
+Specs are executable contracts, but the model should not be the judge of its own work. Sentinel-Kit pushes judgment into deterministic artifacts (contracts, context budgets, capsules, sentinel pytest suites) plus a CLI that runs them and emits a structured `selfcheck` report (`ok | pending | fail` per gate). MCP is the bridge that lets agents (Codex, Claude, etc.) call those tools directly, so the agent iterates like:
+
+1. Change the repo.
+2. Call sentinel tools.
+3. Decide based on the external referee, not vibes.
+
+You can still drive the CLI manually, but the happy path is “wire MCP so the agent asks Sentinel whether it’s allowed to continue.”
 
 All of this runs on Python 3.12 via `uv`. Node tooling (pnpm, vitest, tsconfig) has been removed entirely.
 
@@ -50,17 +53,19 @@ SentinelKit rides on top of GitHub's Spec‑Kit, but you do not need to clone or
 specify init <project-name> --sentinel`     
 cd <project-name>
 ```
-
 # 3) (Optional) Run Spec-Kit’s environment check
 `specify check`
 
-# 4) Open your AI assistant in this directory and follow normal Spec-Kit development flow:
-- `/speckit.constitution` to create your project's governing principles and development guidelines that will guide all subsequent development.
+4. **(Recommended) Wire MCP so your agent can call Sentinel**
+   ```bash
+   codex mcp add sentinel -- uv run sentinel mcp server
+   ```
+   Open Codex in the repo; Sentinel tools become available automatically. `uv run sentinel selfcheck` will flip the `mcp` gate to `ok` once the client reaches the server.
+5. **Iterate with `/speckit.*` commands as usual**
+   - `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`
+   - When Codex runs capsules, it can call Sentinel MCP tools between steps to decide whether to keep going.
 
-- `/speckit.specify` to describe what you want to build. Focus on the what and why, not the tech stack.
-
-
-> **Need a one-off run without installing the CLI globally?** Use `uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <project-name> --sentinel` as an alternative. The rest of the workflow stays inside the generated project via `uv run ...` commands.
+> Need a one-off run without a global install? Use `uvx --from git+https://github.com/llampwall/sentinel-kit.git specify init <project-name> --sentinel`.
 
 ---
 
@@ -149,30 +154,24 @@ Environment overrides:
 
 ## MCP Workflow
 
-1. **Server** – Start the stdio server in a repo:
-   ```bash
-   uv run sentinel mcp server
-   ```
+Sentinel’s MCP server is the “external authority” endpoint. Without it, you must run `uv run sentinel …` yourself. With it, Codex (or any MCP-aware client) calls the same tools directly, which is how you get autonomous `/speckit.implement` loops.
 
-2. **Smoke** – Validate the handshake (initialize → list → call):
-   ```bash
-   uv run sentinel mcp smoke --timeout-call 90
-   ```
+### Manual mode (no MCP)
 
-3. **.mcp.json entry**
-   ```json
-   {
-     "mcpServers": {
-       "sentinel": {
-         "command": "uv",
-         "args": ["run", "sentinel", "mcp", "server"],
-         "env": { "PYTHONUTF8": "1" }
-       }
-     }
-   }
-   ```
+- Run `uv run sentinel selfcheck`, `uv run sentinel sentinels run`, etc. by hand.
+- Useful when you want to stay in the loop, but agents cannot invoke those gates.
 
-The smoke runner is wired into `sentinel selfcheck` and the CI workflow. Dry-run decision previews are cleaned up automatically.
+### Agent mode (with MCP)
+
+- Register the server once per machine (Codex example):
+  ```bash
+  codex mcp add sentinel -- uv run sentinel mcp server
+  ```
+- Open Codex in the repo; Sentinel tools show up automatically.
+- `uv run sentinel mcp smoke --format json` (already part of selfcheck) proves the handshake works.
+- Other MCP clients can point to the same command via `.mcp.json` or their own CLI configuration.
+
+Once configured, every capsule step can run: “apply change → call sentinel tools → only continue if `selfcheck` reports `ok`.” Pending gates are still allowed, but the agent now has a deterministic referee instead of scraping logs.
 
 ---
 
