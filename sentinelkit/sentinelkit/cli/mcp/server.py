@@ -366,6 +366,26 @@ class SentinelMCPServer:
             },
         }
 
+    @staticmethod
+    def server_ready_notification() -> Mapping[str, Any]:
+        """Build an MCP notifications/serverReady payload.
+
+        This is emitted once on startup so passive clients that wait for the
+        server to speak first can safely begin the initialize handshake.
+        """
+
+        return {
+            "jsonrpc": JSONRPC_VERSION,
+            "method": "notifications/serverReady",
+            "params": {
+                "protocolVersion": PROTOCOL_VERSION,
+                "serverInfo": {
+                    "name": SERVER_NAME,
+                    "version": get_version(),
+                },
+            },
+        }
+
 
 class _StdioTransport:
     """Minimal Content-Length framed transport over stdio pipes."""
@@ -435,6 +455,12 @@ async def _serve_async(
 ) -> None:
     server = SentinelMCPServer(root=root)
     transport = _StdioTransport(reader or sys.stdin.buffer, writer or sys.stdout.buffer)
+
+    # Proactively announce readiness so MCP clients that block until the server
+    # sends something (e.g., some Codex harness modes) don't deadlock waiting
+    # for an initialize request that never arrives.
+    await transport.write(SentinelMCPServer.server_ready_notification())
+
     while True:
         try:
             message = await transport.read()
