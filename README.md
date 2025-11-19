@@ -56,12 +56,12 @@ cd <project-name>
 # 3) (Optional) Run Spec-Kit’s environment check
 `specify check`
 
-4. **(Recommended) Wire MCP so your agent can call Sentinel**
+# 4) **(Recommended) Wire MCP so your agent can call Sentinel**
    ```bash
    codex mcp add sentinel -- uv run sentinel mcp server
    ```
    Open Codex in the repo; Sentinel tools become available automatically. `uv run sentinel selfcheck` will flip the `mcp` gate to `ok` once the client reaches the server.
-5. **Iterate with `/speckit.*` commands as usual**
+# 5) **Iterate with `/speckit.*` commands as usual**
    - `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`
    - When Codex runs capsules, it can call Sentinel MCP tools between steps to decide whether to keep going.
 
