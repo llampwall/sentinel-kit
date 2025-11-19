@@ -58,7 +58,7 @@ cd <project-name>
 
 # 4) **(Recommended) Wire MCP so your agent can call Sentinel**
    ```bash
-   codex mcp add sentinel -- uv run sentinel mcp server
+   codex mcp add sentinel -- uv run python -m sentinelkit.cli.mcp.codex_wrapper
    ```
    Open Codex in the repo; Sentinel tools become available automatically. `uv run sentinel selfcheck` will flip the `mcp` gate to `ok` once the client reaches the server.
 # 5) **Iterate with `/speckit.*` commands as usual**
@@ -184,7 +184,7 @@ Sentinel’s MCP server is the “external authority” endpoint. Without it, yo
 
 - Register the server once per machine (Codex example):
   ```bash
-  codex mcp add sentinel -- uv run sentinel mcp server
+  codex mcp add sentinel -- uv run python -m sentinelkit.cli.mcp.codex_wrapper
   ```
 - Open Codex in the repo; Sentinel tools show up automatically.
 - `uv run sentinel mcp smoke --format json` (already part of selfcheck) proves the handshake works.
