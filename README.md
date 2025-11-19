@@ -58,13 +58,10 @@ cd <project-name>
 
 # 4) **(Recommended) Wire MCP so your agent can call Sentinel**
    ```bash
-   codex mcp add sentinel -- uv run python -m sentinelkit.cli.mcp.codex_wrapper
+   codex mcp add sentinel -- uv run sentinel mcp server
    ```
    Open Codex in the repo; Sentinel tools become available automatically. `uv run sentinel selfcheck` will flip the `mcp` gate to `ok` once the client reaches the server.
 
-   Codex-specific notes:
-   - The `codex_wrapper` entrypoint prints a single `notifications/serverReady` MCP notification to stdout, then execs the real `sentinel mcp server`.
-   - This unblocks Codex modes that wait for initial server output before sending `initialize`, while the underlying MCP server still expects and responds to `initialize` first for other clients.
 # 5) **Iterate with `/speckit.*` commands as usual**
    - `/speckit.constitution`, `/speckit.specify`, `/speckit.plan`, `/speckit.tasks`, `/speckit.implement`
    - When Codex runs capsules, it can call Sentinel MCP tools between steps to decide whether to keep going.
@@ -188,7 +185,7 @@ Sentinel’s MCP server is the “external authority” endpoint. Without it, yo
 
 - Register the server once per machine (Codex example):
   ```bash
-  codex mcp add sentinel -- uv run python -m sentinelkit.cli.mcp.codex_wrapper
+  codex mcp add sentinel -- uv run sentinel mcp server
   ```
 - Open Codex in the repo; Sentinel tools show up automatically.
 - `uv run sentinel mcp smoke --format json` (already part of selfcheck) proves the handshake works.

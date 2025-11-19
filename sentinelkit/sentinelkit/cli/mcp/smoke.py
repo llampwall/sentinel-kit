@@ -337,26 +337,15 @@ class _JsonRpcClient:
         return message
 
     async def _write(self, payload: Mapping[str, Any]) -> None:
-        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-        header = f"Content-Length: {len(encoded)}\r\n\r\n".encode("ascii")
-        self._writer.write(header + encoded)
+        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8") + b"\n"
+        self._writer.write(encoded)
         await self._writer.drain()
 
     async def _read(self) -> Mapping[str, Any]:
-        headers = {}
-        while True:
-            line = await self._reader.readline()
-            if not line:
-                raise RuntimeError("MCP server closed the connection unexpectedly.")
-            if line in (b"\r\n", b"\n"):
-                break
-            name, _, value = line.decode("ascii").partition(":")
-            headers[name.strip().lower()] = value.strip()
-
+        line = await self._reader.readline()
+        if not line:
+            raise RuntimeError("MCP server closed the connection unexpectedly.")
         try:
-            length = int(headers["content-length"])
-        except (KeyError, ValueError) as exc:
-            raise RuntimeError("Invalid MCP response headers.") from exc
-
-        body = await self._reader.readexactly(length)
-        return json.loads(body.decode("utf-8"))
+            return json.loads(line.decode("utf-8").rstrip("\r\n"))
+        except json.JSONDecodeError as exc:
+            raise RuntimeError(f"Invalid MCP response payload: {exc.msg}") from exc

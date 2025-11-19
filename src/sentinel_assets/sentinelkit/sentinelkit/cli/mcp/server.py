@@ -368,60 +368,37 @@ class SentinelMCPServer:
 
 
 class _StdioTransport:
-    """Minimal Content-Length framed transport over stdio pipes."""
+    """Minimal newline-delimited JSON-RPC transport over stdio pipes."""
 
     def __init__(self, reader: BinaryIO, writer: BinaryIO) -> None:
         self._reader = reader
         self._writer = writer
 
     async def read(self) -> Mapping[str, Any] | None:
+        """Read a single JSON-RPC message as a newline-delimited JSON object."""
+
         loop = asyncio.get_running_loop()
-        headers: dict[str, str] = {}
-        header_lines: list[str] = []
-        while True:
-            line = await loop.run_in_executor(None, self._reader.readline)
-            if not line:
-                if not header_lines:
-                    return None
-                raise JsonRpcError(INVALID_REQUEST, "Truncated headers.")
-            decoded = line.decode("ascii", errors="ignore")
-            if decoded in ("\r\n", "\n"):
-                break
-            header_lines.append(decoded.strip())
-
-        for entry in header_lines:
-            if ":" not in entry:
-                continue
-            name, value = entry.split(":", 1)
-            headers[name.strip().lower()] = value.strip()
-
-        if "content-length" not in headers:
-            raise JsonRpcError(INVALID_REQUEST, "Missing Content-Length header.")
+        line = await loop.run_in_executor(None, self._reader.readline)
+        if not line:
+            return None
 
         try:
-            remaining = int(headers["content-length"])
-        except ValueError:
-            raise JsonRpcError(INVALID_REQUEST, "Invalid Content-Length header.") from None
-
-        if remaining < 0:
-            raise JsonRpcError(INVALID_REQUEST, "Negative Content-Length.")
-
-        body = await loop.run_in_executor(None, self._reader.read, remaining)
-        if len(body) != remaining:
-            raise JsonRpcError(INVALID_REQUEST, "Truncated message body.")
-
-        try:
-            return json.loads(body.decode("utf-8"))
+            decoded = line.decode("utf-8").rstrip("\r\n")
+            message = json.loads(decoded)
         except json.JSONDecodeError as exc:
             raise JsonRpcError(PARSE_ERROR, f"Invalid JSON payload: {exc.msg}") from exc
 
+        if not isinstance(message, Mapping):
+            raise JsonRpcError(INVALID_REQUEST, "JSON-RPC message must be an object.")
+        return message
+
     async def write(self, payload: Mapping[str, Any]) -> None:
-        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-        header = f"Content-Length: {len(encoded)}\r\n\r\n".encode("ascii")
-        message = header + encoded
+        """Write a single JSON-RPC message as newline-delimited JSON."""
+
+        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8") + b"\n"
         loop = asyncio.get_running_loop()
         try:
-            await loop.run_in_executor(None, self._writer.write, message)
+            await loop.run_in_executor(None, self._writer.write, encoded)
             await loop.run_in_executor(None, self._writer.flush)
         except BrokenPipeError:  # pragma: no cover - occurs when the client disappears
             pass
