@@ -384,6 +384,7 @@ class _StdioTransport:
 
         try:
             decoded = line.decode("utf-8").rstrip("\r\n")
+            print(f"[MCP SERVER READ] {decoded}", file=sys.stderr, flush=True)
             message = json.loads(decoded)
         except json.JSONDecodeError as exc:
             raise JsonRpcError(PARSE_ERROR, f"Invalid JSON payload: {exc.msg}") from exc
@@ -395,7 +396,9 @@ class _StdioTransport:
     async def write(self, payload: Mapping[str, Any]) -> None:
         """Write a single JSON-RPC message as newline-delimited JSON."""
 
-        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8") + b"\n"
+        message_str = json.dumps(payload, separators=(",", ":"))
+        print(f"[MCP SERVER WRITE] {message_str}", file=sys.stderr, flush=True)
+        encoded = (message_str + "\n").encode("utf-8")
         loop = asyncio.get_running_loop()
         try:
             await loop.run_in_executor(None, self._writer.write, encoded)

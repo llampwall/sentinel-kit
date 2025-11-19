@@ -337,7 +337,9 @@ class _JsonRpcClient:
         return message
 
     async def _write(self, payload: Mapping[str, Any]) -> None:
-        encoded = json.dumps(payload, separators=(",", ":")).encode("utf-8") + b"\n"
+        message_str = json.dumps(payload, separators=(",", ":"))
+        print(f"[MCP SMOKE WRITE] {message_str}", file=sys.stderr, flush=True)
+        encoded = (message_str + "\n").encode("utf-8")
         self._writer.write(encoded)
         await self._writer.drain()
 
@@ -346,6 +348,8 @@ class _JsonRpcClient:
         if not line:
             raise RuntimeError("MCP server closed the connection unexpectedly.")
         try:
-            return json.loads(line.decode("utf-8").rstrip("\r\n"))
+            decoded = line.decode("utf-8").rstrip("\r\n")
+            print(f"[MCP SMOKE READ RAW] {decoded}", file=sys.stderr, flush=True)
+            return json.loads(decoded)
         except json.JSONDecodeError as exc:
             raise RuntimeError(f"Invalid MCP response payload: {exc.msg}") from exc
