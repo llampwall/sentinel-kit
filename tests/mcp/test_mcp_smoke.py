@@ -30,7 +30,7 @@ def test_repo_mcp_smoke_cli(repo_root: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
     assert set(payload["tool_results"]) == {
-        "mcp.sentinel.contract_validate",
-        "mcp.sentinel.sentinel_run",
-        "mcp.sentinel.decision_log",
+        "sentinel_contract_validate",
+        "sentinel_run",
+        "sentinel_decision_log",
     }

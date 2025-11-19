@@ -34,9 +34,9 @@ def test_mcp_smoke_command(repo_root: Path) -> None:
     payload = json.loads(result.stdout)
     assert payload["ok"] is True
     assert set(payload["tool_results"]) == {
-        "mcp.sentinel.contract_validate",
-        "mcp.sentinel.decision_log",
-        "mcp.sentinel.sentinel_run",
+        "sentinel_contract_validate",
+        "sentinel_decision_log",
+        "sentinel_run",
     }
     preview_file = repo_root / ".sentinel" / "status" / "mcp-smoke-preview.md"
     assert not preview_file.exists()

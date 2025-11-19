@@ -13,9 +13,9 @@ from typing import Any, Awaitable, Callable, Dict, Mapping, Sequence
 Command = Sequence[str]
 
 EXPECTED_TOOLS = {
-    "mcp.sentinel.contract_validate",
-    "mcp.sentinel.sentinel_run",
-    "mcp.sentinel.decision_log",
+    "sentinel_contract_validate",
+    "sentinel_run",
+    "sentinel_decision_log",
 }
 
 
@@ -257,11 +257,11 @@ def _extract_json_content(result: Mapping[str, Any]) -> Any:
 
 
 def _tool_arguments(tool_name: str, preview_path: Path) -> Mapping[str, Any]:
-    if tool_name == "mcp.sentinel.contract_validate":
+    if tool_name == "sentinel_contract_validate":
         return {}
-    if tool_name == "mcp.sentinel.sentinel_run":
+    if tool_name == "sentinel_run":
         return {}
-    if tool_name == "mcp.sentinel.decision_log":
+    if tool_name == "sentinel_decision_log":
         return {
             "author": "MCP_SMOKE",
             "scope": [".sentinel/docs/IMPLEMENTATION.md"],

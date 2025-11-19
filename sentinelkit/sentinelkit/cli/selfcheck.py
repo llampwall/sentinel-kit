@@ -176,7 +176,7 @@ def _diagnose_mcp_pending(summary: SmokeSummary, context: CLIContext) -> str | N
     if not config_file.exists():
         return "MCP client configuration (.mcp.json) not found; configure your IDE before enabling the smoke test."
 
-    decision_log_payload = summary.tool_results.get("mcp.sentinel.decision_log")
+    decision_log_payload = summary.tool_results.get("sentinel_decision_log")
     if isinstance(decision_log_payload, Mapping):
         error = decision_log_payload.get("error")
         if isinstance(error, Mapping):

@@ -28,9 +28,9 @@ def test_initialize_and_tools_list(server: SentinelMCPServer) -> None:
     tools = list_response["result"]["tools"]
     tool_names = {tool["name"] for tool in tools}
     assert tool_names == {
-        "mcp.sentinel.contract_validate",
-        "mcp.sentinel.sentinel_run",
-        "mcp.sentinel.decision_log",
+        "sentinel_contract_validate",
+        "sentinel_run",
+        "sentinel_decision_log",
     }
 
 
@@ -42,7 +42,7 @@ def test_contract_validate_tool(server: SentinelMCPServer) -> None:
             "id": 3,
             "method": "tools/call",
             "params": {
-                "name": "mcp.sentinel.contract_validate",
+                "name": "sentinel_contract_validate",
                 "arguments": {"contract": "sample.v1"},
             },
         },
@@ -59,7 +59,7 @@ def test_sentinel_run_tool(server: SentinelMCPServer) -> None:
             "jsonrpc": "2.0",
             "id": 4,
             "method": "tools/call",
-            "params": {"name": "mcp.sentinel.sentinel_run", "arguments": {}},
+            "params": {"name": "sentinel_run", "arguments": {}},
         },
     )
     summary = response["result"]["content"][0]["json"]
@@ -76,7 +76,7 @@ def test_decision_log_tool_dry_run(server: SentinelMCPServer, repo_root: Path) -
             "id": 5,
             "method": "tools/call",
             "params": {
-                "name": "mcp.sentinel.decision_log",
+                "name": "sentinel_decision_log",
                 "arguments": {
                     "author": "Builder",
                     "scope": ["docs/README.md", "src/app.py"],

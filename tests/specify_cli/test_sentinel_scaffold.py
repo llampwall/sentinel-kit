@@ -51,7 +51,17 @@ def test_apply_sentinel_scaffold_copies_assets(tmp_path: Path, monkeypatch: pyte
     assert (tmp_path / ".sentinel" / "DECISIONS.md").exists()
     assert (tmp_path / ".sentinel" / "docs" / "IMPLEMENTATION.md").exists()
     assert (tmp_path / ".github" / "workflows" / "sentinel-ci.yml").exists()
-    assert (tmp_path / ".codex" / "prompts" / "sentinel.router.md").exists()
+    codex_dir = tmp_path / ".codex"
+    assert (codex_dir / "prompts" / "sentinel.router.md").exists()
+
+    codex_config = codex_dir / "config.toml"
+    assert codex_config.exists()
+    config_text = codex_config.read_text(encoding="utf-8")
+    assert "[mcp_servers.sentinel]" in config_text
+    assert 'command = "uv"' in config_text
+    assert 'args = ["run", "sentinel", "mcp", "server"]' in config_text
+    assert "startup_timeout_sec = 30" in config_text
+
     assert ("uv", tmp_path) in calls
     assert ("selfcheck", tmp_path) in calls
 

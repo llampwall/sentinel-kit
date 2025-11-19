@@ -1043,6 +1043,38 @@ def sync_agent_prompt_bundles(project_path: Path, assistant: str | None = None) 
     return copied
 
 
+def _ensure_codex_mcp_config(project_path: Path) -> None:
+    """Ensure Codex config.toml includes the Sentinel MCP server entry.
+
+    Codex prefers a per-project CODEX_HOME pointing at .codex/. This helper
+    seeds or amends .codex/config.toml so Sentinel's MCP server is registered
+    by default for Sentinel-enabled scaffolds.
+    """
+
+    codex_dir = project_path / ".codex"
+    config_path = codex_dir / "config.toml"
+    codex_dir.mkdir(parents=True, exist_ok=True)
+
+    sentinel_block = (
+        "[mcp_servers.sentinel]\n"
+        "command = \"uv\"\n"
+        "args = [\"run\", \"sentinel\", \"mcp\", \"server\"]\n"
+        "startup_timeout_sec = 30\n"
+    )
+
+    if config_path.exists():
+        existing = config_path.read_text(encoding="utf-8")
+        if "[mcp_servers.sentinel]" in existing:
+            return
+        if not existing.endswith("\n"):
+            existing += "\n"
+        new_content = existing + "\n" + sentinel_block
+    else:
+        new_content = sentinel_block
+
+    config_path.write_text(new_content, encoding="utf-8")
+
+
 def run_uv_sync_in_project(project_path: Path) -> None:
     """Run uv sync inside the scaffold, falling back to unlocked sync on failure."""
     lock_path = project_path / "uv.lock"
@@ -1159,6 +1191,10 @@ def apply_sentinel_scaffold(
     else:
         if tracker:
             tracker.complete(prompts_key, f"{prompt_count} files")
+
+    # Ensure Codex MCP configuration is present for Sentinel-enabled scaffolds.
+    if assistant == "codex":
+        _ensure_codex_mcp_config(project_path)
 
     sync_key = "sentinel-uv"
     if tracker:

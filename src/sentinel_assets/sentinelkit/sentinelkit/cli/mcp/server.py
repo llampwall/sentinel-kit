@@ -91,8 +91,8 @@ class SentinelMCPServer:
         self._validator = ContractValidator(loader)
         self._ledger_path = self.root / ".sentinel" / "DECISIONS.md"
         self._tools: Dict[str, ToolSpec] = {
-            "mcp.sentinel.contract_validate": ToolSpec(
-                name="mcp.sentinel.contract_validate",
+            "sentinel_contract_validate": ToolSpec(
+                name="sentinel_contract_validate",
                 description="Validate fixtures under .sentinel/contracts/fixtures/** against versioned contracts.",
                 input_schema={
                     "type": "object",
@@ -110,8 +110,8 @@ class SentinelMCPServer:
                 },
                 handler=self._handle_contract_validate,
             ),
-            "mcp.sentinel.sentinel_run": ToolSpec(
-                name="mcp.sentinel.sentinel_run",
+            "sentinel_run": ToolSpec(
+                name="sentinel_run",
                 description="Execute sentinel-marked pytest suites and return the structured summary.",
                 input_schema={
                     "type": "object",
@@ -125,8 +125,8 @@ class SentinelMCPServer:
                 },
                 handler=self._handle_sentinel_run,
             ),
-            "mcp.sentinel.decision_log": ToolSpec(
-                name="mcp.sentinel.decision_log",
+            "sentinel_decision_log": ToolSpec(
+                name="sentinel_decision_log",
                 description="Append to the Sentinel DECISIONS.md ledger and emit ProducedBy snippets.",
                 input_schema={
                     "type": "object",
@@ -219,7 +219,17 @@ class SentinelMCPServer:
 
         spec = self._tools.get(name)
         if spec is None:
-            raise JsonRpcError(METHOD_NOT_FOUND, f"Unknown tool '{name}'.")
+            legacy_map = {
+                "mcp.sentinel.contract_validate": "sentinel_contract_validate",
+                "mcp.sentinel.sentinel_run": "sentinel_run",
+                "mcp.sentinel.decision_log": "sentinel_decision_log",
+            }
+            mapped = legacy_map.get(name)
+            if mapped is None:
+                raise JsonRpcError(METHOD_NOT_FOUND, f"Unknown tool '{name}'.")
+            spec = self._tools.get(mapped)
+            if spec is None:
+                raise JsonRpcError(METHOD_NOT_FOUND, f"Unknown tool '{name}'.")
 
         arguments = params.get("arguments") or {}
         if not isinstance(arguments, Mapping):
